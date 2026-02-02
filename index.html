@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年 · 旬</title>
+    <!-- 使用绝对路径或确保路径正确 -->
+    <link href="src/output.css" rel="stylesheet">
+    <!-- 核心库 -->
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* 走路动画 */
+        @keyframes walk {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0); }
+        }
+        .animate-walk {
+            animation: walk 0.6s infinite ease-in-out;
+        }
+        
+        /* 进度条纹理 */
+        .progress-stripe {
+            background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+            background-size: 1rem 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased overflow-x-hidden">
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl relative">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-light text-gray-700">2026</h1>
+            <p id="current-xun-info" class="text-gray-500 mt-2"></p>
+            <div id="year-progress-container" class="mt-6 max-w-2xl mx-auto px-4">
+                <div class="flex items-center gap-3 text-xs text-gray-400 font-mono">
+                    <span class="min-w-[48px] text-left">1月1日</span>
+                    <div class="relative flex-1 h-4 bg-gray-100 rounded-full shadow-inner overflow-visible">
+                        <div id="year-progress-bar" class="absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all duration-1000 shadow-md progress-stripe overflow-hidden" style="width: 0%"></div>
+                        <div id="year-progress-walker" class="absolute bottom-full translate-y-1 transition-all duration-1000 z-10" style="left: 0%">
+                            <div class="animate-walk -ml-3">
+                                <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-md">
+                                    <circle cx="12" cy="6" r="4" fill="#2563EB"/>
+                                    <path d="M12 10V20M12 20L8 30M12 20L16 30M12 13L7 16M12 13L17 16" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                            <div id="walker-bubble" class="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded opacity-0 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
+                                Today
+                            </div>
+                        </div>
+                    </div>
+                    <span class="min-w-[48px] text-right">12月31日</span>
+                </div>
+                <div class="mt-2 text-center text-xs font-mono">
+                    <span id="year-progress-text" class="font-bold text-blue-600"></span>
+                </div>
+            </div>
+
+            <!-- 年度像素总览 (Tetris/Pixel Grid) -->
+            <div id="year-pixel-grid-container" class="mt-8 max-w-4xl mx-auto px-4 hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-sm font-medium text-gray-500">2026 年度足迹（时间进度）</h3>
+                    <div class="flex gap-2 text-[10px] text-gray-400">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-gray-100 border border-gray-200"></span> 未来</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-blue-100 border border-blue-200"></span> 过去</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-blue-500 border border-blue-600 shadow-sm animate-pulse"></span> 今天</span>
+                    </div>
+                </div>
+                <p class="text-[11px] text-gray-400 mb-3">仅展示全年时间位置，不代表记录强度；详细记录请看下方全景概览。</p>
+                <div id="year-pixel-grid" class="flex flex-wrap gap-[2px] justify-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
+                    <!-- JS 生成 365 个格子 -->
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="flex justify-center mb-6 border-b border-gray-200">
+            <button id="nav-macro" class="px-6 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none">
+                宏观规划 (Macro)
+            </button>
+            <button id="nav-overview" class="px-6 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
+                全景概览 (Overview)
+            </button>
+        </div>
+
+        <!-- View Container -->
+        <div class="relative w-full">
+            <!-- View M: Macro Planning View (New Default) -->
+            <div id="macro-view" class="w-full">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="grid grid-cols-12 gap-0 text-sm font-medium text-gray-500 bg-gray-50 border-b border-gray-200 p-3">
+                        <div class="col-span-1 text-center">旬</div>
+                        <div class="col-span-2 text-center">日期</div>
+                        <div class="col-span-4 pl-2">核心目标</div>
+                        <div class="col-span-3 text-center">每日打卡</div>
+                        <div class="col-span-2 text-center">备注</div>
+                    </div>
+                    <div id="macro-list" class="divide-y divide-gray-100">
+                        <!-- JS Generated Rows -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- View A: Overview & Detail Combined -->
+            <div id="overview-view" class="w-full hidden">
+                <!-- Overview Grid -->
+    <div class="mb-8">
+        <div id="overview-grid" class="grid-container">
+            <!-- Xun blocks will be generated by JS -->
+        </div>
+    </div>
+
+    <!-- Detail View Section (Now embedded) -->
+    <div id="detail-section" class="w-full bg-gray-50 min-h-[600px] rounded-xl border border-gray-100 overflow-hidden relative">
+        <div id="detail-content" class="hidden">
+                        <div class="flex justify-between items-center p-4 bg-white border-b border-gray-100">
+                            <h2 id="detail-title" class="text-xl font-light text-gray-800"></h2>
+                            <button id="show-summary-btn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 shadow-sm transition-colors">
+                                本旬小结
+                            </button>
+                        </div>
+                        <div id="detail-calendars-container" class="space-y-8 p-6"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View B: Detail View (Removed/Merged into Overview) -->
+            <!-- <div id="detail-view" class="hidden ..."> ... </div> -->
+            
+            <!-- View C: Summary View -->
+            <div id="summary-view" class="hidden w-full bg-gray-50 min-h-[600px]">
+                 <div class="flex justify-between items-center mb-4">
+                    <button id="back-to-detail" class="text-blue-500 hover:underline">&larr; 返回日历</button>
+                </div>
+                <h2 id="summary-title" class="text-2xl font-light text-center mb-4"></h2>
+                <div id="summary-content" class="bg-white p-6 rounded-lg shadow-sm">
+                    <!-- Summary charts and stats will go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Rich Data Entry -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div id="modal-panel" class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6 transform transition-transform duration-300 ease-in-out scale-95">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">记录 <span id="modal-date" class="font-mono text-blue-600"></span></h3>
+                <button id="modal-close" class="text-gray-400 hover:text-gray-700 text-5xl leading-none w-12 h-12 flex items-center justify-center rounded-full hover:bg-gray-100 transition-all focus:outline-none focus:ring-2 focus:ring-gray-300" aria-label="关闭">&times;</button>
+            </div>
+
+            <!-- Core Section -->
+            <div class="space-y-6">
+                <!-- Mood Section Redesign -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">今日心情 (Mood)</label>
+                    <div id="mood-selector" class="flex justify-between items-center gap-2">
+                        <button data-mood="1" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-red-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-200" aria-label="糟糕">
+                            <span class="text-4xl filter grayscale hover:grayscale-0 transition-all">😫</span>
+                            <span class="text-xs text-gray-500 font-medium">糟糕</span>
+                        </button>
+                        <button data-mood="2" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-orange-50 transition-all focus:outline-none focus:ring-2 focus:ring-orange-200" aria-label="低落">
+                            <span class="text-4xl filter grayscale hover:grayscale-0 transition-all">😞</span>
+                            <span class="text-xs text-gray-500 font-medium">低落</span>
+                        </button>
+                        <button data-mood="3" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200" aria-label="平淡">
+                            <span class="text-4xl filter grayscale hover:grayscale-0 transition-all">😐</span>
+                            <span class="text-xs text-gray-500 font-medium">平淡</span>
+                        </button>
+                        <button data-mood="4" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-blue-50 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="不错">
+                            <span class="text-4xl filter grayscale hover:grayscale-0 transition-all">🙂</span>
+                            <span class="text-xs text-gray-500 font-medium">不错</span>
+                        </button>
+                        <button data-mood="5" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-green-50 transition-all focus:outline-none focus:ring-2 focus:ring-green-200" aria-label="超棒">
+                            <span class="text-4xl filter grayscale hover:grayscale-0 transition-all">🤩</span>
+                            <span class="text-xs text-gray-500 font-medium">超棒</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Detailed Emotions Tags -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-3">情绪标签 (Feelings)</label>
+                    <div id="emotion-tags" class="flex flex-wrap gap-2">
+                        <!-- Tags will be generated by JS or hardcoded -->
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="快乐" aria-pressed="false">😄 快乐</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="兴奋" aria-pressed="false">😆 兴奋</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="感激" aria-pressed="false">🙏 感激</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="期待" aria-pressed="false">🌟 期待</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="自豪" aria-pressed="false">🦁 自豪</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="充实" aria-pressed="false">💪 充实</button>
+                        
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="平静" aria-pressed="false">😌 平静</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="专注" aria-pressed="false">🧠 专注</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="迷茫" aria-pressed="false">😶‍🌫️ 迷茫</button>
+                        
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="焦虑" aria-pressed="false">😰 焦虑</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="疲惫" aria-pressed="false">😫 疲惫</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="生气" aria-pressed="false">😠 生气</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="孤独" aria-pressed="false">🍂 孤独</button>
+                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="失落" aria-pressed="false">😞 失落</button>
+                    </div>
+                </div>
+
+                <!-- Daily Quote Section -->
+                <div id="daily-quote-container" class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 text-center relative overflow-hidden group">
+                     <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                     <p id="daily-quote-text" class="text-sm text-gray-600 font-serif italic mb-1 min-h-[1.5em]">正在加载今日金句...</p>
+                     <p id="daily-quote-author" class="text-xs text-gray-400 text-right">—— 佚名</p>
+                     <button id="refresh-quote" class="absolute top-2 right-2 text-gray-300 hover:text-blue-500 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100" title="刷新">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                     </button>
+                </div>
+
+                <!-- Keywords Input (Replaces Emoji) -->
+                <div>
+                    <label for="keywords-input" class="block text-sm font-medium text-gray-700 mb-2">今日关键词 (Keywords)</label>
+                    <input type="text" id="keywords-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 健身, 阅读 (空格分隔, 最多2个)">
+                    <p class="text-xs text-gray-400 mt-1">将在日历格子中微缩显示，代替通用图标</p>
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">天气</label>
+                    <div id="weather-selector" class="flex flex-wrap gap-2 text-2xl">
+                        <button data-weather="Sunny" class="p-2 rounded-full hover:bg-gray-200" title="晴">☀️</button>
+                        <button data-weather="Cloudy" class="p-2 rounded-full hover:bg-gray-200" title="多云">☁️</button>
+                        <button data-weather="Overcast" class="p-2 rounded-full hover:bg-gray-200" title="阴">🌥️</button>
+                        <button data-weather="Rainy" class="p-2 rounded-full hover:bg-gray-200" title="雨">🌧️</button>
+                        <button data-weather="Snowy" class="p-2 rounded-full hover:bg-gray-200" title="雪">❄️</button>
+                        <button data-weather="Windy" class="p-2 rounded-full hover:bg-gray-200" title="大风">🌬️</button>
+                        <button data-weather="Foggy" class="p-2 rounded-full hover:bg-gray-200" title="雾">🌫️</button>
+                        <button data-weather="Thunder" class="p-2 rounded-full hover:bg-gray-200" title="雷暴">⚡</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Section -->
+            <div class="mt-6 border-t pt-4 space-y-3">
+                <h4 class="font-semibold text-gray-600">生活指标</h4>
+                <div class="flex items-center justify-between">
+                    <label for="metric-sleep">睡眠 (小时)</label>
+                    <input type="number" id="metric-sleep" step="0.5" class="w-20 p-1 border rounded-md">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label for="metric-exercise">运动 (分钟)</label>
+                    <input type="number" id="metric-exercise" class="w-20 p-1 border rounded-md">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label for="metric-reading">阅读 (分钟)</label>
+                    <input type="number" id="metric-reading" class="w-20 p-1 border rounded-md">
+                </div>
+                <div class="flex items-center justify-between">
+                    <label for="metric-wealth">财富 (盈亏)</label>
+                    <input type="number" id="metric-wealth" step="0.01" class="w-20 p-1 border rounded-md">
+                </div>
+                 <div class="flex items-center justify-between">
+                    <label for="metric-social">社交</label>
+                    <input type="text" id="metric-social" class="w-48 p-1 border rounded-md" placeholder="和朋友聚餐">
+                </div>
+            </div>
+            
+            <!-- Custom Activities Section -->
+            <div id="custom-activities-container" class="mt-6 border-t pt-4 space-y-2">
+                 <h4 class="font-semibold text-gray-600">自定义活动</h4>
+                 <button id="add-custom-activity" class="text-sm text-blue-500 hover:underline">+ 添加活动</button>
+            </div>
+
+            <!-- Journal Section -->
+            <div class="mt-6 border-t pt-4">
+                <label for="journal-input" class="block text-sm font-medium text-gray-700 mb-2">给明天的启发</label>
+                <textarea id="journal-input" rows="3" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="mt-6 flex justify-end space-x-2">
+                <button id="modal-delete" class="px-4 py-2 text-sm text-red-500 hover:underline">删除本日记录</button>
+                <button id="modal-save" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="src/quote.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const YEAR = 2026;
+            const XUN_COUNT = 36;
+            const XUN_DAYS = 10;
+
+            // --- DOM Elements ---
+            const overviewView = document.getElementById('overview-view');
+            // const detailView = document.getElementById('detail-view'); // Removed
+            const summaryView = document.getElementById('summary-view');
+            const macroView = document.getElementById('macro-view');
+            const overviewGrid = document.getElementById('overview-grid');
+            const macroList = document.getElementById('macro-list');
+            const navMacro = document.getElementById('nav-macro');
+            const navOverview = document.getElementById('nav-overview');
+            const modal = document.getElementById('modal');
+            const modalPanel = document.getElementById('modal-panel');
+            
+            // New DOM Elements for merged view
+            const detailSection = document.getElementById('detail-section');
+            // const detailPlaceholder = document.getElementById('detail-placeholder'); // Removed
+            const detailContent = document.getElementById('detail-content');
+
+            // --- State ---
+            let userData = JSON.parse(localStorage.getItem('xun_calendar_data_v2') || '{}');
+            let macroGoals = JSON.parse(localStorage.getItem('xun_macro_goals') || '{}');
+            let currentXun = null;
+            let xunPeriods = [];
+            let selectedDate = '';
+            let currentDetailPeriod = null;
+
+            // --- Core Logic ---
+            function getXunPeriods(year) {
+                const periods = [];
+                let currentDate = new Date(year, 0, 1);
+                for (let i = 1; i <= XUN_COUNT; i++) {
+                    const startDate = new Date(currentDate);
+                    // Last xun (36) has 5 days in non-leap year (365 days), or 6?
+                    // 35 * 10 = 350. Remaining = 15.
+                    // Actually standard Xun is 10 days.
+                    // 36 xuns covers 360 days? No.
+                    // Usually: Early (10), Middle (10), Late (remaining).
+                    // But here we are strictly "36 multiple 10".
+                    // Let's stick to the prompt's 36 * 10 concept but fit into 365 days.
+                    // The prompt says "36个10天". 36*10 = 360.
+                    // The last 5 days (Dec 27-31) are usually part of the 36th period or just appended?
+                    // Let's make 1-35 as 10 days, and 36 as 15/16 days to cover the year?
+                    // Or 36 as 10 days, and remaining 5 days are "Year End"?
+                    // The previous logic I wrote was:
+                    // const daysInXun = (i <= 35) ? XUN_DAYS : 5;
+                    // This covers 350 + 5 = 355. Wait.
+                    // 365 days.
+                    // 36 x 10 = 360. Remaining 5.
+                    // Let's adjust logic:
+                    // 1-35: 10 days. (350 days)
+                    // 36: Remaining days (15 or 16).
+                    
+                    // Wait, previous code:
+                    // const daysInXun = (i <= 35) ? XUN_DAYS : 5;
+                    // 35 * 10 = 350. + 5 = 355.
+                    // 2026 is 365 days. We are missing 10 days!
+                    // Let's re-verify 36 x 10.
+                    // If strictly 10 days per xun, we need 36.5 xuns.
+                    // Or maybe 12 months * 3 xuns = 36 xuns.
+                    // Each month: Early (1-10), Mid (11-20), Late (21-End).
+                    // Late is 28/29/30/31 - 20 = 8~11 days.
+                    // So "10 days" is approximate for the last xun of month.
+                    // Let's switch to standard "Month 3 Xun" logic to be more calendar-accurate?
+                    // OR stick to the user's "36 x 10" strict concept.
+                    // The user shared an image: "Day 1-10".
+                    // Image 1: "01.01-01.10", "01.11-01.20", "01.21-01.30", "01.31-02.09".
+                    // Ah! It ignores month boundaries! It's strictly 10-day blocks.
+                    // 36 * 10 = 360 days.
+                    // 36th xun ends Dec 26.
+                    // What about Dec 27-31?
+                    // Let's make the 36th xun longer to cover the year, OR add a 37th small period?
+                    // User says "36个10天".
+                    // Let's keep 1-35 as 10 days.
+                    // 36th xun: Dec 27 is start? No.
+                    // 35 * 10 = 350 days. Ends Dec 16 (approx).
+                    // 36th xun starts Dec 17. 10 days -> Dec 26.
+                    // Remaining: Dec 27-31 (5 days).
+                    // Let's extend the 36th xun to include the rest of the year.
+                    
+                    let daysInXun = 10;
+                    if (i === 36) {
+                         // Calculate remaining days in year
+                         const yearEnd = new Date(year, 11, 31);
+                         const diffTime = Math.abs(yearEnd - currentDate);
+                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                         daysInXun = diffDays + 1; // +1 to include today
+                    }
+
+                    currentDate.setDate(currentDate.getDate() + daysInXun);
+                    const endDate = new Date(currentDate);
+                    endDate.setDate(endDate.getDate() - 1);
+                    periods.push({ index: i, startDate, endDate, days: daysInXun });
+                }
+                return periods;
+            }
+
+            function getCurrentXun(periods) {
+                const now = new Date();
+                if (now.getFullYear() !== YEAR) return null;
+                return periods.find(p => now >= p.startDate && now <= p.endDate) || null;
+            }
+
+            function saveUserData() {
+                localStorage.setItem('xun_calendar_data_v2', JSON.stringify(userData));
+                // Update macro view checkboxes if visible
+                if (!macroView.classList.contains('hidden')) {
+                     // Optimistic update or full re-render? Full re-render is safest for consistency
+                     // But might lose input focus.
+                     // Better to just update specific row or rely on user navigating back.
+                     // Since modal covers everything, when modal closes, we can refresh.
+                }
+            }
+
+            function saveMacroGoals() {
+                localStorage.setItem('xun_macro_goals', JSON.stringify(macroGoals));
+            }
+            
+            // --- View Management ---
+            function showView(viewName, data) {
+                console.log('Showing view:', viewName, data);
+                // Hide main views
+                [overviewView, summaryView, macroView].forEach(v => v.classList.add('hidden'));
+                
+                // Reset Nav State
+                navMacro.className = "px-6 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer";
+                navOverview.className = "px-6 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none cursor-pointer";
+                navMacro.style.borderBottom = "none";
+                navOverview.style.borderBottom = "none";
+
+                if (viewName === 'macro') {
+                    macroView.classList.remove('hidden');
+                    navMacro.className = "px-6 py-2 text-sm font-medium text-blue-600 focus:outline-none cursor-pointer";
+                    navMacro.style.borderBottom = "2px solid #2563EB";
+                    renderMacroView();
+                } else if (viewName === 'overview') {
+            overviewView.classList.remove('hidden');
+            navOverview.className = "px-6 py-2 text-sm font-medium text-blue-600 focus:outline-none cursor-pointer";
+            navOverview.style.borderBottom = "2px solid #2563EB";
+            renderOverview();
+            // Always show detail view
+            if (data) {
+                renderDetailView(data);
+            } else if (currentDetailPeriod) {
+                renderDetailView(currentDetailPeriod);
+            } else if (currentXun) {
+                renderDetailView(currentXun);
+            } else if (xunPeriods.length > 0) {
+                 renderDetailView(xunPeriods[0]);
+            }
+        } else if (viewName === 'detail') {
+                    // Detail is now part of Overview
+                    overviewView.classList.remove('hidden');
+                    navOverview.className = "px-6 py-2 text-sm font-medium text-blue-600 focus:outline-none cursor-pointer";
+                    navOverview.style.borderBottom = "2px solid #2563EB";
+                    
+                    // Render Grid (if not already there? It's cheap)
+                    renderOverview();
+                    
+                    currentDetailPeriod = data;
+                    renderDetailView(data);
+                    
+                    // Scroll to detail section
+                    detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else if (viewName === 'summary') {
+                    const view = document.getElementById('summary-view');
+                    view.classList.remove('hidden');
+                    renderSummaryView(data);
+                }
+                // window.scrollTo(0, 0); // Remove auto scroll top, let user context decide
+            }
+
+            // --- Rendering ---
+            function renderMacroView() {
+                macroList.innerHTML = '';
+                xunPeriods.forEach((period, index) => {
+                    const row = document.createElement('div');
+                    row.className = "grid grid-cols-12 gap-0 text-sm group hover:bg-opacity-80 transition-colors";
+                    
+                    // Gradient Background
+                    // HSL: Hue = index * 10 (0 to 360), Saturation 70%, Lightness 96%
+                    // We can also use predefined palette from image, but Hue rotation is easiest for "Gradient" effect.
+                    const hue = (index * 10) % 360;
+                    row.style.backgroundColor = `hsl(${hue}, 70%, 96%)`;
+                    
+                    // Check if current xun
+                    if (currentXun && currentXun.index === period.index) {
+                         row.classList.add('ring-2', 'ring-blue-400', 'z-10', 'relative');
+                    }
+
+                    // Format Date
+                    const startStr = `${String(period.startDate.getMonth()+1).padStart(2, '0')}.${String(period.startDate.getDate()).padStart(2, '0')}`;
+                    const endStr = `${String(period.endDate.getMonth()+1).padStart(2, '0')}.${String(period.endDate.getDate()).padStart(2, '0')}`;
+                    
+                    // Goal & Remarks
+                    const goal = macroGoals[period.index]?.goal || '';
+                    const remark = macroGoals[period.index]?.remark || '';
+
+                    // Progress (Checkboxes - Now Interactive Goal Check-in)
+                    let progressHtml = '<div class="flex items-center justify-center h-full space-x-[2px]">';
+                    let tempDate = new Date(period.startDate);
+                    while (tempDate <= period.endDate) {
+                        const dStr = tempDate.toISOString().split('T')[0];
+                        const data = userData[dStr] || {};
+                        const isChecked = data.goal_checkin === true;
+                        const isFuture = tempDate > new Date();
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        const isToday = dStr === todayStr;
+                        
+                        // Style based on checked status
+                        // Checked: Solid color of the Xun
+                        // Unchecked: Empty border
+                        // Today: Pulse animation if unchecked
+                        
+                        let bgClass = isChecked ? '' : 'bg-white';
+                        let borderClass = isChecked ? '' : 'border-gray-300';
+                        let opacityClass = isFuture ? 'opacity-40 cursor-not-allowed' : 'opacity-100 cursor-pointer hover:scale-110';
+                        
+                        // Inline styles for dynamic colors
+                        const xunColor = `hsl(${hue}, 80%, 60%)`; // Stronger color for check
+                        const style = isChecked 
+                            ? `background-color: ${xunColor}; border-color: ${xunColor};` 
+                            : `border-color: #d1d5db;`;
+                        
+                        // Tooltip
+                        const tip = isFuture 
+                            ? `${dStr} (尚未到来)` 
+                            : (isChecked ? `${dStr}: 已打卡 - ${goal || '完成目标'}` : `${dStr}: 点击打卡 - ${goal || '记录今日成果'}`);
+
+                        const clickHandler = isFuture ? '' : `onclick="window.toggleGoalCheckin('${dStr}', ${index})"`;
+
+                        progressHtml += `<div class="w-2.5 h-2.5 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} transition-all duration-200" 
+                            style="${style}" 
+                            title="${tip}"
+                            ${clickHandler}></div>`;
+                            
+                        tempDate.setDate(tempDate.getDate() + 1);
+                    }
+                    progressHtml += '</div>';
+
+                    row.innerHTML = `
+                        <div class="col-span-1 flex items-center justify-center font-mono text-gray-500 py-3 border-r border-black/5 cursor-pointer hover:bg-black/5" onclick="window.showXunDetail(${index})">${period.index}</div>
+                        <div class="col-span-2 flex items-center justify-center font-mono text-gray-600 border-r border-black/5 text-xs">${startStr} - ${endStr}</div>
+                        <div class="col-span-4 border-r border-black/5 p-1">
+                            <input type="text" class="w-full h-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400/70 text-sm" 
+                                placeholder="本旬核心目标..." value="${goal}" onchange="window.updateMacroGoal(${period.index}, 'goal', this.value)">
+                        </div>
+                        <div class="col-span-3 border-r border-black/5 py-1">
+                            ${progressHtml}
+                        </div>
+                        <div class="col-span-2 p-1">
+                            <input type="text" class="w-full h-full bg-transparent border-none focus:ring-0 text-gray-500 text-xs text-center" 
+                                placeholder="备注" value="${remark}" onchange="window.updateMacroGoal(${period.index}, 'remark', this.value)">
+                        </div>
+                    `;
+                    
+                    macroList.appendChild(row);
+                });
+                
+                // Expose helper to global scope for onclick
+                window.showXunDetail = (index) => {
+                    showView('detail', xunPeriods[index - 1]); // Fix index: xunPeriods is 0-indexed array, index passed is 1-based logic from loop? Wait.
+                    // xunPeriods loop: forEach((period, index) => ...). index is 0-based.
+                    // But in HTML I used ${period.index} which is 1-based.
+                    // window.showXunDetail(${index}) passes the loop index (0-based).
+                    // So xunPeriods[index] is correct.
+                };
+
+                window.updateMacroGoal = (xunIndex, field, value) => {
+                    if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
+                    macroGoals[xunIndex][field] = value;
+                    saveMacroGoals();
+                    renderMacroView(); // Re-render to update tooltips
+                };
+
+                window.toggleGoalCheckin = (dateStr, xunIndex) => {
+                    if (!userData[dateStr]) userData[dateStr] = {};
+                    // Toggle
+                    userData[dateStr].goal_checkin = !userData[dateStr].goal_checkin;
+                    saveUserData();
+                    renderMacroView();
+                    // Also update overview if visible? No, this is Macro view.
+                };
+            }
+
+            function renderOverview() {
+                overviewGrid.innerHTML = '';
+                overviewGrid.className = 'flex flex-wrap gap-1 justify-center p-4 bg-white rounded-xl shadow-sm border border-gray-100'; 
+                
+                const legend = document.createElement('div');
+                legend.className = "w-full flex justify-between items-center mb-6 pb-4 border-b border-gray-50";
+                legend.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="text-sm font-medium text-gray-500">全景概览（记录热度）</span>
+                        <span class="text-[11px] text-gray-400">点击任意日期，自动打开下方旬日历</span>
+                    </div>
+                    <div class="flex gap-4 text-xs text-gray-400">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-[1px] bg-gray-50 border border-gray-200"></span> 
+                            <span>未记录</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-[1px] shadow-sm" style="background-color: hsl(210, 85%, 60%)"></span> 
+                            <span>已记录</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-[1px] border-2 border-blue-400 bg-white"></span> 
+                            <span>今天</span>
+                        </div>
+                    </div>
+                `;
+                overviewGrid.appendChild(legend);
+
+                const start = new Date(YEAR, 0, 1);
+                const end = new Date(YEAR, 11, 31);
+                
+                const dateToXunMap = {};
+                xunPeriods.forEach(p => {
+                    let d = new Date(p.startDate);
+                    while (d <= p.endDate) {
+                        dateToXunMap[d.toISOString().split('T')[0]] = p;
+                        d.setDate(d.getDate() + 1);
+                    }
+                });
+
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    const xun = dateToXunMap[dateStr];
+                    const xunIndex = xun ? xun.index : 0;
+                    
+                    const el = document.createElement('div');
+                    el.className = 'w-3 h-3 md:w-4 md:h-4 rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-125 relative group';
+                    
+                    // Enhanced Color Saturation/Lightness for "Obvious Gradient"
+                    // Original: hsl(hue, 70%, 96%) / hsl(hue, 70%, 60%)
+                    // New: hsl(hue, 85%, 85%) / hsl(hue, 85%, 55%)
+                    const hue = (xunIndex * 10) % 360;
+                    
+                    const data = userData[dateStr];
+                    const hasData = data && (data.mood || data.emoji || data.journal || data.weather || data.goal_checkin); // Added goal_checkin
+                    
+                    if (hasData) {
+                         el.style.backgroundColor = `hsl(${hue}, 85%, 60%)`; // Stronger saturation
+                         el.style.boxShadow = `0 0 2px hsl(${hue}, 85%, 40%)`;
+                    } else {
+                         el.style.backgroundColor = `hsl(${hue}, 85%, 90%)`; // Slightly more visible base
+                    }
+                    
+                    // Mood Emoji Map
+                    const moodEmojis = {1: '😫', 2: '😞', 3: '😐', 4: '🙂', 5: '🤩'};
+                    const moodEmoji = data && data.mood ? moodEmojis[data.mood] : (data && data.emoji ? data.emoji : '');
+                    
+                    // Tooltip
+                    const keywordsStr = data && data.keywords ? ` [${data.keywords.join(' ')}]` : '';
+                    el.title = `${dateStr} ${moodEmoji}${keywordsStr} (第 ${xunIndex} 旬)`;
+                    
+                    // Click to go to detail (which is now below)
+                    if (xun) {
+                        el.onclick = () => {
+                             currentDetailPeriod = xun;
+                             renderDetailView(xun);
+                             // Optional: Scroll to detail?
+                             // detailSection.scrollIntoView({ behavior: 'smooth' });
+                        };
+                    }
+
+                    overviewGrid.appendChild(el);
+                }
+            }
+
+            function renderDetailView(period) {
+                try {
+                    const detailTitle = document.getElementById('detail-title');
+                    const container = document.getElementById('detail-calendars-container');
+                    const detailContent = document.getElementById('detail-content');
+                    
+                    detailContent.classList.remove('hidden');
+
+                    container.innerHTML = '';
+                    currentDetailPeriod = period; // Sync state
+
+                    const startMonth = period.startDate.getMonth();
+                    const endMonth = period.endDate.getMonth();
+                    
+                    const startMonthDisplay = startMonth + 1;
+                    const endMonthDisplay = endMonth + 1;
+                    const monthDisplay = startMonth === endMonth ? `${startMonthDisplay}月` : `${startMonthDisplay}月 - ${endMonthDisplay}月`;
+                    
+                    // Enhanced Header with Xun Color
+                    const hue = (period.index * 10) % 360;
+                    const xunColor = `hsl(${hue}, 85%, 60%)`;
+                    // Stronger gradient for background
+                    const xunBg = `linear-gradient(to bottom, hsl(${hue}, 85%, 98%), #f9fafb)`;
+                    
+                    // Apply gradient to the section
+                    detailContent.style.background = xunBg;
+
+                    detailTitle.innerHTML = `
+                        <div class="flex items-center justify-center gap-3">
+                            <span class="px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm" style="background-color: ${xunColor}">
+                                第 ${period.index} 旬
+                            </span>
+                            <span class="text-xl font-light text-gray-800">2026年 ${monthDisplay}</span>
+                        </div>
+                    `;
+                    
+                    // Update Summary Button
+                    const summaryBtn = document.getElementById('show-summary-btn');
+                    if(summaryBtn) {
+                         summaryBtn.onclick = () => showView('summary', period);
+                         summaryBtn.style.backgroundColor = xunColor;
+                         summaryBtn.className = "px-3 py-1 text-sm text-white rounded-md hover:opacity-90 shadow-sm transition-colors";
+                    }
+
+                    // 确定需要渲染的月份列表
+                    const monthsToRender = [];
+                    monthsToRender.push(new Date(period.startDate.getFullYear(), startMonth, 1));
+                    if (startMonth !== endMonth) {
+                        monthsToRender.push(new Date(period.startDate.getFullYear(), endMonth, 1));
+                    }
+
+                    monthsToRender.forEach(monthStart => {
+                        const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
+                        
+                        // 月份容器
+                        const monthWrapper = document.createElement('div');
+                        monthWrapper.className = 'bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100/50 overflow-hidden mb-6';
+                        
+                        // 月份标题
+                        const monthHeader = document.createElement('div');
+                        monthHeader.className = 'bg-white/50 px-6 py-4 border-b border-gray-50 font-light text-xl text-gray-800 flex justify-between items-center';
+                        monthHeader.innerHTML = `<span>${monthStart.getMonth() + 1}月</span><span class="text-xs text-gray-300 font-mono">${monthStart.getFullYear()}</span>`;
+                        monthWrapper.appendChild(monthHeader);
+
+                        // 星期表头
+                        const gridHeader = document.createElement('div');
+                        gridHeader.className = 'detail-grid bg-gray-50/30 border-b border-gray-100';
+                        gridHeader.innerHTML = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(d => `<div class="text-center font-medium text-[10px] text-gray-400 py-3 tracking-wider">${d}</div>`).join('');
+                        monthWrapper.appendChild(gridHeader);
+
+                        // 日期网格
+                        const gridBody = document.createElement('div');
+                        gridBody.className = 'detail-grid bg-white/60';
+                        
+                        // 补齐月初空白
+                        for (let i = 0; i < monthStart.getDay(); i++) {
+                            const empty = document.createElement('div');
+                            empty.className = "border-t border-r border-gray-50 bg-gray-50/10 h-28";
+                            gridBody.appendChild(empty);
+                        }
+
+                        let currentDate = new Date(monthStart);
+                        while (currentDate <= monthEnd) {
+                            const dateStr = currentDate.toISOString().split('T')[0];
+                            const dayData = userData[dateStr] || {};
+                            const isWithinXun = currentDate >= period.startDate && currentDate <= period.endDate;
+                            
+                            let jieQi = '', lunarDay = '';
+                            let holidayName = '';
+                            let isHoliday = false;
+
+                            if (typeof Solar !== 'undefined') {
+                                const solar = Solar.fromYmd(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+                                const lunar = solar.getLunar();
+                                jieQi = lunar.getJieQi();
+                                lunarDay = lunar.getDayInChinese() === '初一' ? lunar.getMonthInChinese() + '月' : lunar.getDayInChinese();
+                                
+                                if (typeof HolidayUtil !== 'undefined') {
+                                    const h = HolidayUtil.getHoliday(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+                                    if (h) {
+                                        holidayName = h.getName();
+                                        isHoliday = !h.isWork();
+                                    }
+                                }
+                            }
+
+                            const dayEl = document.createElement('div');
+                            // Style update
+                            const baseClass = `p-3 border-t border-r border-gray-50 h-28 flex flex-col relative transition-all duration-200 group`;
+                            const activeClass = `cursor-pointer`; // We set BG manually
+                            const inactiveClass = `bg-gray-50/40 text-gray-300 grayscale opacity-50`;
+
+                            dayEl.className = `${baseClass} ${isWithinXun ? activeClass : inactiveClass}`;
+                            
+                            // Xun color gradient
+                            if (isWithinXun) {
+                                // Stronger gradient
+                                dayEl.style.background = `linear-gradient(135deg, hsl(${hue}, 90%, 96%) 0%, hsl(${hue}, 80%, 92%) 100%)`;
+                                dayEl.style.boxShadow = `inset 0 0 0 1px hsl(${hue}, 80%, 80%)`;
+                            } else {
+                                dayEl.style.background = 'white';
+                            }
+
+                            if (dayData.mood) {
+                                dayEl.classList.add(`mood-${dayData.mood}`); 
+                            }
+                            
+                            // Date Number
+                            const dateColor = isWithinXun ? (dayData.mood ? 'text-gray-800' : 'text-gray-700') : 'text-gray-300';
+                            const subText = holidayName 
+                                ? `<span class="${isHoliday ? 'text-red-500 font-bold' : 'text-gray-500'}">${holidayName}</span>` 
+                                : (jieQi ? `<span class="text-blue-500 font-medium">${jieQi}</span>` : lunarDay);
+
+                            // Mood Emoji Map
+                            const moodEmojis = {1: '😫', 2: '😞', 3: '😐', 4: '🙂', 5: '🤩'};
+                            const displayEmoji = dayData.mood ? moodEmojis[dayData.mood] : (dayData.emoji || '');
+
+                            // Indicators
+                            let indicators = [];
+                            if (dayData.metrics) {
+                                if (dayData.metrics.exercise > 0) indicators.push('<span title="运动">🏃</span>');
+                                if (dayData.metrics.reading > 0) indicators.push('<span title="阅读">📚</span>');
+                            }
+                            if (dayData.journal || (dayData.emotions && dayData.emotions.length > 0)) {
+                                indicators.push('<span title="日记/情绪">📝</span>');
+                            }
+                            
+                            // Weather Icon Helper
+                            const getWeatherIcon = (w) => {
+                                const map = { 'Sunny': '☀️', 'Cloudy': '☁️', 'Overcast': '🌥️', 'Rainy': '🌧️', 'Snowy': '❄️', 'Windy': '🌬️', 'Foggy': '🌫️', 'Thunder': '⚡' };
+                                return map[w] || '';
+                            };
+
+                            dayEl.innerHTML = `
+                                <div class="flex justify-between items-start mb-1">
+                                    <span class="text-sm font-medium ${dateColor} group-hover:text-blue-600 transition-colors">${currentDate.getDate()}</span>
+                                    <span class="text-[10px] ${holidayName ? '' : 'text-gray-400'} scale-90 origin-right">${subText}</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center justify-center">
+                                     ${displayEmoji ? `<div class="text-2xl filter drop-shadow-sm transform group-hover:scale-110 transition-transform mb-1">${displayEmoji}</div>` : ''}
+                                     
+                                     <div class="flex gap-1 text-[10px] opacity-70 flex-wrap justify-center">
+                                        ${indicators.join('')}
+                                        ${dayData.weather ? `<span title="${dayData.weather}">${getWeatherIcon(dayData.weather)}</span>` : ''}
+                                     </div>
+                                </div>
+                            `;
+
+                            if (isWithinXun) {
+                                const dStr = dateStr;
+                                dayEl.addEventListener('click', () => openModal(dStr));
+                            }
+                            
+                            gridBody.appendChild(dayEl);
+                            currentDate.setDate(currentDate.getDate() + 1);
+                        }
+
+                        monthWrapper.appendChild(gridBody);
+                        container.appendChild(monthWrapper);
+                    });
+                } catch (e) {
+                    console.error('Error rendering detail view:', e);
+                }
+            }
+
+            function renderSummaryView(period) {
+                const summaryTitle = document.getElementById('summary-title');
+                const summaryContent = document.getElementById('summary-content');
+                
+                // Title Styling
+                const startStr = `${period.startDate.getMonth()+1}.${period.startDate.getDate()}`;
+                const endStr = `${period.endDate.getMonth()+1}.${period.endDate.getDate()}`;
+                const hue = (period.index * 10) % 360;
+                
+                summaryTitle.innerHTML = `
+                    <div class="flex flex-col items-center mb-8">
+                        <div class="px-4 py-1 rounded-full text-xs font-medium bg-white border shadow-sm mb-3" style="color: hsl(${hue}, 70%, 40%); border-color: hsl(${hue}, 70%, 80%)">
+                            ${startStr} - ${endStr}
+                        </div>
+                        <h2 class="text-3xl font-light text-gray-800">第 ${period.index} 旬回顾</h2>
+                    </div>
+                `;
+                
+                summaryContent.innerHTML = '';
+                summaryContent.className = "max-w-4xl mx-auto space-y-8"; // Reset and add layout classes
+
+                const xunData = [];
+                let currentDate = new Date(period.startDate);
+                while (currentDate <= period.endDate) {
+                    const dateStr = currentDate.toISOString().split('T')[0];
+                    // Always push a record for every day in the Xun, even if empty
+                    if (userData[dateStr]) {
+                        xunData.push({ date: dateStr, ...userData[dateStr], hasData: true });
+                    } else {
+                        xunData.push({ date: dateStr, hasData: false });
+                    }
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+
+                if (xunData.every(d => !d.hasData)) {
+                    summaryContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm text-center">
+                            <div class="text-6xl mb-4 opacity-20">📝</div>
+                            <p class="text-gray-500 font-light text-lg">本旬暂无记录，休息一下吧。</p>
+                            <button onclick="showView('detail', currentDetailPeriod)" class="mt-6 px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-md">去记录</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const stats = {
+                    moodCounts: [0, 0, 0, 0, 0],
+                    emotionCounts: {},
+                    sleep: { total: 0, count: 0 },
+                    exercise: { total: 0, count: 0 },
+                    reading: { total: 0, count: 0 },
+                    wealth: 0,
+                    customActivities: {},
+                    journals: [],
+                    dates: xunData.map(d => d.date.slice(5)), // Now contains all dates
+                    sleepData: [],
+                    exerciseData: [],
+                    readingData: [],
+                };
+
+                xunData.forEach(data => {
+                    if (data.hasData) {
+                        if (data.mood) stats.moodCounts[data.mood - 1]++;
+                        if (data.emotions) {
+                            data.emotions.forEach(tag => {
+                                stats.emotionCounts[tag] = (stats.emotionCounts[tag] || 0) + 1;
+                            });
+                        }
+                        if (data.metrics) {
+                            if (data.metrics.sleep) { stats.sleep.total += data.metrics.sleep; stats.sleep.count++; }
+                            if (data.metrics.exercise) { stats.exercise.total += data.metrics.exercise; stats.exercise.count++; }
+                            if (data.metrics.reading) { stats.reading.total += data.metrics.reading; stats.reading.count++; }
+                            if (data.metrics.wealth) stats.wealth += data.metrics.wealth;
+                        }
+                        if (data.custom_activities) {
+                            data.custom_activities.forEach(act => {
+                                stats.customActivities[act.name] = (stats.customActivities[act.name] || 0) + 1;
+                            });
+                        }
+                        if (data.journal) stats.journals.push({ date: data.date, content: data.journal });
+                        
+                        stats.sleepData.push(data.metrics?.sleep || null);
+                        stats.exerciseData.push(data.metrics?.exercise || null);
+                        stats.readingData.push(data.metrics?.reading || null);
+                    } else {
+                        // For days with no data, push null to charts to maintain x-axis alignment
+                        stats.sleepData.push(null);
+                        stats.exerciseData.push(null);
+                        stats.readingData.push(null);
+                    }
+                });
+
+                // Layout Structure
+                summaryContent.innerHTML = `
+                    <!-- 1. Stats Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                            <span class="text-2xl mb-2">😴</span>
+                            <span class="text-sm text-gray-400 mb-1">平均睡眠</span>
+                            <span class="text-xl font-semibold text-gray-700">${(stats.sleep.count > 0 ? (stats.sleep.total / stats.sleep.count).toFixed(1) : '-')} <span class="text-xs font-normal text-gray-400">h</span></span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                            <span class="text-2xl mb-2">🏃</span>
+                            <span class="text-sm text-gray-400 mb-1">总运动</span>
+                            <span class="text-xl font-semibold text-gray-700">${stats.exercise.total} <span class="text-xs font-normal text-gray-400">min</span></span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                            <span class="text-2xl mb-2">📚</span>
+                            <span class="text-sm text-gray-400 mb-1">总阅读</span>
+                            <span class="text-xl font-semibold text-gray-700">${stats.reading.total} <span class="text-xs font-normal text-gray-400">min</span></span>
+                        </div>
+                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                            <span class="text-2xl mb-2">💰</span>
+                            <span class="text-sm text-gray-400 mb-1">财富变动</span>
+                            <span class="text-xl font-semibold ${stats.wealth >= 0 ? 'text-green-500' : 'text-red-500'}">${stats.wealth > 0 ? '+' : ''}${stats.wealth.toFixed(0)}</span>
+                        </div>
+                    </div>
+
+                    <!-- 1.5 Emotion Keywords -->
+                    ${Object.keys(stats.emotionCounts).length > 0 ? `
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                             <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2">
+                                <span class="w-1 h-4 rounded-full bg-pink-400"></span> 情绪关键词
+                            </h4>
+                            <div class="flex flex-wrap gap-2">
+                                ${Object.entries(stats.emotionCounts).sort((a,b) => b[1] - a[1]).map(([tag, count]) => `
+                                    <span class="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-sm border border-gray-100 flex items-center gap-2">
+                                        ${tag} <span class="text-xs bg-gray-200 text-gray-500 rounded-full px-1.5 py-0.5">${count}</span>
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- 2. Charts Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Mood Chart -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                            <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2">
+                                <span class="w-1 h-4 rounded-full bg-blue-400"></span> 心情分布
+                            </h4>
+                            <div class="flex-1 min-h-[200px] relative">
+                                <canvas id="mood-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Trends Chart -->
+                        <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
+                            <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2">
+                                <span class="w-1 h-4 rounded-full bg-green-400"></span> 趋势追踪
+                            </h4>
+                            <div class="flex-1 min-h-[200px] relative">
+                                <canvas id="metrics-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Journals & Highlights -->
+                    ${stats.journals.length > 0 ? `
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                             <h4 class="font-medium text-gray-700 mb-6 flex items-center gap-2">
+                                <span class="w-1 h-4 rounded-full bg-purple-400"></span> 闪念与复盘
+                            </h4>
+                            <div class="grid grid-cols-1 gap-4">
+                                ${stats.journals.map(j => `
+                                    <div class="flex gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 hover:shadow-sm transition-shadow">
+                                        <div class="flex-shrink-0 flex flex-col items-center w-12 pt-1">
+                                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${new Date(j.date).toLocaleString('en-US', {month:'short'})}</span>
+                                            <span class="text-xl font-light text-gray-800">${new Date(j.date).getDate()}</span>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-gray-600 leading-relaxed text-sm">${j.content}</p>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                `;
+
+                // Render Charts
+                setTimeout(() => {
+                    const moodChartEl = document.getElementById('mood-chart');
+                    const metricsChartEl = document.getElementById('metrics-chart');
+                    
+                    if (typeof Chart !== 'undefined') {
+                        if (moodChartEl) {
+                            new Chart(moodChartEl, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: ['1分', '2分', '3分', '4分', '5分'],
+                                    datasets: [{
+                                        data: stats.moodCounts,
+                                        backgroundColor: ['#F3F4F6', '#E5E7EB', '#D1D5DB', '#9CA3AF', '#6B7280'], // Grey scale for minimalist
+                                        hoverBackgroundColor: [`hsl(${hue}, 70%, 90%)`, `hsl(${hue}, 70%, 80%)`, `hsl(${hue}, 70%, 70%)`, `hsl(${hue}, 70%, 60%)`, `hsl(${hue}, 70%, 50%)`],
+                                        borderWidth: 0
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    cutout: '70%',
+                                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
+                                }
+                            });
+                        }
+
+                        if (metricsChartEl) {
+                            new Chart(metricsChartEl, {
+                                type: 'line',
+                                data: {
+                                    labels: stats.dates,
+                                    datasets: [
+                                        { label: '睡眠', data: stats.sleepData, borderColor: '#60A5FA', tension: 0.4, pointRadius: 2 },
+                                        { label: '运动', data: stats.exerciseData, borderColor: '#34D399', tension: 0.4, pointRadius: 2 },
+                                        { label: '阅读', data: stats.readingData, borderColor: '#FBBF24', tension: 0.4, pointRadius: 2 }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    scales: { y: { display: false }, x: { grid: { display: false } } },
+                                    plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, usePointStyle: true } } }
+                                }
+                            });
+                        }
+                    }
+                }, 100);
+            }
+
+            // --- Modal Helpers ---
+            function openModal(dateStr) {
+                selectedDate = dateStr;
+                const data = userData[dateStr] || {};
+                document.getElementById('modal-date').textContent = dateStr;
+                
+                // Reset mood
+                document.querySelectorAll('.mood-btn').forEach(btn => {
+                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400', 'bg-opacity-100');
+                    // Reset background if it was set via inline style or specific class? 
+                    // Our HTML uses hover:bg-*-50. Active state should force that background.
+                    // Let's rely on ring for selection.
+                });
+                
+                if (data.mood) {
+                    const activeMood = document.querySelector(`.mood-btn[data-mood="${data.mood}"]`);
+                    if (activeMood) {
+                        activeMood.classList.add('ring-2', 'ring-offset-2', 'ring-gray-400');
+                        // Optional: Force background color based on mood type?
+                        // For now ring is enough as per previous logic.
+                    }
+                }
+
+                // Emotions Tags
+                document.querySelectorAll('.emotion-tag').forEach(tag => {
+                    tag.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
+                    tag.classList.add('text-gray-600', 'border-gray-200');
+                    tag.setAttribute('aria-pressed', 'false');
+                });
+                
+                if (data.emotions && Array.isArray(data.emotions)) {
+                    data.emotions.forEach(tagText => {
+                        const tagEl = document.querySelector(`.emotion-tag[data-tag="${tagText}"]`);
+                        if (tagEl) {
+                            tagEl.classList.remove('text-gray-600', 'border-gray-200');
+                            tagEl.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
+                            tagEl.setAttribute('aria-pressed', 'true');
+                        }
+                    });
+                }
+
+                document.getElementById('keywords-input').value = data.keywords ? data.keywords.join(' ') : '';
+                document.getElementById('journal-input').value = data.journal || '';
+                
+                // Weather
+                document.querySelectorAll('#weather-selector button').forEach(btn => btn.classList.remove('bg-gray-200'));
+                if (data.weather) {
+                    const btn = document.querySelector(`#weather-selector button[data-weather="${data.weather}"]`);
+                    if (btn) btn.classList.add('bg-gray-200');
+                }
+
+                // Metrics
+                const m = data.metrics || {};
+                document.getElementById('metric-sleep').value = m.sleep || '';
+                document.getElementById('metric-exercise').value = m.exercise || '';
+                document.getElementById('metric-reading').value = m.reading || '';
+                document.getElementById('metric-wealth').value = m.wealth || '';
+                document.getElementById('metric-social').value = m.social || '';
+
+                // Custom activities
+                const container = document.getElementById('custom-activities-container');
+                container.querySelectorAll('.custom-activity-item').forEach(el => el.remove());
+                if (data.custom_activities) {
+                    data.custom_activities.forEach(act => addCustomActivityInput(act.name, act.value));
+                }
+
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+
+            function addCustomActivityInput(name = '', value = '') {
+                const div = document.createElement('div');
+                div.className = 'custom-activity-item flex items-center space-x-2';
+                div.innerHTML = `
+                    <input type="text" placeholder="活动名称" class="custom-name w-1/2 p-1 border rounded-md" value="${name}">
+                    <input type="text" placeholder="值" class="custom-value w-1/3 p-1 border rounded-md" value="${value}">
+                    <button class="text-red-400 hover:text-red-600">&times;</button>
+                `;
+                div.querySelector('button').onclick = () => div.remove();
+                document.getElementById('custom-activities-container').insertBefore(div, document.getElementById('add-custom-activity'));
+            }
+
+            function closeModal() {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+
+            function saveModalData() {
+                const moodEl = document.querySelector('.mood-btn.ring-2');
+                const weatherEl = document.querySelector('#weather-selector button.bg-gray-200');
+                
+                // Get selected emotions
+                const selectedEmotions = Array.from(document.querySelectorAll('.emotion-tag.bg-blue-100'))
+                    .map(el => el.dataset.tag);
+
+                userData[selectedDate] = {
+                    mood: moodEl ? parseInt(moodEl.dataset.mood) : undefined,
+                    emotions: selectedEmotions,
+                    keywords: document.getElementById('keywords-input').value.split(/[\s,]+/).filter(k => k.trim().length > 0).slice(0, 2),
+                    emoji: undefined, // Deprecated in favor of mood/keywords
+                    weather: weatherEl ? weatherEl.dataset.weather : undefined,
+                    journal: document.getElementById('journal-input').value,
+                    metrics: {
+                        sleep: parseFloat(document.getElementById('metric-sleep').value) || undefined,
+                        exercise: parseInt(document.getElementById('metric-exercise').value) || undefined,
+                        reading: parseInt(document.getElementById('metric-reading').value) || undefined,
+                        wealth: parseFloat(document.getElementById('metric-wealth').value) || undefined,
+                        social: document.getElementById('metric-social').value || undefined,
+                    },
+                    custom_activities: Array.from(document.querySelectorAll('.custom-activity-item')).map(item => ({
+                        name: item.querySelector('.custom-name').value,
+                        value: item.querySelector('.custom-value').value,
+                    })).filter(i => i.name)
+                };
+                
+                saveUserData();
+                closeModal();
+                if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
+                renderOverview();
+                renderMacroView();
+            }
+
+            function deleteModalData() {
+                if (confirm('确定删除本日所有记录吗？')) {
+                    delete userData[selectedDate];
+                    saveUserData();
+                    closeModal();
+                    if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
+                    renderOverview();
+                    renderMacroView();
+                }
+            }
+
+            // --- Initialization ---
+            function init() {
+                xunPeriods = getXunPeriods(YEAR);
+                currentXun = getCurrentXun(xunPeriods);
+                document.getElementById('current-xun-info').textContent = currentXun ? `当前是第 ${currentXun.index} 旬` : `当前不在 ${YEAR} 年范围内`;
+                
+                // Set default view to Macro
+                showView('macro');
+
+                // Events
+                document.getElementById('nav-macro').onclick = () => showView('macro');
+                document.getElementById('nav-overview').onclick = () => showView('overview');
+                
+                const backToOverviewBtn = document.getElementById('back-to-overview');
+                if (backToOverviewBtn) backToOverviewBtn.onclick = () => showView('overview');
+
+                const showSummaryBtn = document.getElementById('show-summary-btn');
+                if (showSummaryBtn) showSummaryBtn.onclick = () => showView('summary', currentDetailPeriod);
+
+                const backToDetailBtn = document.getElementById('back-to-detail');
+                if (backToDetailBtn) backToDetailBtn.onclick = () => showView('detail', currentDetailPeriod);
+
+                document.getElementById('modal-close').onclick = closeModal;
+                document.getElementById('modal-save').onclick = saveModalData;
+                document.getElementById('modal-delete').onclick = deleteModalData;
+                document.getElementById('add-custom-activity').onclick = () => addCustomActivityInput();
+
+                document.getElementById('mood-selector').onclick = (e) => {
+                    const btn = e.target.closest('.mood-btn');
+                    if (btn && btn.dataset.mood) {
+                        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400'));
+                        btn.classList.add('ring-2', 'ring-offset-2', 'ring-gray-400');
+                    }
+                };
+
+                // Emotion Tags Listener
+                const emotionTagsContainer = document.getElementById('emotion-tags');
+                if (emotionTagsContainer) {
+                    emotionTagsContainer.onclick = (e) => {
+                        const btn = e.target.closest('.emotion-tag');
+                        if (btn) {
+                            // Toggle active class
+                            const isPressed = btn.getAttribute('aria-pressed') === 'true';
+                            if (isPressed) {
+                                btn.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
+                                btn.classList.add('text-gray-600', 'border-gray-200');
+                                btn.setAttribute('aria-pressed', 'false');
+                            } else {
+                                btn.classList.remove('text-gray-600', 'border-gray-200');
+                                btn.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
+                                btn.setAttribute('aria-pressed', 'true');
+                            }
+                        }
+                    };
+                }
+                
+                document.getElementById('weather-selector').onclick = (e) => {
+                    const btn = e.target.closest('button');
+                    if (btn && btn.dataset.weather) {
+                        document.querySelectorAll('#weather-selector button').forEach(b => b.classList.remove('bg-gray-200'));
+                        btn.classList.add('bg-gray-200');
+                    }
+                };
+
+                // Initialize Quote System
+                if (typeof QuoteSystem !== 'undefined') {
+                    QuoteSystem.init();
+                }
+
+                window.onclick = (e) => {
+                    if (e.target === modal) closeModal();
+                };
+
+                updateYearProgress();
+                renderYearPixelGrid();
+            }
+
+
+
+
+            function updateYearProgress() {
+                const now = new Date();
+                const start = new Date(YEAR, 0, 1);
+                const end = new Date(YEAR, 11, 31);
+                
+                let current = now;
+                if (current.getFullYear() < YEAR) current = new Date(YEAR, 0, 1);
+                if (current.getFullYear() > YEAR) current = new Date(YEAR, 11, 31);
+                
+                const total = end - start;
+                const progress = current - start;
+                const percentage = Math.max(0, Math.min(100, (progress / total) * 100));
+                
+                const dayOfYear = Math.floor((current - start) / (1000 * 60 * 60 * 24)) + 1;
+                
+                const progressBar = document.getElementById('year-progress-bar');
+                const progressWalker = document.getElementById('year-progress-walker');
+                const progressText = document.getElementById('year-progress-text');
+                
+                if (progressBar) progressBar.style.width = `${percentage}%`;
+                if (progressWalker) progressWalker.style.left = `${percentage}%`;
+                if (progressText) progressText.textContent = `第 ${dayOfYear} 天 / ${percentage.toFixed(1)}%`;
+
+                const walker = document.getElementById('year-progress-walker');
+                const bubble = document.getElementById('walker-bubble');
+                if (walker && bubble) {
+                    walker.addEventListener('mouseenter', () => bubble.classList.remove('opacity-0'));
+                    walker.addEventListener('mouseleave', () => bubble.classList.add('opacity-0'));
+                }
+            }
+
+            function renderYearPixelGrid() {
+                const container = document.getElementById('year-pixel-grid');
+                const wrapper = document.getElementById('year-pixel-grid-container');
+                if (!container || !wrapper) return;
+                
+                wrapper.classList.remove('hidden');
+                container.innerHTML = '';
+
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+                const start = new Date(YEAR, 0, 1);
+                const end = new Date(YEAR, 11, 31);
+                
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    const dateStr = d.toISOString().split('T')[0];
+                    const isToday = dateStr === todayStr;
+                    const isPast = d < now && !isToday;
+                    const isFuture = d > now && !isToday;
+                    
+                    const cell = document.createElement('div');
+                    let className = "w-2.5 h-2.5 rounded-[1px] transition-all duration-300 ";
+
+                    if (isToday) {
+                        className += "shadow-md scale-110 z-10 animate-pulse border border-black/10";
+                        cell.style.backgroundColor = `#2563EB`;
+                        cell.title = `${dateStr}（今天）`;
+                    } else if (isPast) {
+                        cell.style.backgroundColor = `#DBEAFE`;
+                        className += "opacity-90 hover:opacity-100";
+                        cell.title = `${dateStr}（过去）`;
+                    } else {
+                        cell.style.backgroundColor = `#F3F4F6`;
+                        className += "hover:bg-gray-200";
+                        cell.title = `${dateStr}（未来）`;
+                    }
+                    
+                    cell.className = className;
+                    container.appendChild(cell);
+                }
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>

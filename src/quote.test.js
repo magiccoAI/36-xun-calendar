@@ -32,6 +32,10 @@ describe('QuoteSystem', () => {
     });
 
     test('should fetch new quote if no local data exists', async () => {
+        const spy = jest.spyOn(QuoteSystem, 'getStrategies').mockReturnValue([
+            { url: 'https://v1.hitokoto.cn?c=d', type: 'hitokoto' }
+        ]);
+
         // Setup mock response
         fetchMock.mockResolvedValueOnce({
             json: () => Promise.resolve({
@@ -45,6 +49,7 @@ describe('QuoteSystem', () => {
         window.localStorage.getItem.mockReturnValue(null);
 
         await QuoteSystem.fetchQuote(false);
+        spy.mockRestore();
 
         expect(fetch).toHaveBeenCalled();
         expect(document.getElementById('daily-quote-text').textContent).toBe('Test Quote');
@@ -69,6 +74,10 @@ describe('QuoteSystem', () => {
     });
 
     test('should fetch new quote on force refresh', async () => {
+        const spy = jest.spyOn(QuoteSystem, 'getStrategies').mockReturnValue([
+            { url: 'https://v1.hitokoto.cn?c=d', type: 'hitokoto' }
+        ]);
+
         fetchMock.mockResolvedValueOnce({
             json: () => Promise.resolve({
                 hitokoto: 'Refreshed Quote',
@@ -78,6 +87,7 @@ describe('QuoteSystem', () => {
         });
 
         await QuoteSystem.fetchQuote(true);
+        spy.mockRestore();
 
         expect(fetch).toHaveBeenCalled();
         expect(document.getElementById('daily-quote-text').textContent).toBe('Refreshed Quote');
@@ -90,7 +100,7 @@ describe('QuoteSystem', () => {
         // Wait, processData uses type.
         // We can spy on getStrategies to return only jinrishici type.
         
-        jest.spyOn(QuoteSystem, 'getStrategies').mockReturnValue([
+        const spy = jest.spyOn(QuoteSystem, 'getStrategies').mockReturnValue([
             { url: 'https://v2.jinrishici.com/one.json', type: 'jinrishici' }
         ]);
 
@@ -105,6 +115,7 @@ describe('QuoteSystem', () => {
         });
 
         await QuoteSystem.fetchQuote(false);
+        spy.mockRestore();
 
         expect(document.getElementById('daily-quote-text').textContent).toBe('Jinrishici Quote');
         expect(document.getElementById('daily-quote-author').textContent).toBe('—— Poet «Poem»');

@@ -93,17 +93,17 @@
         <!-- Navigation Tabs -->
         <div class="flex justify-center mb-6 border-b border-gray-200">
             <button id="nav-macro" class="px-6 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none">
-                宏观规划 (Macro)
+                36旬 (36-Xun)
             </button>
             <button id="nav-overview" class="px-6 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
-                全景概览 (Overview)
+                全景 & 旬 (Overview & Xun)
             </button>
         </div>
 
         <!-- View Container -->
         <div class="relative w-full">
             <!-- View M: Macro Planning View (New Default) -->
-            <div id="macro-view" class="w-full">
+            <div id="macro-view" class="w-full relative">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="hidden md:grid grid-cols-12 gap-0 text-sm font-medium text-gray-500 bg-gray-50 border-b border-gray-200 p-3">
                         <div class="col-span-1 text-center">旬</div>
@@ -116,6 +116,7 @@
                         <!-- JS Generated Rows -->
                     </div>
                 </div>
+
             </div>
 
             <!-- View A: Overview & Detail Combined -->
@@ -130,9 +131,17 @@
     <!-- Detail View Section (Now embedded) -->
     <div id="detail-section" class="w-full bg-gray-50 min-h-[600px] rounded-xl border border-gray-100 overflow-hidden relative">
         <div id="detail-content" class="hidden">
-                        <div class="flex justify-between items-center p-4 bg-white border-b border-gray-100">
-                            <h2 id="detail-title" class="text-xl font-light text-gray-800"></h2>
-                            <button id="show-summary-btn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 shadow-sm transition-colors">
+                        <div class="flex justify-between items-center p-4 bg-white border-b border-gray-100 gap-2 md:gap-4">
+                            <div class="flex items-center gap-1">
+                                <button onclick="window.goToMacro()" class="p-2 text-gray-500 hover:text-blue-600 transition-colors rounded-full hover:bg-gray-100" title="返回36旬">
+                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                </button>
+                                <!-- Back to Grid Button (Removed as per user request) -->
+                            </div>
+                            <h2 id="detail-title" class="text-xl font-light text-gray-800 flex-1"></h2>
+                            <button id="show-summary-btn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 shadow-sm transition-colors whitespace-nowrap">
                                 本旬小结
                             </button>
                         </div>
@@ -155,6 +164,25 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Mobile Scroll Controls -->
+    <div id="macro-back-to-top-container" style="position: fixed; bottom: 1rem; right: 1rem; z-index: 50;" class="transition-opacity duration-300 opacity-0 pointer-events-none" aria-hidden="true">
+        <button id="macro-back-to-top" type="button" tabindex="-1" class="p-2 md:p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg text-blue-600 hover:bg-blue-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2" aria-label="返回顶部" title="返回顶部">
+            <span class="sr-only">返回顶部</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-3.5 md:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+        </button>
+    </div>
+
+    <div id="macro-scroll-down-container" style="position: fixed; bottom: 1rem; left: 1rem; z-index: 50;" class="transition-opacity duration-300 opacity-0 pointer-events-none" aria-hidden="true">
+        <button id="macro-scroll-down" type="button" tabindex="-1" class="p-2 md:p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg text-blue-600 hover:bg-blue-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2" aria-label="快速下滑到下一旬" title="快速下滑到下一旬">
+            <span class="sr-only">快速下滑到下一旬</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-3.5 md:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+        </button>
     </div>
 
     <!-- Modal for Rich Data Entry -->
@@ -233,8 +261,61 @@
                 <!-- Keywords Input (Replaces Emoji) -->
                 <div>
                     <label for="keywords-input" class="block text-sm font-medium text-gray-700 mb-2">今日关键词 (Keywords)</label>
-                    <input type="text" id="keywords-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 健身, 阅读 (空格分隔, 最多2个)">
+                    <input type="text" id="keywords-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 健身, Reading, Carpe Diem (最多3个)">
                     <p class="text-xs text-gray-400 mt-1">将在日历格子中微缩显示，代替通用图标</p>
+                </div>
+                <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/40">
+                    <div class="flex items-baseline justify-between gap-2">
+                        <h4 class="text-sm font-semibold text-gray-700">36旬 · 核心目标对齐</h4>
+                        <span id="xun-goal-meta" class="text-xs text-gray-400 font-mono"></span>
+                    </div>
+                    <div class="mt-3 space-y-3">
+                        <div>
+                            <label for="xun-goal-input" class="block text-xs font-medium text-gray-600 mb-1">本旬核心目标</label>
+                            <input type="text" id="xun-goal-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="本旬核心目标...">
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-medium text-gray-600">本旬关键指标 (最多3个)</span>
+                                <span class="text-[11px] text-gray-400">用于每日勾选对齐</span>
+                            </div>
+                            <div class="mt-2 space-y-2">
+                                <input type="text" id="xun-indicator-1" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="指标1：例如 深度工作 45m">
+                                <input type="text" id="xun-indicator-2" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="指标2：例如 运动 20m">
+                                <input type="text" id="xun-indicator-3" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="指标3：例如 阅读 10页">
+                            </div>
+                            <div class="mt-3 grid grid-cols-1 gap-2">
+                                <label class="flex items-center justify-between gap-3 text-xs text-gray-600">
+                                    <span id="day-indicator-label-1" class="truncate">今日完成指标1</span>
+                                    <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5">
+                                </label>
+                                <label class="flex items-center justify-between gap-3 text-xs text-gray-600">
+                                    <span id="day-indicator-label-2" class="truncate">今日完成指标2</span>
+                                    <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5">
+                                </label>
+                                <label class="flex items-center justify-between gap-3 text-xs text-gray-600">
+                                    <span id="day-indicator-label-3" class="truncate">今日完成指标3</span>
+                                    <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5">
+                                </label>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <label for="goal-checkin-input" class="text-xs font-medium text-gray-600">今日推进核心目标</label>
+                            <input type="checkbox" id="goal-checkin-input" class="h-5 w-5">
+                        </div>
+                        <div>
+                            <label for="goal-confidence-input" class="block text-xs font-medium text-gray-600 mb-1">信心分数 (0-100)</label>
+                            <input type="number" id="goal-confidence-input" min="0" max="100" step="5" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 80">
+                        </div>
+                        <div>
+                            <label for="goal-actions-input" class="block text-xs font-medium text-gray-600 mb-1">今日最小行动 (最多3条)</label>
+                            <input type="text" id="goal-actions-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 写300字, Run 2km, Deep Work 45m">
+                        </div>
+                        <div>
+                            <label for="goal-blockers-input" class="block text-xs font-medium text-gray-600 mb-1">阻碍 / 风险</label>
+                            <textarea id="goal-blockers-input" rows="2" class="w-full p-2 border border-gray-300 rounded-md text-sm"></textarea>
+                        </div>
+                    </div>
                 </div>
                  <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">天气</label>
@@ -328,8 +409,50 @@
             let selectedDate = '';
             let currentDetailPeriod = null;
 
+            const pad2 = (n) => String(n).padStart(2, '0');
+            const formatLocalDate = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+            const addDaysToDateStr = (dateStr, days) => {
+                const d = new Date(`${dateStr}T00:00:00`);
+                d.setDate(d.getDate() + days);
+                return formatLocalDate(d);
+            };
+
+            const migrateUserDataToLocalDates = (data) => {
+                const migrationKey = 'xun_calendar_data_v2_local_date_migrated_v1';
+                if (localStorage.getItem(migrationKey) === '1') return data;
+
+                const timezoneOffsetMinutes = new Date().getTimezoneOffset();
+                if (timezoneOffsetMinutes >= 0 || !data || typeof data !== 'object') {
+                    localStorage.setItem(migrationKey, '1');
+                    return data;
+                }
+
+                const entries = Object.entries(data);
+                if (entries.length === 0) {
+                    localStorage.setItem(migrationKey, '1');
+                    return data;
+                }
+
+                const migrated = {};
+                for (const [key, value] of entries) {
+                    const isDateKey = /^\d{4}-\d{2}-\d{2}$/.test(key);
+                    const newKey = isDateKey ? addDaysToDateStr(key, 1) : key;
+                    if (migrated[newKey] && value && typeof value === 'object') {
+                        migrated[newKey] = { ...migrated[newKey], ...value };
+                    } else {
+                        migrated[newKey] = value;
+                    }
+                }
+
+                localStorage.setItem('xun_calendar_data_v2', JSON.stringify(migrated));
+                localStorage.setItem(migrationKey, '1');
+                return migrated;
+            };
+
+            userData = migrateUserDataToLocalDates(userData);
+
             // --- Core Logic ---
-            function getXunPeriods(year) {
+            window.getXunPeriods = function(year) {
                 const periods = [];
                 let currentDate = new Date(year, 0, 1);
                 for (let i = 1; i <= XUN_COUNT; i++) {
@@ -420,6 +543,49 @@
             }
             
             // --- View Management ---
+            let hasScrolledToCurrentXun = false;
+
+            window.scrollToCurrentXun = (force = false) => {
+                // If already scrolled and not forced, skip
+                if (hasScrolledToCurrentXun && !force) return;
+                
+                // 1. URL Param
+                const urlParams = new URLSearchParams(window.location.search);
+                let targetXun = parseInt(urlParams.get('xun'));
+                
+                // 2. Local Cache
+                if (!targetXun) {
+                    const cached = localStorage.getItem('xun_last_viewed_index');
+                    if (cached) targetXun = parseInt(cached);
+                }
+
+                // 3. Fallback to Today's Xun
+                if (!targetXun && currentXun) {
+                    targetXun = currentXun.index;
+                }
+                
+                if (targetXun) {
+                    // Mark as scrolled
+                    hasScrolledToCurrentXun = true;
+                    // Save to cache for next time
+                    localStorage.setItem('xun_last_viewed_index', targetXun);
+                    
+                    setTimeout(() => {
+                        const el = document.getElementById(`xun-row-${targetXun}`);
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Highlight effect
+                            const originalBg = el.style.backgroundColor;
+                            el.style.transition = 'background-color 0.5s';
+                            el.style.backgroundColor = '#eff6ff'; // blue-50
+                            setTimeout(() => {
+                                el.style.backgroundColor = originalBg;
+                            }, 1000);
+                        }
+                    }, 300);
+                }
+            };
+
             function showView(viewName, data) {
                 console.log('Showing view:', viewName, data);
                 // Hide main views
@@ -439,6 +605,7 @@
                     macroView.classList.remove('hidden');
                     navMacro.className = `${baseNavClass} ${activeClass}`;
                     renderMacroView();
+                    window.scrollToCurrentXun();
                 } else if (viewName === 'overview') {
                     overviewView.classList.remove('hidden');
                     navOverview.className = `${baseNavClass} ${activeClass}`;
@@ -465,6 +632,22 @@
                     // Render Grid (if not already there? It's cheap)
                     renderOverview();
                     
+                    // Handle missing data/fallback
+                    if (!data) {
+                        if (currentDetailPeriod) {
+                            data = currentDetailPeriod;
+                        } else {
+                            // Fallback to current date's Xun
+                            const todayStr = formatLocalDate(new Date());
+                            const foundXun = xunPeriods.find(p => {
+                                const start = formatLocalDate(new Date(p.startDate));
+                                const end = formatLocalDate(new Date(p.endDate));
+                                return todayStr >= start && todayStr <= end;
+                            });
+                            data = foundXun || xunPeriods[0];
+                        }
+                    }
+
                     currentDetailPeriod = data;
                     renderDetailView(data);
                     
@@ -481,8 +664,13 @@
             // --- Rendering ---
             function renderMacroView() {
                 macroList.innerHTML = '';
+                const todayStart = new Date();
+                todayStart.setHours(0, 0, 0, 0);
+                const tomorrowStart = new Date(todayStart);
+                tomorrowStart.setDate(tomorrowStart.getDate() + 1);
                 xunPeriods.forEach((period, index) => {
                     const row = document.createElement('div');
+                    row.id = `xun-row-${period.index}`; // Add ID for scrolling
                     row.className = "grid grid-cols-1 md:grid-cols-12 gap-0 text-sm group hover:bg-opacity-80 transition-colors border-b border-gray-100 md:border-none relative";
                     
                     // Gradient Background
@@ -506,10 +694,10 @@
                     let progressHtml = '<div class="flex items-center justify-center h-full space-x-[2px]">';
                     let tempDate = new Date(period.startDate);
                     while (tempDate <= period.endDate) {
-                        const dStr = tempDate.toISOString().split('T')[0];
+                        const dStr = formatLocalDate(tempDate);
                         const data = userData[dStr] || {};
                         const isChecked = data.goal_checkin === true;
-                        const isFuture = tempDate > new Date();
+                        const isFuture = tempDate >= tomorrowStart;
                         
                         let bgClass = isChecked ? '' : 'bg-white';
                         let borderClass = isChecked ? '' : 'border-gray-300';
@@ -539,7 +727,7 @@
                     row.innerHTML = `
                         <!-- Index & Date (Mobile: Header, Desktop: Col 1 & 2) -->
                         <div class="col-span-1 md:col-span-1 flex items-center justify-between md:justify-center p-3 md:py-3 md:px-0 bg-gray-50/50 md:bg-transparent border-b md:border-b-0 md:border-r border-black/5 cursor-pointer hover:bg-black/5" onclick="window.showXunDetail(${index})">
-                            <span class="font-mono text-gray-500 font-bold md:font-normal">第 ${period.index} 旬</span>
+                            <span class="font-mono text-gray-900 font-extrabold md:font-bold">第 ${period.index} 旬</span>
                             <span class="md:hidden text-xs text-gray-400 font-mono">${startStr} - ${endStr}</span>
                         </div>
                         
@@ -573,12 +761,22 @@
                 
                 // Expose helper to global scope for onclick
                 window.showXunDetail = (index) => {
-                    showView('detail', xunPeriods[index - 1]); // Fix index: xunPeriods is 0-indexed array, index passed is 1-based logic from loop? Wait.
-                    // xunPeriods loop: forEach((period, index) => ...). index is 0-based.
-                    // But in HTML I used ${period.index} which is 1-based.
-                    // window.showXunDetail(${index}) passes the loop index (0-based).
-                    // So xunPeriods[index] is correct.
+                    showView('detail', xunPeriods[index]); 
                 };
+
+                window.showView = showView; // Expose showView for inline onclick handlers
+
+                window.scrollToGrid = () => {
+                    const grid = document.getElementById('overview-grid');
+                    if (grid) {
+                        grid.scrollIntoView({ behavior: 'smooth' });
+                    }
+                };
+
+                window.goToMacro = () => {
+                    showView('macro');
+                };
+
 
                 window.updateMacroGoal = (xunIndex, field, value) => {
                     if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
@@ -595,6 +793,16 @@
                     renderMacroView();
                     // Also update overview if visible? No, this is Macro view.
                 };
+
+                // --- Navigation Helpers ---
+                window.changeXunDetail = (offset) => {
+                    if (!currentDetailPeriod) return;
+                    const newIndex = currentDetailPeriod.index + offset;
+                    if (newIndex < 1 || newIndex > 36) return; // Boundary check
+                    showView('detail', xunPeriods[newIndex - 1]);
+                };
+
+
             }
 
             function renderOverview() {
@@ -605,10 +813,10 @@
                 legend.className = "w-full flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-gray-50 gap-2";
                 legend.innerHTML = `
                     <div class="flex flex-col">
-                        <span class="text-sm font-medium text-gray-500">全景概览（记录热度）</span>
-                        <span class="text-[11px] text-gray-400">点击任意日期，自动打开下方旬日历</span>
+                        <span class="text-sm font-medium text-gray-500">每日记录（记录热度）</span>
+                        <span class="text-[11px] text-gray-500">点击任意日期，自动打开下方旬日历</span>
                     </div>
-                    <div class="flex flex-wrap gap-4 text-xs text-gray-400">
+                    <div class="flex flex-wrap gap-4 text-xs text-gray-500">
                         <div class="flex items-center gap-1.5">
                             <span class="w-3 h-3 rounded-[1px] bg-gray-50 border border-gray-200"></span> 
                             <span>未记录</span>
@@ -632,13 +840,13 @@
                 xunPeriods.forEach(p => {
                     let d = new Date(p.startDate);
                     while (d <= p.endDate) {
-                        dateToXunMap[d.toISOString().split('T')[0]] = p;
+                        dateToXunMap[formatLocalDate(d)] = p;
                         d.setDate(d.getDate() + 1);
                     }
                 });
 
                 for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                    const dateStr = d.toISOString().split('T')[0];
+                    const dateStr = formatLocalDate(d);
                     const xun = dateToXunMap[dateStr];
                     const xunIndex = xun ? xun.index : 0;
                     
@@ -651,7 +859,10 @@
                     const hue = (xunIndex * 10) % 360;
                     
                     const data = userData[dateStr];
-                    const hasData = data && (data.mood || data.emoji || data.journal || data.weather || data.goal_checkin); // Added goal_checkin
+                    const hasIndicators = data && Array.isArray(data.indicator_checkins) && data.indicator_checkins.some(v => v === true);
+                    const hasGoalActions = data && Array.isArray(data.goal_actions) && data.goal_actions.length > 0;
+                    const hasKeywords = data && Array.isArray(data.keywords) && data.keywords.length > 0;
+                    const hasData = data && (data.mood || data.journal || data.weather || data.goal_checkin || data.goal_confidence || data.goal_blockers || hasGoalActions || hasIndicators || hasKeywords);
                     
                     if (hasData) {
                          el.style.backgroundColor = `hsl(${hue}, 85%, 60%)`; // Stronger saturation
@@ -666,7 +877,14 @@
                     
                     // Tooltip
                     const keywordsStr = data && data.keywords ? ` [${data.keywords.join(' ')}]` : '';
-                    el.title = `${dateStr} ${moodEmoji}${keywordsStr} (第 ${xunIndex} 旬)`;
+                    const goalStr = data && data.goal_checkin ? ' 🎯' : '';
+                    const xunIndicators = Array.isArray(macroGoals[xunIndex]?.indicators) ? macroGoals[xunIndex].indicators : [];
+                    const indicatorTotal = xunIndicators.length;
+                    const indicatorDone = data && Array.isArray(data.indicator_checkins)
+                        ? data.indicator_checkins.slice(0, indicatorTotal).filter(v => v === true).length
+                        : 0;
+                    const indicatorStr = indicatorTotal > 0 ? ` 📌${indicatorDone}/${indicatorTotal}` : '';
+                    el.title = `${dateStr} ${moodEmoji}${goalStr}${indicatorStr}${keywordsStr} (第 ${xunIndex} 旬)`;
                     
                     // Click to go to detail (which is now below)
                     if (xun) {
@@ -710,11 +928,23 @@
                     detailContent.style.background = xunBg;
 
                     detailTitle.innerHTML = `
-                        <div class="flex items-center justify-center gap-3">
-                            <span class="px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm" style="background-color: ${xunColor}">
-                                第 ${period.index} 旬
-                            </span>
-                            <span class="text-xl font-light text-gray-800">2026年 ${monthDisplay}</span>
+                        <div class="flex items-center justify-between w-full">
+                            <button onclick="window.changeXunDetail(-1)" class="p-2 text-gray-400 hover:text-blue-500 transition-colors rounded-full hover:bg-white/50" title="上一旬">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm" style="background-color: ${xunColor}">
+                                    第 ${period.index} 旬
+                                </span>
+                                <span class="text-xl font-light text-gray-800">2026年 ${monthDisplay}</span>
+                            </div>
+                            <button onclick="window.changeXunDetail(1)" class="p-2 text-gray-400 hover:text-blue-500 transition-colors rounded-full hover:bg-white/50" title="下一旬">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
                         </div>
                     `;
                     
@@ -765,13 +995,15 @@
 
                         let currentDate = new Date(monthStart);
                         while (currentDate <= monthEnd) {
-                            const dateStr = currentDate.toISOString().split('T')[0];
+                            const dateStr = formatLocalDate(currentDate);
                             const dayData = userData[dateStr] || {};
                             const isWithinXun = currentDate >= period.startDate && currentDate <= period.endDate;
                             
                             let jieQi = '', lunarDay = '';
                             let holidayName = '';
                             let isHoliday = false;
+                            
+                            const dayEl = document.createElement('div');
 
                             if (typeof Solar !== 'undefined') {
                                 const solar = Solar.fromYmd(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
@@ -788,9 +1020,8 @@
                                 }
                             }
 
-                            const dayEl = document.createElement('div');
-                            // Style update
-                            const baseClass = `p-1 md:p-3 border-t border-r border-gray-50 h-20 md:h-28 flex flex-col relative transition-all duration-200 group`;
+                            // Style update: Dynamic height and width logic
+                            const baseClass = `p-1 md:p-3 border-t border-r border-gray-50 min-h-[5rem] md:min-h-[7rem] max-h-[20rem] overflow-y-auto h-auto flex flex-col relative transition-all duration-200 group`;
                             const activeClass = `cursor-pointer`; // We set BG manually
                             const inactiveClass = `bg-gray-50/40 text-gray-300 grayscale opacity-50`;
 
@@ -819,8 +1050,21 @@
                             const moodEmojis = {1: '😫', 2: '😞', 3: '😐', 4: '🙂', 5: '🤩'};
                             const displayEmoji = dayData.mood ? moodEmojis[dayData.mood] : (dayData.emoji || '');
 
-                            // Indicators
                             let indicators = [];
+                            if (dayData.goal_checkin) indicators.push('<span title="核心目标">🎯</span>');
+                            if (isWithinXun) {
+                                const xunIndicators = Array.isArray(macroGoals[period.index]?.indicators) ? macroGoals[period.index].indicators : [];
+                                const checkins = Array.isArray(dayData.indicator_checkins) ? dayData.indicator_checkins : [];
+                                const marks = ['①', '②', '③'];
+                                for (let i = 0; i < 3; i++) {
+                                    if (checkins[i] === true) {
+                                        const title = xunIndicators[i] ? `指标：${xunIndicators[i]}` : `指标${i + 1}`;
+                                        indicators.push(`<span title="${title}">${marks[i]}</span>`);
+                                    }
+                                }
+                            }
+                            if (dayData.goal_actions && dayData.goal_actions.length > 0) indicators.push('<span title="最小行动">✅</span>');
+                            if (dayData.goal_blockers) indicators.push('<span title="阻碍">🚧</span>');
                             if (dayData.metrics) {
                                 if (dayData.metrics.exercise > 0) indicators.push('<span title="运动">🏃</span>');
                                 if (dayData.metrics.reading > 0) indicators.push('<span title="阅读">📚</span>');
@@ -840,10 +1084,16 @@
                                     <span class="text-xs md:text-sm font-medium ${dateColor} group-hover:text-blue-600 transition-colors">${currentDate.getDate()}</span>
                                     <span class="text-[8px] md:text-[10px] ${holidayName ? '' : 'text-gray-400'} scale-90 origin-right transform">${subText}</span>
                                 </div>
-                                <div class="flex-1 flex flex-col items-center justify-center">
+                                <div class="flex-1 flex flex-col items-center justify-center w-full">
                                      ${displayEmoji ? `<div class="text-xl md:text-2xl filter drop-shadow-sm transform group-hover:scale-110 transition-transform mb-1">${displayEmoji}</div>` : ''}
                                      
-                                     <div class="flex gap-0.5 md:gap-1 text-[8px] md:text-[10px] opacity-70 flex-wrap justify-center">
+                                     ${dayData.keywords && dayData.keywords.length > 0 ? `
+                                        <div class="flex flex-wrap justify-center gap-0.5 mb-1 w-full px-0.5">
+                                            ${dayData.keywords.slice(0, 3).map(k => `<span class="text-[8px] leading-tight text-gray-500 bg-white/50 px-1 rounded-sm border border-gray-100/50 break-words whitespace-normal max-w-full text-center">${k}</span>`).join('')}
+                                        </div>
+                                     ` : ''}
+
+                                     <div class="flex gap-0.5 md:gap-1 text-[8px] md:text-[10px] opacity-70 flex-wrap justify-center mt-auto">
                                         ${indicators.join('')}
                                         ${dayData.weather ? `<span title="${dayData.weather}">${getWeatherIcon(dayData.weather)}</span>` : ''}
                                      </div>
@@ -891,7 +1141,7 @@
                 const xunData = [];
                 let currentDate = new Date(period.startDate);
                 while (currentDate <= period.endDate) {
-                    const dateStr = currentDate.toISOString().split('T')[0];
+                    const dateStr = formatLocalDate(currentDate);
                     // Always push a record for every day in the Xun, even if empty
                     if (userData[dateStr]) {
                         xunData.push({ date: dateStr, ...userData[dateStr], hasData: true });
@@ -906,7 +1156,7 @@
                         <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm text-center">
                             <div class="text-6xl mb-4 opacity-20">📝</div>
                             <p class="text-gray-500 font-light text-lg">本旬暂无记录，休息一下吧。</p>
-                            <button onclick="showView('detail', currentDetailPeriod)" class="mt-6 px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-md">去记录</button>
+                            <button onclick="window.showView('detail')" class="mt-6 px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-md">去记录</button>
                         </div>
                     `;
                     return;
@@ -1098,6 +1348,11 @@
             }
 
             // --- Modal Helpers ---
+            function getXunPeriodByDateStr(dateStr) {
+                const d = new Date(`${dateStr}T00:00:00`);
+                return xunPeriods.find(p => d >= p.startDate && d <= p.endDate) || null;
+            }
+
             function openModal(dateStr) {
                 selectedDate = dateStr;
                 const data = userData[dateStr] || {};
@@ -1105,18 +1360,17 @@
                 
                 // Reset mood
                 document.querySelectorAll('.mood-btn').forEach(btn => {
-                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400', 'bg-opacity-100');
-                    // Reset background if it was set via inline style or specific class? 
-                    // Our HTML uses hover:bg-*-50. Active state should force that background.
-                    // Let's rely on ring for selection.
+                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400', 'ring-blue-400', 'bg-blue-50', 'selected', 'bg-opacity-100');
+                    const span = btn.querySelector('span.filter');
+                    if (span) span.classList.add('grayscale');
                 });
                 
                 if (data.mood) {
                     const activeMood = document.querySelector(`.mood-btn[data-mood="${data.mood}"]`);
                     if (activeMood) {
-                        activeMood.classList.add('ring-2', 'ring-offset-2', 'ring-gray-400');
-                        // Optional: Force background color based on mood type?
-                        // For now ring is enough as per previous logic.
+                        activeMood.classList.add('ring-2', 'ring-offset-2', 'ring-blue-400', 'bg-blue-50', 'selected');
+                        const span = activeMood.querySelector('span.filter');
+                        if (span) span.classList.remove('grayscale');
                     }
                 }
 
@@ -1138,9 +1392,123 @@
                     });
                 }
 
-                document.getElementById('keywords-input').value = data.keywords ? data.keywords.join(' ') : '';
+                document.getElementById('keywords-input').value = data.keywords ? data.keywords.join(', ') : '';
                 document.getElementById('journal-input').value = data.journal || '';
                 
+                const xunPeriod = getXunPeriodByDateStr(dateStr);
+                const xunIndex = xunPeriod ? xunPeriod.index : null;
+                const xunGoalInput = document.getElementById('xun-goal-input');
+                const xunGoalMeta = document.getElementById('xun-goal-meta');
+                const goalCheckinInput = document.getElementById('goal-checkin-input');
+                const goalConfidenceInput = document.getElementById('goal-confidence-input');
+                const goalActionsInput = document.getElementById('goal-actions-input');
+                const goalBlockersInput = document.getElementById('goal-blockers-input');
+
+                if (xunGoalMeta) {
+                    if (xunPeriod) {
+                        const startStr = formatLocalDate(xunPeriod.startDate);
+                        const endStr = formatLocalDate(xunPeriod.endDate);
+                        xunGoalMeta.textContent = `第 ${xunPeriod.index} 旬 · ${startStr} ~ ${endStr}`;
+                    } else {
+                        xunGoalMeta.textContent = '';
+                    }
+                }
+
+                if (xunGoalInput) {
+                    if (xunIndex) {
+                        xunGoalInput.disabled = false;
+                        xunGoalInput.value = macroGoals[xunIndex]?.goal || '';
+                        xunGoalInput.onchange = () => {
+                            if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
+                            macroGoals[xunIndex].goal = xunGoalInput.value;
+                            saveMacroGoals();
+                            renderMacroView();
+                            if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
+                            renderOverview();
+                        };
+                    } else {
+                        xunGoalInput.disabled = true;
+                        xunGoalInput.value = '';
+                        xunGoalInput.onchange = null;
+                    }
+                }
+
+                const indicatorInput1 = document.getElementById('xun-indicator-1');
+                const indicatorInput2 = document.getElementById('xun-indicator-2');
+                const indicatorInput3 = document.getElementById('xun-indicator-3');
+                const dayIndicatorLabel1 = document.getElementById('day-indicator-label-1');
+                const dayIndicatorLabel2 = document.getElementById('day-indicator-label-2');
+                const dayIndicatorLabel3 = document.getElementById('day-indicator-label-3');
+                const dayIndicatorCheck1 = document.getElementById('day-indicator-check-1');
+                const dayIndicatorCheck2 = document.getElementById('day-indicator-check-2');
+                const dayIndicatorCheck3 = document.getElementById('day-indicator-check-3');
+
+                const applyIndicatorState = () => {
+                    const names = [
+                        indicatorInput1 ? indicatorInput1.value.trim() : '',
+                        indicatorInput2 ? indicatorInput2.value.trim() : '',
+                        indicatorInput3 ? indicatorInput3.value.trim() : ''
+                    ];
+
+                    const setRow = (i, labelEl, checkEl) => {
+                        const name = names[i] || '';
+                        if (labelEl) labelEl.textContent = name ? `今日完成：${name}` : `今日完成指标${i + 1}`;
+                        if (checkEl) {
+                            checkEl.disabled = !name;
+                            if (!name) checkEl.checked = false;
+                        }
+                    };
+
+                    setRow(0, dayIndicatorLabel1, dayIndicatorCheck1);
+                    setRow(1, dayIndicatorLabel2, dayIndicatorCheck2);
+                    setRow(2, dayIndicatorLabel3, dayIndicatorCheck3);
+
+                    if (xunIndex) {
+                        if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
+                        macroGoals[xunIndex].indicators = names.filter(Boolean).slice(0, 3);
+                        saveMacroGoals();
+                        renderMacroView();
+                        if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
+                        renderOverview();
+                    }
+                };
+
+                if (indicatorInput1 && indicatorInput2 && indicatorInput3) {
+                    if (xunIndex) {
+                        const indicators = Array.isArray(macroGoals[xunIndex]?.indicators) ? macroGoals[xunIndex].indicators : [];
+                        indicatorInput1.disabled = false;
+                        indicatorInput2.disabled = false;
+                        indicatorInput3.disabled = false;
+                        indicatorInput1.value = indicators[0] || '';
+                        indicatorInput2.value = indicators[1] || '';
+                        indicatorInput3.value = indicators[2] || '';
+                        indicatorInput1.oninput = applyIndicatorState;
+                        indicatorInput2.oninput = applyIndicatorState;
+                        indicatorInput3.oninput = applyIndicatorState;
+                    } else {
+                        indicatorInput1.disabled = true;
+                        indicatorInput2.disabled = true;
+                        indicatorInput3.disabled = true;
+                        indicatorInput1.value = '';
+                        indicatorInput2.value = '';
+                        indicatorInput3.value = '';
+                        indicatorInput1.oninput = null;
+                        indicatorInput2.oninput = null;
+                        indicatorInput3.oninput = null;
+                    }
+                }
+
+                const checkins = Array.isArray(data.indicator_checkins) ? data.indicator_checkins : [];
+                if (dayIndicatorCheck1) dayIndicatorCheck1.checked = checkins[0] === true;
+                if (dayIndicatorCheck2) dayIndicatorCheck2.checked = checkins[1] === true;
+                if (dayIndicatorCheck3) dayIndicatorCheck3.checked = checkins[2] === true;
+                applyIndicatorState();
+
+                if (goalCheckinInput) goalCheckinInput.checked = data.goal_checkin === true;
+                if (goalConfidenceInput) goalConfidenceInput.value = Number.isFinite(data.goal_confidence) ? String(data.goal_confidence) : '';
+                if (goalActionsInput) goalActionsInput.value = Array.isArray(data.goal_actions) ? data.goal_actions.join(', ') : '';
+                if (goalBlockersInput) goalBlockersInput.value = data.goal_blockers || '';
+
                 // Weather
                 document.querySelectorAll('#weather-selector button').forEach(btn => btn.classList.remove('bg-gray-200'));
                 if (data.weather) {
@@ -1192,13 +1560,65 @@
                 const selectedEmotions = Array.from(document.querySelectorAll('.emotion-tag.bg-blue-100'))
                     .map(el => el.dataset.tag);
 
+                const goalCheckinInput = document.getElementById('goal-checkin-input');
+                const goalConfidenceInput = document.getElementById('goal-confidence-input');
+                const goalActionsInput = document.getElementById('goal-actions-input');
+                const goalBlockersInput = document.getElementById('goal-blockers-input');
+                const indicatorInput1 = document.getElementById('xun-indicator-1');
+                const indicatorInput2 = document.getElementById('xun-indicator-2');
+                const indicatorInput3 = document.getElementById('xun-indicator-3');
+                const dayIndicatorCheck1 = document.getElementById('day-indicator-check-1');
+                const dayIndicatorCheck2 = document.getElementById('day-indicator-check-2');
+                const dayIndicatorCheck3 = document.getElementById('day-indicator-check-3');
+                const rawGoalConfidence = goalConfidenceInput ? parseInt(goalConfidenceInput.value, 10) : NaN;
+                const goalConfidence = Number.isFinite(rawGoalConfidence)
+                    ? Math.max(0, Math.min(100, rawGoalConfidence))
+                    : undefined;
+
+                const xunPeriod = getXunPeriodByDateStr(selectedDate);
+                const xunIndex = xunPeriod ? xunPeriod.index : null;
+
+                const indicatorNames = [
+                    indicatorInput1 ? indicatorInput1.value.trim() : '',
+                    indicatorInput2 ? indicatorInput2.value.trim() : '',
+                    indicatorInput3 ? indicatorInput3.value.trim() : ''
+                ].filter(Boolean).slice(0, 3);
+
+                if (xunIndex) {
+                    if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
+                    macroGoals[xunIndex].indicators = indicatorNames;
+                    saveMacroGoals();
+                }
+
+                const indicatorCheckins = [
+                    dayIndicatorCheck1 ? dayIndicatorCheck1.checked : false,
+                    dayIndicatorCheck2 ? dayIndicatorCheck2.checked : false,
+                    dayIndicatorCheck3 ? dayIndicatorCheck3.checked : false
+                ];
+
                 userData[selectedDate] = {
                     mood: moodEl ? parseInt(moodEl.dataset.mood) : undefined,
                     emotions: selectedEmotions,
-                    keywords: document.getElementById('keywords-input').value.split(/[\s,]+/).filter(k => k.trim().length > 0).slice(0, 2),
+                    // Keywords: allow 3 items, relax separator splitting to allow idioms?
+                    // Actually, simple space/comma split is fine for "idioms" if they don't have spaces within.
+                    // But English idioms have spaces.
+                    // Let's use comma as primary separator if present, otherwise space?
+                    // Or just let user manage it.
+                    // User said: "not limited to 2 bytes or Chinese", "English words or idioms".
+                    // Code below splits by space or comma. "Carpe Diem" would become "Carpe", "Diem".
+                    // We should probably split by comma ONLY if user uses commas?
+                    // Or maybe just use comma as separator?
+                    // Let's stick to comma for idioms, or let user input freely.
+                    // Let's try splitting by comma first.
+                    keywords: document.getElementById('keywords-input').value.split(/[,，]/).map(k => k.trim()).filter(k => k.length > 0).slice(0, 3),
                     emoji: undefined, // Deprecated in favor of mood/keywords
                     weather: weatherEl ? weatherEl.dataset.weather : undefined,
                     journal: document.getElementById('journal-input').value,
+                    goal_checkin: goalCheckinInput ? goalCheckinInput.checked : undefined,
+                    goal_confidence: goalConfidence,
+                    goal_actions: goalActionsInput ? goalActionsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k.length > 0).slice(0, 3) : undefined,
+                    goal_blockers: goalBlockersInput ? (goalBlockersInput.value.trim() || undefined) : undefined,
+                    indicator_checkins: indicatorCheckins,
                     metrics: {
                         sleep: parseFloat(document.getElementById('metric-sleep').value) || undefined,
                         exercise: parseInt(document.getElementById('metric-exercise').value) || undefined,
@@ -1230,6 +1650,82 @@
                 }
             }
 
+            function initScrollControls() {
+                const backToTopContainer = document.getElementById('macro-back-to-top-container');
+                const scrollDownContainer = document.getElementById('macro-scroll-down-container');
+                const backToTopBtn = document.getElementById('macro-back-to-top');
+                const scrollDownBtn = document.getElementById('macro-scroll-down');
+                const macroView = document.getElementById('macro-view');
+
+                if (backToTopBtn && scrollDownBtn && backToTopContainer && scrollDownContainer) {
+                    const handleScroll = () => {
+                        // 1. Check if we are in Macro View
+                        const isMacroView = !macroView.classList.contains('hidden');
+                        
+                        if (!isMacroView) {
+                            // Hide both if not in macro view
+                            backToTopContainer.classList.add('opacity-0', 'pointer-events-none');
+                            scrollDownContainer.classList.add('opacity-0', 'pointer-events-none');
+                            backToTopContainer.setAttribute('aria-hidden', 'true');
+                            scrollDownContainer.setAttribute('aria-hidden', 'true');
+                            backToTopBtn.tabIndex = -1;
+                            scrollDownBtn.tabIndex = -1;
+                            return;
+                        }
+
+                        // 2. We are in Macro View
+                        // Scroll Down button always visible
+                        scrollDownContainer.classList.remove('opacity-0', 'pointer-events-none');
+                        scrollDownContainer.setAttribute('aria-hidden', 'false');
+                        scrollDownBtn.tabIndex = 0;
+
+                        // 3. Back to Top Logic
+                        if (window.scrollY > 300) {
+                            backToTopContainer.classList.remove('opacity-0', 'pointer-events-none');
+                            backToTopContainer.setAttribute('aria-hidden', 'false');
+                            backToTopBtn.tabIndex = 0;
+                        } else {
+                            backToTopContainer.classList.add('opacity-0', 'pointer-events-none');
+                            backToTopContainer.setAttribute('aria-hidden', 'true');
+                            backToTopBtn.tabIndex = -1;
+                        }
+                    };
+                    
+                    // Add listeners for view changes
+                    const observer = new MutationObserver(handleScroll);
+                    observer.observe(macroView, { attributes: true, attributeFilter: ['class'] });
+                    window.addEventListener('scroll', handleScroll);
+                    
+                    // Initial check
+                    handleScroll();
+
+                    backToTopBtn.addEventListener('click', () => {
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                    
+                    scrollDownBtn.addEventListener('click', () => {
+                        // Find next xun row
+                        const rows = Array.from(document.querySelectorAll('[id^="xun-row-"]'));
+                        // Current center line
+                        const centerLine = window.scrollY + (window.innerHeight / 2);
+                        
+                        // Find the first row that is below the center line
+                        let nextRow = rows.find(row => {
+                            const rect = row.getBoundingClientRect();
+                            // rect.top is relative to viewport
+                            return rect.top > (window.innerHeight * 0.6); 
+                        });
+                        
+                        if (nextRow) {
+                            nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                             // If no next row, scroll to bottom
+                             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                        }
+                    });
+                }
+            }
+
             // --- Initialization ---
             function init() {
                 xunPeriods = getXunPeriods(YEAR);
@@ -1238,6 +1734,8 @@
                 
                 // Set default view to Macro
                 showView('macro');
+                window.openModal = openModal;
+                window.closeModal = closeModal;
 
                 // Events
                 document.getElementById('nav-macro').onclick = () => showView('macro');
@@ -1266,6 +1764,28 @@
                 };
 
                 // Emotion Tags Listener
+                const moodSelector = document.getElementById('mood-selector');
+                if (moodSelector) {
+                    moodSelector.onclick = (e) => {
+                        const btn = e.target.closest('.mood-btn');
+                        if (btn) {
+                             // Reset all
+                             document.querySelectorAll('.mood-btn').forEach(b => {
+                                 b.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-400', 'bg-blue-50', 'selected');
+                                 // Reset grayscale for all
+                                 const span = b.querySelector('span.filter');
+                                 if (span) span.classList.add('grayscale');
+                             });
+                             
+                             // Activate current
+                             btn.classList.add('ring-2', 'ring-offset-2', 'ring-blue-400', 'bg-blue-50', 'selected');
+                             // Remove grayscale
+                             const span = btn.querySelector('span.filter');
+                             if (span) span.classList.remove('grayscale');
+                        }
+                    };
+                }
+
                 const emotionTagsContainer = document.getElementById('emotion-tags');
                 if (emotionTagsContainer) {
                     emotionTagsContainer.onclick = (e) => {
@@ -1305,6 +1825,7 @@
 
                 updateYearProgress();
                 renderYearPixelGrid();
+                initScrollControls();
             }
 
 
@@ -1350,15 +1871,18 @@
                 container.innerHTML = '';
 
                 const now = new Date();
-                const todayStr = now.toISOString().split('T')[0];
+                const todayStart = new Date(now);
+                todayStart.setHours(0, 0, 0, 0);
                 const start = new Date(YEAR, 0, 1);
                 const end = new Date(YEAR, 11, 31);
                 
                 for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                    const dateStr = d.toISOString().split('T')[0];
-                    const isToday = dateStr === todayStr;
-                    const isPast = d < now && !isToday;
-                    const isFuture = d > now && !isToday;
+                    const dateStr = formatLocalDate(d);
+                    const cellStart = new Date(d);
+                    cellStart.setHours(0, 0, 0, 0);
+                    const isToday = cellStart.getTime() === todayStart.getTime();
+                    const isPast = cellStart.getTime() < todayStart.getTime();
+                    const isFuture = cellStart.getTime() > todayStart.getTime();
                     
                     const cell = document.createElement('div');
                     let className = "w-2.5 h-2.5 rounded-[1px] transition-all duration-300 ";

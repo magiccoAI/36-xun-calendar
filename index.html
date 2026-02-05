@@ -10,6 +10,104 @@
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Nunito:wght@300;400;600&display=swap');
+        
+        body {
+            font-family: 'Nunito', 'Noto Serif SC', sans-serif;
+            background-color: #fdfdfd;
+            color: #333;
+            transition: background 0.5s ease;
+        }
+
+        /* --- Theme Textures --- */
+        /* Common overlay for texture noise */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* 1. Spring (Vitality) - Oil Painting / Watercolor Effect */
+        body.theme-spring {
+            background-color: #ecfdf5;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.6) 0%, transparent 40%),
+                radial-gradient(circle at 80% 10%, rgba(209, 250, 229, 0.7) 0%, transparent 30%),
+                radial-gradient(circle at 40% 80%, rgba(254, 243, 199, 0.5) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3Cpath d='M50,150 Q100,100 150,150 T250,150' stroke='rgba(167, 243, 208, 0.4)' stroke-width='2' fill='none'/%3E%3Cpath d='M-50,350 Q50,300 150,350 T350,350' stroke='rgba(252, 165, 165, 0.2)' stroke-width='20' stroke-linecap='round' fill='none' filter='blur(10px)'/%3E%3C/svg%3E");
+            background-size: cover, cover, cover, 600px 600px;
+        }
+        body.theme-spring .bg-gray-50 { background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); }
+
+        /* 2. Summer (Fresh Vitality) - Mint & Lemon | Watercolor Style */
+        body.theme-summer {
+            background-color: #f0f9f4;
+            color: #1a4d3e;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(255, 249, 196, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(178, 223, 219, 0.4) 0%, transparent 50%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='water'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='3'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='20'/%3E%3CfeGaussianBlur stdDeviation='2'/%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='100' fill='rgba(0, 150, 136, 0.05)' filter='url(%23water)'/%3E%3Cpath d='M300 300 Q 350 200 400 300' stroke='rgba(255, 235, 59, 0.2)' stroke-width='40' filter='blur(10px)'/%3E%3C/svg%3E");
+            background-size: cover, cover, cover;
+        }
+        body.theme-summer .text-gray-800 { color: #1a4d3e; }
+        body.theme-summer .text-gray-700 { color: #004d40; }
+        body.theme-summer .text-gray-500 { color: #00695c; }
+        body.theme-summer .text-gray-400 { color: #4db6ac; }
+        body.theme-summer .bg-gray-50 { 
+            background-color: rgba(255, 255, 255, 0.85); 
+            border: 1px solid rgba(178, 223, 219, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 77, 64, 0.05);
+        }
+
+        /* 3. Autumn (Warm Steady) - Maple & Parchment | Oil Canvas Style */
+        body.theme-autumn {
+            background-color: #fff8e1; /* Amber 50 */
+            color: #3e2723; /* Dark Brown */
+            background-image: 
+                linear-gradient(135deg, rgba(255, 243, 224, 0.8) 0%, rgba(255, 255, 255, 0) 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='canvas'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23canvas)'/%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 20 Q 70 5 80 30 T 60 60' stroke='rgba(230, 81, 0, 0.08)' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-size: cover, 200px 200px, 150px 150px;
+        }
+        body.theme-autumn .text-gray-800 { color: #3e2723; }
+        body.theme-autumn .text-gray-700 { color: #4e342e; }
+        body.theme-autumn .text-gray-500 { color: #795548; }
+        body.theme-autumn .text-gray-400 { color: #a1887f; }
+        body.theme-autumn .bg-gray-50 { 
+            background-color: rgba(255, 253, 231, 0.9); 
+            border: 1px solid rgba(255, 224, 178, 0.4);
+            box-shadow: 0 4px 15px rgba(62, 39, 35, 0.05);
+        }
+
+        /* 4. Winter (Quiet Deep) - Snow & Ink | Washi/Frosted Style */
+        body.theme-winter {
+            background-color: #f5f7fa; /* Snow Gray */
+            color: #2c3e50; /* Ink Blue */
+            background-image: 
+                linear-gradient(to bottom, #f5f7fa 0%, #e3e8ee 100%),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='washi'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23washi)' opacity='0.5'/%3E%3C/svg%3E"),
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='60' fill='rgba(44, 62, 80, 0.03)' filter='blur(20px)'/%3E%3Cpath d='M250,250 Q300,300 350,250' stroke='rgba(38, 50, 56, 0.05)' stroke-width='2' fill='none' filter='blur(2px)'/%3E%3C/svg%3E");
+            background-size: cover, 150px 150px, cover;
+            background-blend-mode: multiply;
+        }
+        body.theme-winter .text-gray-800 { color: #2c3e50; }
+        body.theme-winter .text-gray-700 { color: #37474f; }
+        body.theme-winter .text-gray-500 { color: #546e7a; }
+        body.theme-winter .text-gray-400 { color: #607d8b; }
+        body.theme-winter .bg-gray-50 { 
+            background-color: rgba(255, 255, 255, 0.8); 
+            border: 1px solid rgba(207, 216, 220, 0.5);
+            box-shadow: 0 4px 20px rgba(38, 50, 56, 0.05);
+            backdrop-filter: blur(8px);
+        }
+
         /* 自定义滚动条 */
         ::-webkit-scrollbar {
             width: 8px;
@@ -41,12 +139,50 @@
             background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
             background-size: 1rem 1rem;
         }
+
+        /* Night Mode Adaptation (Reduces glare) */
+        @media (prefers-color-scheme: dark) {
+            body.theme-summer { background-color: #dbece4; }
+            body.theme-autumn { background-color: #f5e8c8; }
+            body.theme-winter { background-color: #cfd8dc; }
+            /* Dim the white containers slightly */
+            body[class*="theme-"] .bg-gray-50 {
+                background-color: rgba(255, 255, 255, 0.6);
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased overflow-x-hidden">
 
     <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl relative">
-        <header class="text-center mb-8">
+        <header class="text-center mb-8 relative">
+            <!-- Theme Toggle Button -->
+            <div class="absolute right-0 top-0">
+                <button id="theme-btn" class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50" title="切换主题">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                    </svg>
+                </button>
+                <!-- Theme Menu -->
+                <div id="theme-menu" class="hidden absolute right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 text-xs">
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2" onclick="setTheme('default')">
+                        <span class="w-3 h-3 rounded-full bg-gray-100 border border-gray-200"></span> 默认 (Default)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2" onclick="setTheme('spring')">
+                        <span class="w-3 h-3 rounded-full bg-green-100 border border-green-200"></span> 春生 (Spring)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2" onclick="setTheme('summer')">
+                        <span class="w-3 h-3 rounded-full bg-blue-100 border border-blue-200"></span> 夏长 (Summer)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2" onclick="setTheme('autumn')">
+                        <span class="w-3 h-3 rounded-full bg-orange-100 border border-orange-200"></span> 秋收 (Autumn)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2" onclick="setTheme('winter')">
+                        <span class="w-3 h-3 rounded-full bg-gray-200 border border-gray-300"></span> 冬藏 (Winter)
+                    </button>
+                </div>
+            </div>
+
             <h1 class="text-3xl font-light text-gray-700">2026</h1>
             <p id="current-xun-info" class="text-gray-500 mt-2"></p>
             <div id="year-progress-container" class="mt-6 max-w-2xl mx-auto px-4">
@@ -197,7 +333,8 @@
             <div class="space-y-6">
                 <!-- Mood Section Redesign -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3">今日心情 (Mood)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">今日整体感受 (Daily Mood Tone)</label>
+                    <p class="text-[10px] text-gray-400 mb-3">无需纠结每时每刻，只需记录这一天留给你最深的印记。</p>
                     <div id="mood-selector" class="flex justify-between items-center gap-1 md:gap-2">
                         <button data-mood="1" class="mood-btn flex flex-col items-center gap-1 p-1 md:p-2 rounded-xl hover:bg-red-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-200" aria-label="糟糕">
                             <span class="text-3xl md:text-4xl filter grayscale hover:grayscale-0 transition-all">😫</span>
@@ -226,23 +363,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">情绪标签 (Feelings)</label>
                     <div id="emotion-tags" class="flex flex-wrap gap-2">
-                        <!-- Tags will be generated by JS or hardcoded -->
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="快乐" aria-pressed="false">😄 快乐</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="兴奋" aria-pressed="false">😆 兴奋</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="感激" aria-pressed="false">🙏 感激</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="期待" aria-pressed="false">🌟 期待</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="自豪" aria-pressed="false">🦁 自豪</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="充实" aria-pressed="false">💪 充实</button>
-                        
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="平静" aria-pressed="false">😌 平静</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="专注" aria-pressed="false">🧠 专注</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="迷茫" aria-pressed="false">😶‍🌫️ 迷茫</button>
-                        
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="焦虑" aria-pressed="false">😰 焦虑</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="疲惫" aria-pressed="false">😫 疲惫</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="生气" aria-pressed="false">😠 生气</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="孤独" aria-pressed="false">🍂 孤独</button>
-                        <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="失落" aria-pressed="false">😞 失落</button>
+                        <!-- Tags will be generated by JS -->
                     </div>
                 </div>
 
@@ -265,56 +386,54 @@
                     <p class="text-xs text-gray-400 mt-1">将在日历格子中微缩显示，代替通用图标</p>
                 </div>
                 <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/40">
-                    <div class="flex items-baseline justify-between gap-2">
-                        <h4 class="text-sm font-semibold text-gray-700">36旬 · 核心目标对齐</h4>
-                        <span id="xun-goal-meta" class="text-xs text-gray-400 font-mono"></span>
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-medium text-gray-600">本旬习惯打卡 (Micro Habits)</span>
+                        <span class="text-[10px] text-gray-400">坚持微小改变</span>
                     </div>
-                    <div class="mt-3 space-y-3">
-                        <div>
-                            <label for="xun-goal-input" class="block text-xs font-medium text-gray-600 mb-1">本旬核心目标</label>
-                            <input type="text" id="xun-goal-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="本旬核心目标...">
+                    
+                    <!-- Only show in Xun view (hidden by default, JS toggles visibility) -->
+                    <div id="xun-goal-container" class="hidden mt-2 mb-2">
+                         <label for="xun-goal-input" class="block text-[10px] font-medium text-gray-500 mb-1">当前旬目标</label>
+                         <div id="xun-goal-display" class="text-xs text-gray-700 italic bg-white p-2 rounded border border-gray-100"></div>
+                         <input type="hidden" id="xun-goal-input">
+                    </div>
+
+                    <div class="mt-2 space-y-2 hidden">
+                        <!-- Hidden inputs for defining habits - they should be defined in Macro View, but kept here for compatibility if needed or removed if we move definition elsewhere. 
+                             For now, let's keep them but maybe hide them if we want "minimalist"? 
+                             Actually, user might want to EDIT them here. Let's keep them visible but simplified. 
+                             Wait, user wants MINIMALIST. Let's hide the DEFINITION inputs if they are already defined?
+                             Let's just keep the CHECKBOXES prominent. 
+                             Let's keep the inputs but make them look like "settings" or just simplified.
+                        -->
+                        <input type="text" id="xun-indicator-1" class="w-full p-2 border border-gray-300 rounded-md text-xs" placeholder="习惯1">
+                        <input type="text" id="xun-indicator-2" class="w-full p-2 border border-gray-300 rounded-md text-xs" placeholder="习惯2">
+                        <input type="text" id="xun-indicator-3" class="w-full p-2 border border-gray-300 rounded-md text-xs" placeholder="习惯3">
+                    </div>
+                    
+                    <!-- Simplified Habits Definition (Collapsible or just simpler) -->
+                    <details class="mb-3">
+                        <summary class="text-[10px] text-gray-400 cursor-pointer hover:text-blue-500">编辑习惯内容</summary>
+                         <div class="mt-2 space-y-2">
+                                <input type="text" id="xun-indicator-1" class="w-full p-2 border border-gray-200 rounded-md text-xs bg-white" placeholder="习惯1：例如 每天阅读">
+                                <input type="text" id="xun-indicator-2" class="w-full p-2 border border-gray-200 rounded-md text-xs bg-white" placeholder="习惯2：例如 冥想 10分钟">
+                                <input type="text" id="xun-indicator-3" class="w-full p-2 border border-gray-200 rounded-md text-xs bg-white" placeholder="习惯3：例如 不喝含糖饮料">
                         </div>
-                        <div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-medium text-gray-600">本旬关键指标 (最多3个)</span>
-                                <span class="text-[11px] text-gray-400">用于每日勾选对齐</span>
-                            </div>
-                            <div class="mt-2 space-y-2">
-                                <input type="text" id="xun-indicator-1" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="指标1：例如 深度工作 45m">
-                                <input type="text" id="xun-indicator-2" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="指标2：例如 运动 20m">
-                                <input type="text" id="xun-indicator-3" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="指标3：例如 阅读 10页">
-                            </div>
-                            <div class="mt-3 grid grid-cols-1 gap-2">
-                                <label class="flex items-center justify-between gap-3 text-xs text-gray-600">
-                                    <span id="day-indicator-label-1" class="truncate">今日完成指标1</span>
-                                    <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5">
-                                </label>
-                                <label class="flex items-center justify-between gap-3 text-xs text-gray-600">
-                                    <span id="day-indicator-label-2" class="truncate">今日完成指标2</span>
-                                    <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5">
-                                </label>
-                                <label class="flex items-center justify-between gap-3 text-xs text-gray-600">
-                                    <span id="day-indicator-label-3" class="truncate">今日完成指标3</span>
-                                    <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5">
-                                </label>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between gap-3">
-                            <label for="goal-checkin-input" class="text-xs font-medium text-gray-600">今日推进核心目标</label>
-                            <input type="checkbox" id="goal-checkin-input" class="h-5 w-5">
-                        </div>
-                        <div>
-                            <label for="goal-confidence-input" class="block text-xs font-medium text-gray-600 mb-1">信心分数 (0-100)</label>
-                            <input type="number" id="goal-confidence-input" min="0" max="100" step="5" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 80">
-                        </div>
-                        <div>
-                            <label for="goal-actions-input" class="block text-xs font-medium text-gray-600 mb-1">今日最小行动 (最多3条)</label>
-                            <input type="text" id="goal-actions-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 写300字, Run 2km, Deep Work 45m">
-                        </div>
-                        <div>
-                            <label for="goal-blockers-input" class="block text-xs font-medium text-gray-600 mb-1">阻碍 / 风险</label>
-                            <textarea id="goal-blockers-input" rows="2" class="w-full p-2 border border-gray-300 rounded-md text-sm"></textarea>
-                        </div>
+                    </details>
+
+                    <div class="grid grid-cols-1 gap-2" id="day-indicator-container">
+                        <label id="day-indicator-row-1" class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm">
+                            <span id="day-indicator-label-1" class="truncate font-medium">习惯1</span>
+                            <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500">
+                        </label>
+                        <label id="day-indicator-row-2" class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm">
+                            <span id="day-indicator-label-2" class="truncate font-medium">习惯2</span>
+                            <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500">
+                        </label>
+                        <label id="day-indicator-row-3" class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm">
+                            <span id="day-indicator-label-3" class="truncate font-medium">习惯3</span>
+                            <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500">
+                        </label>
                     </div>
                 </div>
                  <div>
@@ -332,29 +451,61 @@
                 </div>
             </div>
 
-            <!-- Metrics Section -->
-            <div class="mt-6 border-t pt-4 space-y-3">
-                <h4 class="font-semibold text-gray-600">生活指标</h4>
-                <div class="flex items-center justify-between">
-                    <label for="metric-sleep">睡眠 (小时)</label>
-                    <input type="number" id="metric-sleep" step="0.5" class="w-20 p-1 border rounded-md">
+            <!-- Vitality Section (New) -->
+            <div class="mt-6 border-t pt-4">
+                <h4 class="font-semibold text-gray-600 mb-3">身心状态 (Vitality)</h4>
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-600 mb-1">今日能量值 (Energy Level)</label>
+                    <input type="range" id="energy-level" min="0" max="100" step="5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+                        <span>🌱 疲惫 (Recharge)</span>
+                        <span>⚡ 活力 (Flow)</span>
+                    </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <label for="metric-exercise">运动 (分钟)</label>
-                    <input type="number" id="metric-exercise" class="w-20 p-1 border rounded-md">
+            </div>
+
+            <!-- Nourishment Section (Renamed from Metrics) -->
+            <div class="mt-4 border-t pt-4 space-y-3">
+                <h4 class="font-semibold text-gray-600">生活滋养 (Nourishment)</h4>
+                
+                <!-- Tag Cloud (New) -->
+                <div class="flex flex-wrap gap-2 mb-2" id="nourishment-tags-container">
+                    <!-- Tags will be generated by JS -->
                 </div>
-                <div class="flex items-center justify-between">
-                    <label for="metric-reading">阅读 (分钟)</label>
-                    <input type="number" id="metric-reading" class="w-20 p-1 border rounded-md">
+
+                <!-- Detailed Metrics (Simplified) -->
+                <div class="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-md">
+                    <div class="flex items-center justify-between">
+                        <label for="metric-sleep" class="text-xs text-gray-500">睡眠 (h)</label>
+                        <input type="number" id="metric-sleep" step="0.5" class="w-16 p-1 border rounded text-xs bg-white">
+                    </div>
+                     <div class="flex items-center justify-between">
+                        <label for="metric-exercise" class="text-xs text-gray-500">运动 (min)</label>
+                        <input type="number" id="metric-exercise" class="w-16 p-1 border rounded text-xs bg-white">
+                    </div>
+                     <div class="flex items-center justify-between">
+                        <label for="metric-reading" class="text-xs text-gray-500">阅读 (min)</label>
+                        <input type="number" id="metric-reading" class="w-16 p-1 border rounded text-xs bg-white">
+                    </div>
+                     <div class="flex items-center justify-between">
+                        <label for="metric-wealth" class="text-xs text-gray-500">财富 (+/-)</label>
+                        <input type="number" id="metric-wealth" step="0.01" class="w-16 p-1 border rounded text-xs bg-white">
+                    </div>
+                     <div class="flex items-center justify-between col-span-2">
+                        <label for="metric-social" class="text-xs text-gray-500">社交/备注</label>
+                        <input type="text" id="metric-social" class="w-full ml-2 p-1 border rounded text-xs bg-white" placeholder="和朋友聚餐...">
+                    </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <label for="metric-wealth">财富 (盈亏)</label>
-                    <input type="number" id="metric-wealth" step="0.01" class="w-20 p-1 border rounded-md">
-                </div>
-                 <div class="flex items-center justify-between">
-                    <label for="metric-social">社交</label>
-                    <input type="text" id="metric-social" class="w-48 p-1 border rounded-md" placeholder="和朋友聚餐">
-                </div>
+            </div>
+
+            <!-- Evening Resonance (Three Good Things) -->
+            <div class="mt-6 border-t pt-4">
+                 <h4 class="font-semibold text-gray-600 mb-2">✨ 今日三件好事 (Three Good Things)</h4>
+                 <div class="space-y-2">
+                     <input type="text" id="good-thing-1" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="1. 值得感恩的小事...">
+                     <input type="text" id="good-thing-2" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="2. 今天的高光时刻...">
+                     <input type="text" id="good-thing-3" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="3. 我做得很棒的事...">
+                 </div>
             </div>
             
             <!-- Custom Activities Section -->
@@ -404,6 +555,37 @@
             // --- State ---
             let userData = JSON.parse(localStorage.getItem('xun_calendar_data_v2') || '{}');
             let macroGoals = JSON.parse(localStorage.getItem('xun_macro_goals') || '{}');
+            // Custom Emotions
+            let customEmotions = JSON.parse(localStorage.getItem('xun_custom_emotions') || '[]');
+            const defaultEmotions = [
+                { text: '😄 快乐', value: '快乐' },
+                { text: '😆 兴奋', value: '兴奋' },
+                { text: '🙏 感激', value: '感激' },
+                { text: '🌟 期待', value: '期待' },
+                { text: '🦁 自豪', value: '自豪' },
+                { text: '💪 充实', value: '充实' },
+                { text: '😌 平静', value: '平静' },
+                { text: '🧠 专注', value: '专注' },
+                { text: '😶‍🌫️ 迷茫', value: '迷茫' },
+                { text: '😰 焦虑', value: '焦虑' },
+                { text: '😫 疲惫', value: '疲惫' },
+                { text: '😠 生气', value: '生气' },
+                { text: '🍂 孤独', value: '孤独' },
+                { text: '😞 失落', value: '失落' }
+            ];
+
+            // Custom Nourishments
+            let customNourishments = JSON.parse(localStorage.getItem('xun_custom_nourishments') || '[]');
+            const defaultNourishments = [
+                { text: '📚 阅读', value: '阅读' },
+                { text: '🧘 冥想', value: '冥想' },
+                { text: '🏃 运动', value: '运动' },
+                { text: '🥗 健康饮食', value: '健康饮食' },
+                { text: '🌲 大自然', value: '大自然' },
+                { text: '☕ 社交', value: '社交' },
+                { text: '🎨 创作', value: '创作' }
+            ];
+
             let currentXun = null;
             let xunPeriods = [];
             let selectedDate = '';
@@ -664,6 +846,7 @@
             // --- Rendering ---
             function renderMacroView() {
                 macroList.innerHTML = '';
+                const todayStr = formatLocalDate(new Date()); // Added for today highlighting
                 const todayStart = new Date();
                 todayStart.setHours(0, 0, 0, 0);
                 const tomorrowStart = new Date(todayStart);
@@ -698,15 +881,26 @@
                         const data = userData[dStr] || {};
                         const isChecked = data.goal_checkin === true;
                         const isFuture = tempDate >= tomorrowStart;
+                        const isToday = dStr === todayStr;
                         
                         let bgClass = isChecked ? '' : 'bg-white';
                         let borderClass = isChecked ? '' : 'border-gray-300';
                         let opacityClass = isFuture ? 'opacity-40 cursor-not-allowed' : 'opacity-100 cursor-pointer hover:scale-110';
+                        let additionalClass = '';
                         
                         const xunColor = `hsl(${hue}, 80%, 60%)`;
-                        const style = isChecked 
+                        let style = isChecked 
                             ? `background-color: ${xunColor}; border-color: ${xunColor};` 
                             : `border-color: #d1d5db;`;
+                        
+                        if (isToday) {
+                             borderClass = 'border-2 border-blue-500 z-10';
+                             additionalClass = 'ring-2 ring-blue-200 shadow-md animate-pulse';
+                             // Ensure inline style doesn't override border color for today
+                             style = isChecked 
+                                ? `background-color: ${xunColor}; border-color: #3b82f6;` 
+                                : `border-color: #3b82f6;`;
+                        }
                         
                         const tip = isFuture 
                             ? `${dStr} (尚未到来)` 
@@ -715,7 +909,7 @@
                         const clickHandler = isFuture ? '' : `onclick="window.toggleGoalCheckin('${dStr}', ${index})"`;
 
                         // Mobile: larger touch targets (w-4 h-4), Desktop: compact (w-2.5 h-2.5)
-                        progressHtml += `<div class="w-5 h-5 md:w-2.5 md:h-2.5 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} transition-all duration-200 flex-shrink-0" 
+                        progressHtml += `<div class="w-5 h-5 md:w-2.5 md:h-2.5 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} transition-all duration-200 flex-shrink-0" 
                             style="${style}" 
                             title="${tip}"
                             ${clickHandler}></div>`;
@@ -738,8 +932,10 @@
                         <!-- Goal Input -->
                         <div class="col-span-1 md:col-span-4 border-b md:border-b-0 md:border-r border-black/5 p-3 md:p-1 flex flex-col justify-center">
                             <label class="md:hidden text-xs text-gray-400 font-bold mb-1">核心目标</label>
-                            <input type="text" class="w-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400/70 text-sm" 
-                                placeholder="本旬核心目标..." value="${goal}" onchange="window.updateMacroGoal(${period.index}, 'goal', this.value)">
+                            <textarea class="w-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400/70 text-sm resize-none overflow-hidden" 
+                                placeholder="本旬核心目标..." rows="1" 
+                                oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"
+                                onchange="window.updateMacroGoal(${period.index}, 'goal', this.value)">${goal}</textarea>
                         </div>
 
                         <!-- Check-in Dots -->
@@ -751,8 +947,10 @@
                         <!-- Remark -->
                         <div class="col-span-1 md:col-span-2 p-3 md:p-1 flex flex-col justify-center">
                             <label class="md:hidden text-xs text-gray-400 font-bold mb-1">备注</label>
-                            <input type="text" class="w-full bg-transparent border-none focus:ring-0 text-gray-500 text-xs md:text-center" 
-                                placeholder="备注" value="${remark}" onchange="window.updateMacroGoal(${period.index}, 'remark', this.value)">
+                            <textarea class="w-full bg-transparent border-none focus:ring-0 text-gray-500 text-xs md:text-center resize-none overflow-hidden" 
+                                placeholder="备注" rows="1" 
+                                oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"
+                                onchange="window.updateMacroGoal(${period.index}, 'remark', this.value)">${remark}</textarea>
                         </div>
                     `;
                     
@@ -845,6 +1043,7 @@
                     }
                 });
 
+                const todayStr = formatLocalDate(new Date());
                 for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
                     const dateStr = formatLocalDate(d);
                     const xun = dateToXunMap[dateStr];
@@ -869,6 +1068,11 @@
                          el.style.boxShadow = `0 0 2px hsl(${hue}, 85%, 40%)`;
                     } else {
                          el.style.backgroundColor = `hsl(${hue}, 85%, 90%)`; // Slightly more visible base
+                    }
+
+                    if (dateStr === todayStr) {
+                         el.style.border = '2px solid #3b82f6'; // blue-500
+                         el.classList.add('z-10');
                     }
                     
                     // Mood Emoji Map
@@ -1254,11 +1458,21 @@
                     <!-- 2. Charts Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Mood Chart -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                            <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col relative z-0 overflow-visible">
+                            <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2 relative z-10">
                                 <span class="w-1 h-4 rounded-full bg-blue-400"></span> 心情分布
+                                <div class="ml-auto group relative">
+                                    <span class="text-xs font-normal text-gray-400 cursor-help border-b border-dashed border-gray-300">来自“今日整体感受”</span>
+                                    <!-- Tooltip -->
+                                    <div class="hidden group-hover:block absolute right-0 top-full mt-2 w-64 p-3 bg-gray-800 text-white text-xs rounded-xl shadow-xl z-50 text-left leading-relaxed">
+                                        <p class="mb-2">• 它会读取您在这10天（一旬）内每一次打卡记录的“今日整体感受”。</p>
+                                        <p>• 它统计的是这5种心情出现的频率。（例如：这10天里有3天“不错”、2天“平淡”，图表上就会直观地显示出这种比例）。</p>
+                                        <!-- Arrow -->
+                                        <div class="absolute -top-1 right-8 w-2 h-2 bg-gray-800 transform rotate-45"></div>
+                                    </div>
+                                </div>
                             </h4>
-                            <div class="flex-1 min-h-[200px] relative">
+                            <div class="flex-1 min-h-[200px] relative z-0">
                                 <canvas id="mood-chart"></canvas>
                             </div>
                         </div>
@@ -1353,6 +1567,209 @@
                 return xunPeriods.find(p => d >= p.startDate && d <= p.endDate) || null;
             }
 
+            function saveCustomEmotions() {
+                localStorage.setItem('xun_custom_emotions', JSON.stringify(customEmotions));
+            }
+
+            function renderEmotionTags() {
+                const container = document.getElementById('emotion-tags');
+                if (!container) return;
+
+                const allEmotions = [...defaultEmotions, ...customEmotions.map(t => ({ text: t, value: t }))];
+                
+                let html = allEmotions.map(emotion => `
+                    <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="${emotion.value}" aria-pressed="false">
+                        ${emotion.text}
+                    </button>
+                `).join('');
+
+                // Add "Add Custom" button
+                html += `
+                    <button type="button" id="add-custom-emotion-btn" class="px-3 py-1.5 text-sm border border-dashed border-gray-300 rounded-full text-gray-500 hover:bg-gray-50 hover:text-blue-500 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" title="添加自定义标签">
+                        + 自定义
+                    </button>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            function addCustomEmotion() {
+                const btn = document.getElementById('add-custom-emotion-btn');
+                if (!btn) return;
+
+                const container = document.createElement('div');
+                container.className = 'inline-flex items-center gap-1 ml-1 align-middle';
+                container.innerHTML = `
+                    <input type="text" id="custom-emotion-input" class="w-24 px-2 py-1 text-xs border border-blue-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-400 placeholder-gray-400" placeholder="新标签" autocomplete="off">
+                    <button type="button" id="save-custom-emotion" class="p-1 text-green-600 hover:text-green-700 rounded-full hover:bg-green-50" title="确认">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                    <button type="button" id="cancel-custom-emotion" class="p-1 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-50" title="取消">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+
+                btn.replaceWith(container);
+
+                const input = container.querySelector('input');
+                input.focus();
+
+                const handleConfirm = () => confirmAddCustomEmotion(input.value);
+                const handleCancel = () => renderEmotionTags();
+
+                input.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleConfirm();
+                    } else if (e.key === 'Escape') {
+                        handleCancel();
+                    }
+                };
+
+                container.querySelector('#save-custom-emotion').onclick = (e) => {
+                    e.stopPropagation();
+                    handleConfirm();
+                };
+
+                container.querySelector('#cancel-custom-emotion').onclick = (e) => {
+                    e.stopPropagation();
+                    handleCancel();
+                };
+            }
+
+            function confirmAddCustomEmotion(tag) {
+                if (tag && tag.trim()) {
+                    const cleanTag = tag.trim();
+                    if (defaultEmotions.some(e => e.value === cleanTag) || customEmotions.includes(cleanTag)) {
+                        alert('该标签已存在！');
+                        return;
+                    }
+
+                    // Capture current selection before re-rendering
+                    const selectedTags = Array.from(document.querySelectorAll('.emotion-tag[aria-pressed="true"]')).map(el => el.dataset.tag);
+
+                    customEmotions.push(cleanTag);
+                    saveCustomEmotions();
+                    renderEmotionTags();
+
+                    // Restore selection + Select new
+                    selectedTags.push(cleanTag);
+
+                    selectedTags.forEach(t => {
+                        const el = document.querySelector(`.emotion-tag[data-tag="${t}"]`);
+                        if (el) {
+                             el.classList.remove('text-gray-600', 'border-gray-200');
+                             el.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
+                             el.setAttribute('aria-pressed', 'true');
+                        }
+                    });
+                } else {
+                    renderEmotionTags(); // Empty input, just cancel
+                }
+            }
+
+            // --- Nourishment Helpers ---
+            function saveCustomNourishments() {
+                localStorage.setItem('xun_custom_nourishments', JSON.stringify(customNourishments));
+            }
+
+            function renderNourishmentTags() {
+                const container = document.getElementById('nourishment-tags-container');
+                if (!container) return;
+
+                const allNourishments = [...defaultNourishments, ...customNourishments.map(t => ({ text: t, value: t }))];
+                
+                let html = allNourishments.map(item => `
+                    <button type="button" class="nourishment-tag px-3 py-1 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors" data-tag="${item.value}" aria-pressed="false">
+                        ${item.text}
+                    </button>
+                `).join('');
+
+                // Add "Add Custom" button
+                html += `
+                    <button type="button" id="add-custom-nourishment-btn" class="px-3 py-1 text-xs border border-dashed border-gray-300 rounded-full text-gray-500 hover:bg-gray-50 hover:text-blue-500 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" title="添加自定义活动">
+                        + 自定义
+                    </button>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            function addCustomNourishment() {
+                const btn = document.getElementById('add-custom-nourishment-btn');
+                if (!btn) return;
+
+                const container = document.createElement('div');
+                container.className = 'inline-flex items-center gap-1 ml-1 align-middle';
+                container.innerHTML = `
+                    <input type="text" id="custom-nourishment-input" class="w-24 px-2 py-1 text-xs border border-blue-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-400 placeholder-gray-400" placeholder="新活动" autocomplete="off">
+                    <button type="button" id="save-custom-nourishment" class="p-1 text-green-600 hover:text-green-700 rounded-full hover:bg-green-50" title="确认">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                    </button>
+                    <button type="button" id="cancel-custom-nourishment" class="p-1 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-50" title="取消">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                `;
+
+                btn.replaceWith(container);
+
+                const input = container.querySelector('input');
+                input.focus();
+
+                const handleConfirm = () => confirmAddCustomNourishment(input.value);
+                const handleCancel = () => renderNourishmentTags();
+
+                input.onkeydown = (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleConfirm();
+                    } else if (e.key === 'Escape') {
+                        handleCancel();
+                    }
+                };
+
+                container.querySelector('#save-custom-nourishment').onclick = (e) => {
+                    e.stopPropagation();
+                    handleConfirm();
+                };
+
+                container.querySelector('#cancel-custom-nourishment').onclick = (e) => {
+                    e.stopPropagation();
+                    handleCancel();
+                };
+            }
+
+            function confirmAddCustomNourishment(tag) {
+                if (tag && tag.trim()) {
+                    const cleanTag = tag.trim();
+                    if (defaultNourishments.some(e => e.value === cleanTag) || customNourishments.includes(cleanTag)) {
+                        alert('该活动已存在！');
+                        return;
+                    }
+
+                    // Capture current selection before re-rendering
+                    const selectedTags = Array.from(document.querySelectorAll('.nourishment-tag[aria-pressed="true"]')).map(el => el.dataset.tag);
+
+                    customNourishments.push(cleanTag);
+                    saveCustomNourishments();
+                    renderNourishmentTags();
+
+                    // Restore selection + Select new
+                    selectedTags.push(cleanTag);
+
+                    selectedTags.forEach(t => {
+                        const el = document.querySelector(`.nourishment-tag[data-tag="${t}"]`);
+                        if (el) {
+                             el.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
+                             el.classList.remove('bg-gray-50', 'text-gray-600', 'border-gray-200');
+                             el.setAttribute('aria-pressed', 'true');
+                        }
+                    });
+                } else {
+                    renderNourishmentTags(); // Empty input, just cancel
+                }
+            }
+
             function openModal(dateStr) {
                 selectedDate = dateStr;
                 const data = userData[dateStr] || {};
@@ -1375,6 +1792,7 @@
                 }
 
                 // Emotions Tags
+                renderEmotionTags();
                 document.querySelectorAll('.emotion-tag').forEach(tag => {
                     tag.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
                     tag.classList.add('text-gray-600', 'border-gray-200');
@@ -1398,38 +1816,28 @@
                 const xunPeriod = getXunPeriodByDateStr(dateStr);
                 const xunIndex = xunPeriod ? xunPeriod.index : null;
                 const xunGoalInput = document.getElementById('xun-goal-input');
-                const xunGoalMeta = document.getElementById('xun-goal-meta');
-                const goalCheckinInput = document.getElementById('goal-checkin-input');
-                const goalConfidenceInput = document.getElementById('goal-confidence-input');
-                const goalActionsInput = document.getElementById('goal-actions-input');
-                const goalBlockersInput = document.getElementById('goal-blockers-input');
+                const xunGoalDisplay = document.getElementById('xun-goal-display');
+                const xunGoalContainer = document.getElementById('xun-goal-container');
+                // const xunGoalMeta = document.getElementById('xun-goal-meta'); // Removed
+                // const goalCheckinInput = document.getElementById('goal-checkin-input'); // Removed
+                // const goalConfidenceInput = document.getElementById('goal-confidence-input'); // Removed
+                // const goalActionsInput = document.getElementById('goal-actions-input'); // Removed
+                // const goalBlockersInput = document.getElementById('goal-blockers-input'); // Removed
 
-                if (xunGoalMeta) {
-                    if (xunPeriod) {
-                        const startStr = formatLocalDate(xunPeriod.startDate);
-                        const endStr = formatLocalDate(xunPeriod.endDate);
-                        xunGoalMeta.textContent = `第 ${xunPeriod.index} 旬 · ${startStr} ~ ${endStr}`;
-                    } else {
-                        xunGoalMeta.textContent = '';
-                    }
-                }
+                // if (xunGoalMeta) { ... } // Removed
 
                 if (xunGoalInput) {
                     if (xunIndex) {
                         xunGoalInput.disabled = false;
-                        xunGoalInput.value = macroGoals[xunIndex]?.goal || '';
-                        xunGoalInput.onchange = () => {
-                            if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
-                            macroGoals[xunIndex].goal = xunGoalInput.value;
-                            saveMacroGoals();
-                            renderMacroView();
-                            if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
-                            renderOverview();
-                        };
+                        const currentGoal = macroGoals[xunIndex]?.goal || '';
+                        xunGoalInput.value = currentGoal;
+                        if (xunGoalDisplay) xunGoalDisplay.textContent = currentGoal || '（本旬未设置核心目标）';
+                        if (xunGoalContainer) xunGoalContainer.classList.remove('hidden');
+                        
+                        // We use input for storage but display for view in minimalist mode
+                        // If we want to allow edit, we can add an edit button, but for now let's just use the inputs hidden logic or similar
                     } else {
-                        xunGoalInput.disabled = true;
-                        xunGoalInput.value = '';
-                        xunGoalInput.onchange = null;
+                         if (xunGoalContainer) xunGoalContainer.classList.add('hidden');
                     }
                 }
 
@@ -1442,6 +1850,9 @@
                 const dayIndicatorCheck1 = document.getElementById('day-indicator-check-1');
                 const dayIndicatorCheck2 = document.getElementById('day-indicator-check-2');
                 const dayIndicatorCheck3 = document.getElementById('day-indicator-check-3');
+                const dayIndicatorRow1 = document.getElementById('day-indicator-row-1');
+                const dayIndicatorRow2 = document.getElementById('day-indicator-row-2');
+                const dayIndicatorRow3 = document.getElementById('day-indicator-row-3');
 
                 const applyIndicatorState = () => {
                     const names = [
@@ -1450,18 +1861,25 @@
                         indicatorInput3 ? indicatorInput3.value.trim() : ''
                     ];
 
-                    const setRow = (i, labelEl, checkEl) => {
+                    const setRow = (i, labelEl, checkEl, rowEl) => {
                         const name = names[i] || '';
-                        if (labelEl) labelEl.textContent = name ? `今日完成：${name}` : `今日完成指标${i + 1}`;
+                        if (labelEl) labelEl.textContent = name ? `今日打卡：${name}` : `今日打卡`;
                         if (checkEl) {
                             checkEl.disabled = !name;
                             if (!name) checkEl.checked = false;
                         }
+                        if (rowEl) {
+                            if (name) {
+                                rowEl.classList.remove('hidden');
+                            } else {
+                                rowEl.classList.add('hidden');
+                            }
+                        }
                     };
 
-                    setRow(0, dayIndicatorLabel1, dayIndicatorCheck1);
-                    setRow(1, dayIndicatorLabel2, dayIndicatorCheck2);
-                    setRow(2, dayIndicatorLabel3, dayIndicatorCheck3);
+                    setRow(0, dayIndicatorLabel1, dayIndicatorCheck1, dayIndicatorRow1);
+                    setRow(1, dayIndicatorLabel2, dayIndicatorCheck2, dayIndicatorRow2);
+                    setRow(2, dayIndicatorLabel3, dayIndicatorCheck3, dayIndicatorRow3);
 
                     if (xunIndex) {
                         if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
@@ -1504,10 +1922,10 @@
                 if (dayIndicatorCheck3) dayIndicatorCheck3.checked = checkins[2] === true;
                 applyIndicatorState();
 
-                if (goalCheckinInput) goalCheckinInput.checked = data.goal_checkin === true;
-                if (goalConfidenceInput) goalConfidenceInput.value = Number.isFinite(data.goal_confidence) ? String(data.goal_confidence) : '';
-                if (goalActionsInput) goalActionsInput.value = Array.isArray(data.goal_actions) ? data.goal_actions.join(', ') : '';
-                if (goalBlockersInput) goalBlockersInput.value = data.goal_blockers || '';
+                // if (goalCheckinInput) goalCheckinInput.checked = data.goal_checkin === true;
+                // if (goalConfidenceInput) goalConfidenceInput.value = Number.isFinite(data.goal_confidence) ? String(data.goal_confidence) : '';
+                // if (goalActionsInput) goalActionsInput.value = Array.isArray(data.goal_actions) ? data.goal_actions.join(', ') : '';
+                // if (goalBlockersInput) goalBlockersInput.value = data.goal_blockers || '';
 
                 // Weather
                 document.querySelectorAll('#weather-selector button').forEach(btn => btn.classList.remove('bg-gray-200'));
@@ -1516,6 +1934,30 @@
                     if (btn) btn.classList.add('bg-gray-200');
                 }
 
+                // Vitality (Energy)
+                document.getElementById('energy-level').value = data.energy_level !== undefined ? data.energy_level : 50;
+
+                // Nourishment Tags
+                renderNourishmentTags();
+                const savedTags = data.nourishment_tags || [];
+                
+                // Reset all first
+                document.querySelectorAll('.nourishment-tag').forEach(btn => {
+                    btn.classList.remove('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
+                    btn.classList.add('bg-gray-50', 'text-gray-600', 'border-gray-200');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
+
+                // Apply saved selection
+                savedTags.forEach(tag => {
+                    const btn = document.querySelector(`.nourishment-tag[data-tag="${tag}"]`);
+                    if (btn) {
+                        btn.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
+                        btn.classList.remove('bg-gray-50', 'text-gray-600', 'border-gray-200');
+                        btn.setAttribute('aria-pressed', 'true');
+                    }
+                });
+
                 // Metrics
                 const m = data.metrics || {};
                 document.getElementById('metric-sleep').value = m.sleep || '';
@@ -1523,6 +1965,12 @@
                 document.getElementById('metric-reading').value = m.reading || '';
                 document.getElementById('metric-wealth').value = m.wealth || '';
                 document.getElementById('metric-social').value = m.social || '';
+
+                // Three Good Things
+                const goodThings = data.three_good_things || [];
+                document.getElementById('good-thing-1').value = goodThings[0] || '';
+                document.getElementById('good-thing-2').value = goodThings[1] || '';
+                document.getElementById('good-thing-3').value = goodThings[2] || '';
 
                 // Custom activities
                 const container = document.getElementById('custom-activities-container');
@@ -1560,23 +2008,31 @@
                 const selectedEmotions = Array.from(document.querySelectorAll('.emotion-tag.bg-blue-100'))
                     .map(el => el.dataset.tag);
 
-                const goalCheckinInput = document.getElementById('goal-checkin-input');
-                const goalConfidenceInput = document.getElementById('goal-confidence-input');
-                const goalActionsInput = document.getElementById('goal-actions-input');
-                const goalBlockersInput = document.getElementById('goal-blockers-input');
+                const xunGoalInput = document.getElementById('xun-goal-input'); // Added back for saving logic
+                // const goalCheckinInput = document.getElementById('goal-checkin-input'); // Removed
+                // const goalConfidenceInput = document.getElementById('goal-confidence-input'); // Removed
+                // const goalActionsInput = document.getElementById('goal-actions-input'); // Removed
+                // const goalBlockersInput = document.getElementById('goal-blockers-input'); // Removed
                 const indicatorInput1 = document.getElementById('xun-indicator-1');
                 const indicatorInput2 = document.getElementById('xun-indicator-2');
                 const indicatorInput3 = document.getElementById('xun-indicator-3');
                 const dayIndicatorCheck1 = document.getElementById('day-indicator-check-1');
                 const dayIndicatorCheck2 = document.getElementById('day-indicator-check-2');
                 const dayIndicatorCheck3 = document.getElementById('day-indicator-check-3');
-                const rawGoalConfidence = goalConfidenceInput ? parseInt(goalConfidenceInput.value, 10) : NaN;
-                const goalConfidence = Number.isFinite(rawGoalConfidence)
-                    ? Math.max(0, Math.min(100, rawGoalConfidence))
-                    : undefined;
+                // const rawGoalConfidence = goalConfidenceInput ? parseInt(goalConfidenceInput.value, 10) : NaN;
+                // const goalConfidence = Number.isFinite(rawGoalConfidence)
+                //    ? Math.max(0, Math.min(100, rawGoalConfidence))
+                //    : undefined;
 
                 const xunPeriod = getXunPeriodByDateStr(selectedDate);
                 const xunIndex = xunPeriod ? xunPeriod.index : null;
+
+                // Save Goal if modified in modal (though it's hidden now, logic remains if we re-enable)
+                if (xunIndex && xunGoalInput && xunGoalInput.value !== (macroGoals[xunIndex]?.goal || '')) {
+                     if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
+                     macroGoals[xunIndex].goal = xunGoalInput.value;
+                     saveMacroGoals();
+                }
 
                 const indicatorNames = [
                     indicatorInput1 ? indicatorInput1.value.trim() : '',
@@ -1599,6 +2055,13 @@
                 userData[selectedDate] = {
                     mood: moodEl ? parseInt(moodEl.dataset.mood) : undefined,
                     emotions: selectedEmotions,
+                    energy_level: parseInt(document.getElementById('energy-level').value) || 50,
+                    nourishment_tags: Array.from(document.querySelectorAll('.nourishment-tag.bg-blue-100')).map(btn => btn.dataset.tag),
+                    three_good_things: [
+                        document.getElementById('good-thing-1').value,
+                        document.getElementById('good-thing-2').value,
+                        document.getElementById('good-thing-3').value
+                    ].filter(Boolean),
                     // Keywords: allow 3 items, relax separator splitting to allow idioms?
                     // Actually, simple space/comma split is fine for "idioms" if they don't have spaces within.
                     // But English idioms have spaces.
@@ -1614,10 +2077,10 @@
                     emoji: undefined, // Deprecated in favor of mood/keywords
                     weather: weatherEl ? weatherEl.dataset.weather : undefined,
                     journal: document.getElementById('journal-input').value,
-                    goal_checkin: goalCheckinInput ? goalCheckinInput.checked : undefined,
-                    goal_confidence: goalConfidence,
-                    goal_actions: goalActionsInput ? goalActionsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k.length > 0).slice(0, 3) : undefined,
-                    goal_blockers: goalBlockersInput ? (goalBlockersInput.value.trim() || undefined) : undefined,
+                    // goal_checkin: goalCheckinInput ? goalCheckinInput.checked : undefined, // Removed
+                    // goal_confidence: goalConfidence, // Removed
+                    // goal_actions: goalActionsInput ? goalActionsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k.length > 0).slice(0, 3) : undefined, // Removed
+                    // goal_blockers: goalBlockersInput ? (goalBlockersInput.value.trim() || undefined) : undefined, // Removed
                     indicator_checkins: indicatorCheckins,
                     metrics: {
                         sleep: parseFloat(document.getElementById('metric-sleep').value) || undefined,
@@ -1726,6 +2189,46 @@
                 }
             }
 
+            // --- Theme Management ---
+            const themeBtn = document.getElementById('theme-btn');
+            const themeMenu = document.getElementById('theme-menu');
+            
+            if (themeBtn && themeMenu) {
+                themeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    themeMenu.classList.toggle('hidden');
+                };
+
+                document.addEventListener('click', (e) => {
+                    if (!themeMenu.contains(e.target) && !themeBtn.contains(e.target)) {
+                        themeMenu.classList.add('hidden');
+                    }
+                });
+            }
+
+            window.setTheme = function(theme) {
+                document.body.className = document.body.className.replace(/theme-\w+/g, '').trim();
+                
+                // Keep base classes
+                if (!document.body.classList.contains('bg-gray-50')) document.body.classList.add('bg-gray-50');
+                if (!document.body.classList.contains('text-gray-800')) document.body.classList.add('text-gray-800');
+                if (!document.body.classList.contains('antialiased')) document.body.classList.add('antialiased');
+                if (!document.body.classList.contains('overflow-x-hidden')) document.body.classList.add('overflow-x-hidden');
+
+                if (theme !== 'default') {
+                    document.body.classList.add(`theme-${theme}`);
+                }
+                
+                localStorage.setItem('user_theme', theme);
+                if (themeMenu) themeMenu.classList.add('hidden');
+            };
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('user_theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            }
+
             // --- Initialization ---
             function init() {
                 xunPeriods = getXunPeriods(YEAR);
@@ -1789,6 +2292,12 @@
                 const emotionTagsContainer = document.getElementById('emotion-tags');
                 if (emotionTagsContainer) {
                     emotionTagsContainer.onclick = (e) => {
+                        // Handle Custom Button
+                        if (e.target.closest('#add-custom-emotion-btn')) {
+                            addCustomEmotion();
+                            return;
+                        }
+
                         const btn = e.target.closest('.emotion-tag');
                         if (btn) {
                             // Toggle active class
@@ -1800,6 +2309,35 @@
                             } else {
                                 btn.classList.remove('text-gray-600', 'border-gray-200');
                                 btn.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
+                                btn.setAttribute('aria-pressed', 'true');
+                            }
+                        }
+                    };
+                }
+
+                // Nourishment Tags Listener (New)
+                const nourishmentContainer = document.getElementById('nourishment-tags-container');
+                if (nourishmentContainer) {
+                    nourishmentContainer.onclick = (e) => {
+                        // Handle Custom Button
+                        if (e.target.closest('#add-custom-nourishment-btn')) {
+                            addCustomNourishment();
+                            return;
+                        }
+
+                        const btn = e.target.closest('.nourishment-tag');
+                        if (btn) {
+                            // Toggle state
+                            const isPressed = btn.getAttribute('aria-pressed') === 'true';
+                            if (isPressed) {
+                                // Unselect
+                                btn.classList.remove('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
+                                btn.classList.add('bg-gray-50', 'text-gray-600', 'border-gray-200');
+                                btn.setAttribute('aria-pressed', 'false');
+                            } else {
+                                // Select
+                                btn.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
+                                btn.classList.remove('bg-gray-50', 'text-gray-600', 'border-gray-200');
                                 btn.setAttribute('aria-pressed', 'true');
                             }
                         }
@@ -1846,13 +2384,16 @@
                 
                 const dayOfYear = Math.floor((current - start) / (1000 * 60 * 60 * 24)) + 1;
                 
+                const totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                const remainingDays = totalDays - dayOfYear;
+                
                 const progressBar = document.getElementById('year-progress-bar');
                 const progressWalker = document.getElementById('year-progress-walker');
                 const progressText = document.getElementById('year-progress-text');
                 
                 if (progressBar) progressBar.style.width = `${percentage}%`;
                 if (progressWalker) progressWalker.style.left = `${percentage}%`;
-                if (progressText) progressText.textContent = `第 ${dayOfYear} 天 / ${percentage.toFixed(1)}%`;
+                if (progressText) progressText.textContent = `已过 ${dayOfYear} 天 · 剩余 ${remainingDays} 天 · ${percentage.toFixed(1)}%`;
 
                 const walker = document.getElementById('year-progress-walker');
                 const bubble = document.getElementById('walker-bubble');

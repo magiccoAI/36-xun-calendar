@@ -1,4 +1,47 @@
 @import "tailwindcss";
+@theme {
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 1024px; /* User requested tablet 600-1023, so md (desktop start) should be 1024? No, Tailwind has sm, md, lg, xl. */
+  /* User: Mobile 320-599. Tablet 600-1023. Desktop >= 1024. */
+  /* So: sm=600px. md=1024px? No, usually md is tablet. */
+  /* Let's map: 
+     sm: 600px (Tablet starts here)
+     lg: 1024px (Desktop starts here)
+     md: ? Maybe intermediate or just ignore. 
+     Tailwind default: sm 640, md 768, lg 1024.
+     I'll set sm to 600px. And lg to 1024px (default).
+     So 'md:' prefix in code (usually 768) will trigger inside tablet range.
+     User code uses 'md:' for desktop layout in MacroView.js: "hidden md:grid". 
+     This means it switches to grid at 768px.
+     User wants desktop at >= 1024px.
+     So I should change the classes in MacroView.js to 'lg:grid' or change 'md' breakpoint to 1024px?
+     If I change 'md' to 1024px, then <1024 is mobile layout.
+     But user defined "Tablet 600-1023". Tablet should probably look like desktop or have its own layout?
+     "在手机断点下使用单列... 在桌面断点下恢复多列".
+     Tablet usually behaves like desktop or intermediate.
+     If I set md=1024px, then tablet (600-1023) will be mobile layout (single col).
+     Is that desired? "Mobile first... Tablet... Desktop".
+     Usually Tablet gets the multi-col layout too, or a simplified one.
+     If I want Tablet to have multi-col, I should keep 'md' at 600px (start of tablet).
+     Let's set --breakpoint-md: 600px; 
+     Then 'md:grid' will trigger at 600px.
+     And Desktop requirements (>=1024) might need 'lg:'.
+     The user says: "In desktop breakpoint (>=1024) restore multi-column grid". 
+     So <1024 (including tablet) should be single column? 
+     "Mobile layout... 320-599. Tablet 600-1023. Desktop >= 1024."
+     "In mobile breakpoint... single column". 
+     "In desktop breakpoint... multi column".
+     It doesn't explicitly say what Tablet does. But usually Tablet is more like Desktop.
+     However, if the prompt distinguishes them, maybe Tablet is specific.
+     But "In desktop breakpoint... restore multi-column" implies Tablet might be single column?
+     Let's assume Tablet should adapt. But to be safe and follow "Desktop >= 1024 restore multi-col", I will use 'lg' (1024) for the grid switch.
+     So I will change 'md:grid' to 'lg:grid' in JS/HTML? Or change 'md' definition?
+     Changing 'md' definition to 1024px is easiest to make existing 'md:' classes apply only to desktop.
+     So: sm=600px (Tablet), md=1024px (Desktop).
+  */
+  --breakpoint-sm: 600px;
+  --breakpoint-md: 1024px;
+}
 
 :root {
   --color-xun-1: #F87171;
@@ -11,23 +54,39 @@
   --color-mood-5: #60A5FA;
 }
 
+@layer base {
+    html {
+        font-size: 14px; /* Mobile root */
+    }
+    @media (min-width: 1024px) {
+        html {
+            font-size: 16px; /* Desktop root */
+        }
+    }
+    
+    /* Prevent iOS zoom on inputs */
+    input, textarea, select {
+        font-size: 16px !important; 
+    }
+}
+
 @layer components {
     body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     }
     .grid-container {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr; /* Mobile: Single column */
         gap: 0.75rem;
     }
-    @media (min-width: 640px) {
+    @media (min-width: 600px) {
         .grid-container {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr)); /* Tablet */
         }
     }
     @media (min-width: 1024px) {
         .grid-container {
-            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-columns: repeat(6, minmax(0, 1fr)); /* Desktop */
         }
     }
     .detail-grid {
@@ -44,4 +103,18 @@
     .mood-3 { background-color: var(--color-mood-3) !important; }
     .mood-4 { background-color: var(--color-mood-4) !important; }
     .mood-5 { background-color: var(--color-mood-5) !important; color: white !important; }
+}
+
+@layer utilities {
+    .touch-target {
+        min-width: 48px;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 20px);
+    }
 }

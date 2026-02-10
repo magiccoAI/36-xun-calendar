@@ -2,13 +2,15 @@
   "name": "a-year-in-36-multiple-10-perspective-calendar",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build:css": "npx tailwindcss -i ./src/input.css -o ./src/output.css --minify",
     "watch:css": "npx tailwindcss -i ./src/input.css -o ./src/output.css --watch",
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "jest": {
     "testEnvironment": "jsdom",
+    "transform": {},
     "testMatch": [
       "<rootDir>/src/**/*.test.js"
     ],

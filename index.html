@@ -12,6 +12,17 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Nunito:wght@300;400;600&display=swap');
         
+        /* Mobile-first root font size */
+        html {
+            font-size: 14px;
+        }
+        /* Desktop root font size */
+        @media (min-width: 1024px) {
+            html {
+                font-size: 16px;
+            }
+        }
+
         body {
             font-family: 'Nunito', 'Noto Serif SC', sans-serif;
             background-color: #fdfdfd;
@@ -48,22 +59,22 @@
 
         /* 2. Summer (Fresh Vitality) - Mint & Lemon | Watercolor Style */
         body.theme-summer {
-            background-color: #f0f9f4;
-            color: #1a4d3e;
+            background-color: #eef7f1;
+            color: #103b2f;
             background-image: 
-                radial-gradient(circle at 0% 0%, rgba(255, 249, 196, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(178, 223, 219, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 0% 0%, rgba(255, 249, 196, 0.35) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(178, 223, 219, 0.35) 0%, transparent 50%),
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='water'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='3'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='20'/%3E%3CfeGaussianBlur stdDeviation='2'/%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='100' fill='rgba(0, 150, 136, 0.05)' filter='url(%23water)'/%3E%3Cpath d='M300 300 Q 350 200 400 300' stroke='rgba(255, 235, 59, 0.2)' stroke-width='40' filter='blur(10px)'/%3E%3C/svg%3E");
             background-size: cover, cover, cover;
         }
-        body.theme-summer .text-gray-800 { color: #1a4d3e; }
-        body.theme-summer .text-gray-700 { color: #004d40; }
-        body.theme-summer .text-gray-500 { color: #00695c; }
-        body.theme-summer .text-gray-400 { color: #4db6ac; }
+        body.theme-summer .text-gray-800 { color: #103b2f; }
+        body.theme-summer .text-gray-700 { color: #0b2e24; }
+        body.theme-summer .text-gray-500 { color: #0f5a4d; }
+        body.theme-summer .text-gray-400 { color: #2f7f73; }
         body.theme-summer .bg-gray-50 { 
-            background-color: rgba(255, 255, 255, 0.85); 
-            border: 1px solid rgba(178, 223, 219, 0.3);
-            box-shadow: 0 4px 20px rgba(0, 77, 64, 0.05);
+            background-color: rgba(255, 255, 255, 0.92); 
+            border: 1px solid rgba(0, 77, 64, 0.25);
+            box-shadow: 0 4px 20px rgba(0, 77, 64, 0.07);
         }
 
         /* 3. Autumn (Warm Steady) - Maple & Parchment | Oil Canvas Style */
@@ -93,7 +104,7 @@
             background-image: 
                 linear-gradient(to bottom, #f5f7fa 0%, #e3e8ee 100%),
                 url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='washi'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23washi)' opacity='0.5'/%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='60' fill='rgba(44, 62, 80, 0.03)' filter='blur(20px)'/%3E%3Cpath d='M250,250 Q300,300 350,250' stroke='rgba(38, 50, 56, 0.05)' stroke-width='2' fill='none' filter='blur(2px)'/%3E%3C/svg%3E");
+                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='60' fill='rgba(44, 62, 80, 0.03)' filter='blur(20px)'/%3E%3Cpath d='M250,250 Q300,300 350,250' stroke='rgba(38, 50, 56, 0.05)' stroke-width='2' fill='none' filter='blur(2px)'/%3E%3Ctext x='50' y='350' font-size='40' fill='rgba(255,255,255,0.4)'%3E❄%3C/text%3E%3Ctext x='300' y='50' font-size='60' fill='rgba(255,255,255,0.3)'%3E❄%3C/text%3E%3C/svg%3E");
             background-size: cover, 150px 150px, cover;
             background-blend-mode: multiply;
         }
@@ -106,6 +117,25 @@
             border: 1px solid rgba(207, 216, 220, 0.5);
             box-shadow: 0 4px 20px rgba(38, 50, 56, 0.05);
             backdrop-filter: blur(8px);
+        }
+
+        /* 5. Liqiu Theme (Beginning of Autumn) */
+        body.theme-liqiu {
+            background-color: #f5e6ab; /* Rice Yellow */
+            color: #5d4037; /* Dark Brown */
+        }
+        body.theme-liqiu .bg-gray-50 {
+            background-color: rgba(255, 248, 225, 0.85); /* Lighter Rice Yellow */
+            border: 1px solid rgba(200, 76, 35, 0.2);
+        }
+        body.theme-liqiu #year-progress-bar {
+            background: #c84c23; /* Maple Red */
+        }
+        body.theme-liqiu .text-gray-700 { color: #4e342e; }
+        body.theme-liqiu .text-gray-500 { color: #795548; }
+        body.theme-liqiu .text-gray-400 { color: #a1887f; }
+        body.theme-liqiu #year-progress-text, body.theme-liqiu #current-xun-info {
+            color: #c84c23;
         }
 
         /* 自定义滚动条 */
@@ -150,18 +180,90 @@
                 background-color: rgba(255, 255, 255, 0.6);
             }
         }
+
+        /* Spring Festival Theme - Redesigned */
+        .spring-festival-theme #year-progress-bar {
+            background: linear-gradient(90deg, #fde68a 0%, #f59e0b 50%, #fde68a 100%);
+            background-size: 200% 100%;
+            animation: spring-glow 3s infinite linear;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+            border-radius: 4px;
+        }
+
+        @keyframes spring-glow {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        /* Keep walker blue, but enhance scarf visibility */
+        .spring-festival-theme .walker-head {
+            fill: #2563eb !important; /* Blue head - keep original */
+        }
+        
+        .spring-festival-theme .walker-body {
+            stroke: #2563eb !important; /* Blue body - keep original */
+        }
+
+        .spring-festival-theme .scarf-path {
+            display: block !important;
+            animation: scarf-sway 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.6));
+        }
+
+        @keyframes scarf-sway {
+            from { transform: rotate(-5deg); transform-origin: 12px 10px; }
+            to { transform: rotate(5deg); transform-origin: 12px 10px; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased overflow-x-hidden">
+    <!-- SVG Sprite Symbols -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-backup" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+        </symbol>
+        <symbol id="icon-theme" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+        </symbol>
+        <symbol id="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </symbol>
+        <symbol id="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </symbol>
+        <symbol id="icon-top" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </symbol>
+        <symbol id="icon-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </symbol>
+    </svg>
 
     <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl relative">
         <header class="text-center mb-8 relative">
+            <!-- Backup Button -->
+            <div class="absolute right-12 top-0 mr-2">
+                <button id="backup-btn" class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50" title="数据备份">
+                    <svg class="h-5 w-5"><use href="#icon-backup"></use></svg>
+                </button>
+            </div>
             <!-- Theme Toggle Button -->
             <div class="absolute right-0 top-0">
                 <button id="theme-btn" class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50" title="切换主题">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-                    </svg>
+                    <svg class="h-5 w-5"><use href="#icon-theme"></use></svg>
                 </button>
                 <!-- Theme Menu -->
                 <div id="theme-menu" class="hidden absolute right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 text-xs">
@@ -193,8 +295,15 @@
                         <div id="year-progress-walker" class="absolute bottom-full translate-y-1 transition-all duration-1000 z-10" style="left: 0%">
                             <div class="animate-walk -ml-3">
                                 <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-md">
-                                    <circle cx="12" cy="6" r="4" fill="#2563EB"/>
-                                    <path d="M12 10V20M12 20L8 30M12 20L16 30M12 13L7 16M12 13L17 16" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="6" r="4" fill="#2563EB" class="walker-head transition-colors duration-300"/>
+                                    <path d="M12 10V20M12 20L8 30M12 20L16 30M12 13L7 16M12 13L17 16" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="walker-body transition-colors duration-300"/>
+                                    <!-- Scarf Path (Hidden by default) -->
+                                    <path d="M10 10 Q 12 14 14 10 L 15 11 L 15 18 L 12 18 L 12 12 L 10 12 Z" fill="#EF4444" class="scarf-path hidden"/>
+                                    <path d="M14 11 L 16 20" stroke="#EF4444" stroke-width="2" stroke-linecap="round" class="scarf-path hidden"/>
+                                    <!-- Additional scarf details for visibility -->
+                                    <path d="M10 12 L 12 14 L 14 12" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round" fill="none" class="scarf-path hidden"/>
+                                    <circle cx="11" cy="13" r="0.5" fill="#FECACA" class="scarf-path hidden"/>
+                                    <circle cx="13" cy="13" r="0.5" fill="#FECACA" class="scarf-path hidden"/>
                                 </svg>
                             </div>
                             <div id="walker-bubble" class="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded opacity-0 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
@@ -209,25 +318,14 @@
                 </div>
             </div>
 
-            <!-- 年度像素总览 (Tetris/Pixel Grid) -->
+            <!-- 年度像素总览 (Tetris/Pixel Grid) - Optional/Hidden -->
             <div id="year-pixel-grid-container" class="mt-8 max-w-4xl mx-auto px-4 hidden">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-sm font-medium text-gray-500">2026 年度足迹（时间进度）</h3>
-                    <div class="flex gap-2 text-[10px] text-gray-400">
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-gray-100 border border-gray-200"></span> 未来</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-blue-100 border border-blue-200"></span> 过去</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-blue-500 border border-blue-600 shadow-sm animate-pulse"></span> 今天</span>
-                    </div>
-                </div>
-                <p class="text-[11px] text-gray-400 mb-3">仅展示全年时间位置，不代表记录强度；详细记录请看下方全景概览。</p>
-                <div id="year-pixel-grid" class="flex flex-wrap gap-[2px] justify-center bg-white p-3 rounded-xl border border-gray-100 shadow-sm">
-                    <!-- JS 生成 365 个格子 -->
-                </div>
+                 <!-- Keep hidden for now or implement in future components -->
             </div>
         </header>
 
         <!-- Navigation Tabs -->
-        <div class="flex justify-center mb-6 border-b border-gray-200">
+        <div class="hidden md:flex justify-center mb-6 border-b border-gray-200">
             <button id="nav-macro" class="px-6 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none">
                 36旬 (36-Xun)
             </button>
@@ -238,7 +336,7 @@
 
         <!-- View Container -->
         <div class="relative w-full">
-            <!-- View M: Macro Planning View (New Default) -->
+            <!-- View M: Macro Planning View -->
             <div id="macro-view" class="w-full relative">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="hidden md:grid grid-cols-12 gap-0 text-sm font-medium text-gray-500 bg-gray-50 border-b border-gray-200 p-3">
@@ -252,74 +350,33 @@
                         <!-- JS Generated Rows -->
                     </div>
                 </div>
-
             </div>
 
-            <!-- View A: Overview & Detail Combined -->
+            <!-- View A: Overview View -->
             <div id="overview-view" class="w-full hidden">
-                <!-- Overview Grid -->
-    <div class="mb-8">
-        <div id="overview-grid" class="grid-container">
-            <!-- Xun blocks will be generated by JS -->
-        </div>
-    </div>
-
-    <!-- Detail View Section (Now embedded) -->
-    <div id="detail-section" class="w-full bg-gray-50 min-h-[600px] rounded-xl border border-gray-100 overflow-hidden relative">
-        <div id="detail-content" class="hidden">
-                        <div class="flex justify-between items-center p-4 bg-white border-b border-gray-100 gap-2 md:gap-4">
-                            <div class="flex items-center gap-1">
-                                <button onclick="window.goToMacro()" class="p-2 text-gray-500 hover:text-blue-600 transition-colors rounded-full hover:bg-gray-100" title="返回36旬">
-                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                    </svg>
-                                </button>
-                                <!-- Back to Grid Button (Removed as per user request) -->
-                            </div>
-                            <h2 id="detail-title" class="text-xl font-light text-gray-800 flex-1"></h2>
-                            <button id="show-summary-btn" class="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 shadow-sm transition-colors whitespace-nowrap">
-                                本旬小结
-                            </button>
-                        </div>
-                        <div id="detail-calendars-container" class="space-y-6 md:space-y-8 p-2 md:p-6"></div>
+                <div class="mb-8">
+                    <div id="overview-grid" class="grid-container">
+                        <!-- Xun blocks will be generated by JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- View B: Detail View (Removed/Merged into Overview) -->
-            <!-- <div id="detail-view" class="hidden ..."> ... </div> -->
+            <!-- View B: Detail View -->
+            <div id="detail-view" class="w-full hidden">
+                 <div id="detail-content" class="bg-gray-50 min-h-[600px] rounded-xl border border-gray-100 overflow-hidden relative">
+                    <!-- Detail content generated by JS -->
+                 </div>
+            </div>
             
             <!-- View C: Summary View -->
             <div id="summary-view" class="hidden w-full bg-gray-50 min-h-[600px]">
-                 <div class="flex justify-between items-center mb-4">
-                    <button id="back-to-detail" class="text-blue-500 hover:underline">&larr; 返回日历</button>
-                </div>
-                <h2 id="summary-title" class="text-2xl font-light text-center mb-4"></h2>
-                <div id="summary-content" class="bg-white p-6 rounded-lg shadow-sm">
-                    <!-- Summary charts and stats will go here -->
-                </div>
+                 <!-- Summary content generated by JS -->
             </div>
         </div>
     </div>
 
-    <!-- Mobile Scroll Controls -->
-    <div id="macro-back-to-top-container" style="position: fixed; bottom: 1rem; right: 1rem; z-index: 50;" class="transition-opacity duration-300 opacity-0 pointer-events-none" aria-hidden="true">
-        <button id="macro-back-to-top" type="button" tabindex="-1" class="p-2 md:p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg text-blue-600 hover:bg-blue-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2" aria-label="返回顶部" title="返回顶部">
-            <span class="sr-only">返回顶部</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-3.5 md:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-            </svg>
-        </button>
-    </div>
+    <!-- Mobile Scroll Controls - Removed unused partial implementation -->
 
-    <div id="macro-scroll-down-container" style="position: fixed; bottom: 1rem; left: 1rem; z-index: 50;" class="transition-opacity duration-300 opacity-0 pointer-events-none" aria-hidden="true">
-        <button id="macro-scroll-down" type="button" tabindex="-1" class="p-2 md:p-1.5 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg text-blue-600 hover:bg-blue-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2" aria-label="快速下滑到下一旬" title="快速下滑到下一旬">
-            <span class="sr-only">快速下滑到下一旬</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-3.5 md:w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-        </button>
-    </div>
 
     <!-- Modal for Rich Data Entry -->
     <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">
@@ -373,9 +430,7 @@
                      <p id="daily-quote-text" class="text-sm text-gray-600 font-serif italic mb-1 min-h-[1.5em]">正在加载今日金句...</p>
                      <p id="daily-quote-author" class="text-xs text-gray-400 text-right">—— 佚名</p>
                      <button id="refresh-quote" class="absolute top-2 right-2 text-gray-300 hover:text-blue-500 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100" title="刷新">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                        <svg class="h-4 w-4"><use href="#icon-refresh"></use></svg>
                      </button>
                 </div>
 
@@ -385,55 +440,31 @@
                     <input type="text" id="keywords-input" class="w-full p-2 border border-gray-300 rounded-md text-sm" placeholder="例如: 健身, Reading, Carpe Diem (最多3个)">
                     <p class="text-xs text-gray-400 mt-1">将在日历格子中微缩显示，代替通用图标</p>
                 </div>
-                <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/40">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-medium text-gray-600">本旬习惯打卡 (Micro Habits)</span>
-                        <span class="text-[10px] text-gray-400">坚持微小改变</span>
-                    </div>
-                    
-                    <!-- Only show in Xun view (hidden by default, JS toggles visibility) -->
-                    <div id="xun-goal-container" class="hidden mt-2 mb-2">
-                         <label for="xun-goal-input" class="block text-[10px] font-medium text-gray-500 mb-1">当前旬目标</label>
-                         <div id="xun-goal-display" class="text-xs text-gray-700 italic bg-white p-2 rounded border border-gray-100"></div>
-                         <input type="hidden" id="xun-goal-input">
-                    </div>
+                <!-- Core Goal Section removed as per request -->
 
-                    <div class="mt-2 space-y-2 hidden">
-                        <!-- Hidden inputs for defining habits - they should be defined in Macro View, but kept here for compatibility if needed or removed if we move definition elsewhere. 
-                             For now, let's keep them but maybe hide them if we want "minimalist"? 
-                             Actually, user might want to EDIT them here. Let's keep them visible but simplified. 
-                             Wait, user wants MINIMALIST. Let's hide the DEFINITION inputs if they are already defined?
-                             Let's just keep the CHECKBOXES prominent. 
-                             Let's keep the inputs but make them look like "settings" or just simplified.
-                        -->
-                        <input type="text" id="xun-indicator-1" class="w-full p-2 border border-gray-300 rounded-md text-xs" placeholder="习惯1">
-                        <input type="text" id="xun-indicator-2" class="w-full p-2 border border-gray-300 rounded-md text-xs" placeholder="习惯2">
-                        <input type="text" id="xun-indicator-3" class="w-full p-2 border border-gray-300 rounded-md text-xs" placeholder="习惯3">
+                <!-- Habits Section -->
+                <div class="border border-gray-100 rounded-xl p-3 bg-gray-50/40">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-gray-600 flex items-center gap-1">
+                            <svg class="w-3 h-3"><use href="#icon-check"></use></svg>
+                            每日打卡 (Daily Check-ins)
+                        </span>
+                        <span class="text-[10px] text-gray-400">习惯、待办或任何你想提醒的事</span>
                     </div>
-                    
-                    <!-- Simplified Habits Definition (Collapsible or just simpler) -->
-                    <details class="mb-3">
-                        <summary class="text-[10px] text-gray-400 cursor-pointer hover:text-blue-500">编辑习惯内容</summary>
-                         <div class="mt-2 space-y-2">
-                                <input type="text" id="xun-indicator-1" class="w-full p-2 border border-gray-200 rounded-md text-xs bg-white" placeholder="习惯1：例如 每天阅读">
-                                <input type="text" id="xun-indicator-2" class="w-full p-2 border border-gray-200 rounded-md text-xs bg-white" placeholder="习惯2：例如 冥想 10分钟">
-                                <input type="text" id="xun-indicator-3" class="w-full p-2 border border-gray-200 rounded-md text-xs bg-white" placeholder="习惯3：例如 不喝含糖饮料">
-                        </div>
-                    </details>
 
                     <div class="grid grid-cols-1 gap-2" id="day-indicator-container">
-                        <label id="day-indicator-row-1" class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm">
-                            <span id="day-indicator-label-1" class="truncate font-medium">习惯1</span>
-                            <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500">
-                        </label>
-                        <label id="day-indicator-row-2" class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm">
-                            <span id="day-indicator-label-2" class="truncate font-medium">习惯2</span>
-                            <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500">
-                        </label>
-                        <label id="day-indicator-row-3" class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm">
-                            <span id="day-indicator-label-3" class="truncate font-medium">习惯3</span>
-                            <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500">
-                        </label>
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm focus-within:border-blue-300 transition-colors">
+                            <input type="text" id="day-indicator-input-1" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-xs placeholder-gray-400" placeholder="">
+                            <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300">
+                        </div>
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm focus-within:border-blue-300 transition-colors">
+                            <input type="text" id="day-indicator-input-2" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-xs placeholder-gray-400" placeholder="Habits">
+                            <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300">
+                        </div>
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm focus-within:border-blue-300 transition-colors">
+                            <input type="text" id="day-indicator-input-3" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-xs placeholder-gray-400" placeholder=" (To-do)">
+                            <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300">
+                        </div>
                     </div>
                 </div>
                  <div>
@@ -501,11 +532,12 @@
             <!-- Evening Resonance (Three Good Things) -->
             <div class="mt-6 border-t pt-4">
                  <h4 class="font-semibold text-gray-600 mb-2">✨ 今日三件好事 (Three Good Things)</h4>
+                 <p class="text-[10px] text-gray-400 mb-3">Things that I am grateful for today...</p>
                  <div class="space-y-2">
-                     <input type="text" id="good-thing-1" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="1. 值得感恩的小事...">
-                     <input type="text" id="good-thing-2" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="2. 今天的高光时刻...">
-                     <input type="text" id="good-thing-3" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="3. 我做得很棒的事...">
-                 </div>
+                    <input type="text" id="good-thing-1" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="1. 值得感恩的小事...">
+                    <input type="text" id="good-thing-2" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="2. 感受到的善意与温暖...">
+                    <input type="text" id="good-thing-3" class="w-full p-2 border border-orange-100 bg-orange-50/50 rounded-md text-sm focus:bg-white focus:ring-1 focus:ring-orange-200 transition-colors" placeholder="3. 让我会心一笑的瞬间...">
+                </div>
             </div>
             
             <!-- Custom Activities Section -->
@@ -528,1927 +560,124 @@
         </div>
     </div>
 
-    <script src="src/quote.js"></script>
+    <!-- Mobile Scroll Actions -->
+    <div class="fixed bottom-20 right-6 flex flex-col gap-3 z-40 md:hidden print:hidden">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="p-3 bg-white/90 backdrop-blur-md text-gray-600 rounded-full shadow-lg border border-gray-100 hover:bg-white active:scale-95 transition-all" title="回到顶部">
+            <svg class="h-6 w-6"><use href="#icon-top"></use></svg>
+        </button>
+        <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="p-3 bg-white/90 backdrop-blur-md text-gray-600 rounded-full shadow-lg border border-gray-100 hover:bg-white active:scale-95 transition-all" title="快速到底">
+            <svg class="h-6 w-6"><use href="#icon-bottom"></use></svg>
+        </button>
+    </div>
+
+    <!-- Backup Modal -->
+    <div id="backup-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">数据备份与恢复</h3>
+                <button id="backup-modal-close" class="text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Export -->
+                <div class="border-b border-gray-100 pb-6">
+                    <h4 class="font-medium text-gray-700 mb-2">导出数据 (Export)</h4>
+                    <p class="text-sm text-gray-500 mb-4">将所有数据下载为 JSON 文件，以防丢失。</p>
+                    <button id="btn-export" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5"><use href="#icon-download"></use></svg>
+                        立即备份 (Download)
+                    </button>
+                </div>
+
+                <!-- Import -->
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">导入数据 (Import)</h4>
+                    <p class="text-sm text-gray-500 mb-4">从备份文件恢复数据。注意：这将覆盖当前所有数据。</p>
+                    <input type="file" id="file-import" accept=".json" class="hidden">
+                    <button id="btn-import" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5"><use href="#icon-upload"></use></svg>
+                        选择备份文件 (Upload)
+                    </button>
+                </div>
+
+                <!-- Auto Backup Toggle -->
+                 <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">自动快照 (Auto Snapshot)</span>
+                        <p class="text-xs text-gray-400">数据变更时自动保存最近7份快照</p>
+                    </div>
+                     <!-- Toggle Switch -->
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle-auto-backup" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <!-- Auto Backup List -->
+                <div id="auto-backup-list-container" class="hidden space-y-2 border-t border-gray-100 pt-4">
+                    <h4 class="font-medium text-gray-700 text-sm">最近快照 (Latest Snapshots)</h4>
+                    <div id="auto-backup-list" class="max-h-40 overflow-y-auto space-y-2 text-sm">
+                        <!-- Populated by JS -->
+                        <p class="text-xs text-gray-400">暂无快照记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-50 md:hidden pb-safe">
+        <div class="flex justify-around items-center h-14">
+            <button id="mobile-nav-macro" class="flex flex-col items-center justify-center w-full h-full text-blue-600 focus:outline-none hover:bg-gray-50 active:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span class="text-[10px] mt-1">36旬</span>
+            </button>
+            <button id="mobile-nav-overview" class="flex flex-col items-center justify-center w-full h-full text-gray-500 focus:outline-none hover:bg-gray-50 active:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span class="text-[10px] mt-1">全景</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- IE11 Warning -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const YEAR = 2026;
-            const XUN_COUNT = 36;
-            const XUN_DAYS = 10;
-
-            // --- DOM Elements ---
-            const overviewView = document.getElementById('overview-view');
-            // const detailView = document.getElementById('detail-view'); // Removed
-            const summaryView = document.getElementById('summary-view');
-            const macroView = document.getElementById('macro-view');
-            const overviewGrid = document.getElementById('overview-grid');
-            const macroList = document.getElementById('macro-list');
-            const navMacro = document.getElementById('nav-macro');
-            const navOverview = document.getElementById('nav-overview');
-            const modal = document.getElementById('modal');
-            const modalPanel = document.getElementById('modal-panel');
-            
-            // New DOM Elements for merged view
-            const detailSection = document.getElementById('detail-section');
-            // const detailPlaceholder = document.getElementById('detail-placeholder'); // Removed
-            const detailContent = document.getElementById('detail-content');
-
-            // --- State ---
-            let userData = JSON.parse(localStorage.getItem('xun_calendar_data_v2') || '{}');
-            let macroGoals = JSON.parse(localStorage.getItem('xun_macro_goals') || '{}');
-            // Custom Emotions
-            let customEmotions = JSON.parse(localStorage.getItem('xun_custom_emotions') || '[]');
-            const defaultEmotions = [
-                { text: '😄 快乐', value: '快乐' },
-                { text: '😆 兴奋', value: '兴奋' },
-                { text: '🙏 感激', value: '感激' },
-                { text: '🌟 期待', value: '期待' },
-                { text: '🦁 自豪', value: '自豪' },
-                { text: '💪 充实', value: '充实' },
-                { text: '😌 平静', value: '平静' },
-                { text: '🧠 专注', value: '专注' },
-                { text: '😶‍🌫️ 迷茫', value: '迷茫' },
-                { text: '😰 焦虑', value: '焦虑' },
-                { text: '😫 疲惫', value: '疲惫' },
-                { text: '😠 生气', value: '生气' },
-                { text: '🍂 孤独', value: '孤独' },
-                { text: '😞 失落', value: '失落' }
-            ];
-
-            // Custom Nourishments
-            let customNourishments = JSON.parse(localStorage.getItem('xun_custom_nourishments') || '[]');
-            const defaultNourishments = [
-                { text: '📚 阅读', value: '阅读' },
-                { text: '🧘 冥想', value: '冥想' },
-                { text: '🏃 运动', value: '运动' },
-                { text: '🥗 健康饮食', value: '健康饮食' },
-                { text: '🌲 大自然', value: '大自然' },
-                { text: '☕ 社交', value: '社交' },
-                { text: '🎨 创作', value: '创作' }
-            ];
-
-            let currentXun = null;
-            let xunPeriods = [];
-            let selectedDate = '';
-            let currentDetailPeriod = null;
-
-            const pad2 = (n) => String(n).padStart(2, '0');
-            const formatLocalDate = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-            const addDaysToDateStr = (dateStr, days) => {
-                const d = new Date(`${dateStr}T00:00:00`);
-                d.setDate(d.getDate() + days);
-                return formatLocalDate(d);
-            };
-
-            const migrateUserDataToLocalDates = (data) => {
-                const migrationKey = 'xun_calendar_data_v2_local_date_migrated_v1';
-                if (localStorage.getItem(migrationKey) === '1') return data;
-
-                const timezoneOffsetMinutes = new Date().getTimezoneOffset();
-                if (timezoneOffsetMinutes >= 0 || !data || typeof data !== 'object') {
-                    localStorage.setItem(migrationKey, '1');
-                    return data;
-                }
-
-                const entries = Object.entries(data);
-                if (entries.length === 0) {
-                    localStorage.setItem(migrationKey, '1');
-                    return data;
-                }
-
-                const migrated = {};
-                for (const [key, value] of entries) {
-                    const isDateKey = /^\d{4}-\d{2}-\d{2}$/.test(key);
-                    const newKey = isDateKey ? addDaysToDateStr(key, 1) : key;
-                    if (migrated[newKey] && value && typeof value === 'object') {
-                        migrated[newKey] = { ...migrated[newKey], ...value };
-                    } else {
-                        migrated[newKey] = value;
-                    }
-                }
-
-                localStorage.setItem('xun_calendar_data_v2', JSON.stringify(migrated));
-                localStorage.setItem(migrationKey, '1');
-                return migrated;
-            };
-
-            userData = migrateUserDataToLocalDates(userData);
-
-            // --- Core Logic ---
-            window.getXunPeriods = function(year) {
-                const periods = [];
-                let currentDate = new Date(year, 0, 1);
-                for (let i = 1; i <= XUN_COUNT; i++) {
-                    const startDate = new Date(currentDate);
-                    // Last xun (36) has 5 days in non-leap year (365 days), or 6?
-                    // 35 * 10 = 350. Remaining = 15.
-                    // Actually standard Xun is 10 days.
-                    // 36 xuns covers 360 days? No.
-                    // Usually: Early (10), Middle (10), Late (remaining).
-                    // But here we are strictly "36 multiple 10".
-                    // Let's stick to the prompt's 36 * 10 concept but fit into 365 days.
-                    // The prompt says "36个10天". 36*10 = 360.
-                    // The last 5 days (Dec 27-31) are usually part of the 36th period or just appended?
-                    // Let's make 1-35 as 10 days, and 36 as 15/16 days to cover the year?
-                    // Or 36 as 10 days, and remaining 5 days are "Year End"?
-                    // The previous logic I wrote was:
-                    // const daysInXun = (i <= 35) ? XUN_DAYS : 5;
-                    // This covers 350 + 5 = 355. Wait.
-                    // 365 days.
-                    // 36 x 10 = 360. Remaining 5.
-                    // Let's adjust logic:
-                    // 1-35: 10 days. (350 days)
-                    // 36: Remaining days (15 or 16).
-                    
-                    // Wait, previous code:
-                    // const daysInXun = (i <= 35) ? XUN_DAYS : 5;
-                    // 35 * 10 = 350. + 5 = 355.
-                    // 2026 is 365 days. We are missing 10 days!
-                    // Let's re-verify 36 x 10.
-                    // If strictly 10 days per xun, we need 36.5 xuns.
-                    // Or maybe 12 months * 3 xuns = 36 xuns.
-                    // Each month: Early (1-10), Mid (11-20), Late (21-End).
-                    // Late is 28/29/30/31 - 20 = 8~11 days.
-                    // So "10 days" is approximate for the last xun of month.
-                    // Let's switch to standard "Month 3 Xun" logic to be more calendar-accurate?
-                    // OR stick to the user's "36 x 10" strict concept.
-                    // The user shared an image: "Day 1-10".
-                    // Image 1: "01.01-01.10", "01.11-01.20", "01.21-01.30", "01.31-02.09".
-                    // Ah! It ignores month boundaries! It's strictly 10-day blocks.
-                    // 36 * 10 = 360 days.
-                    // 36th xun ends Dec 26.
-                    // What about Dec 27-31?
-                    // Let's make the 36th xun longer to cover the year, OR add a 37th small period?
-                    // User says "36个10天".
-                    // Let's keep 1-35 as 10 days.
-                    // 36th xun: Dec 27 is start? No.
-                    // 35 * 10 = 350 days. Ends Dec 16 (approx).
-                    // 36th xun starts Dec 17. 10 days -> Dec 26.
-                    // Remaining: Dec 27-31 (5 days).
-                    // Let's extend the 36th xun to include the rest of the year.
-                    
-                    let daysInXun = 10;
-                    if (i === 36) {
-                         // Calculate remaining days in year
-                         const yearEnd = new Date(year, 11, 31);
-                         const diffTime = Math.abs(yearEnd - currentDate);
-                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                         daysInXun = diffDays + 1; // +1 to include today
-                    }
-
-                    currentDate.setDate(currentDate.getDate() + daysInXun);
-                    const endDate = new Date(currentDate);
-                    endDate.setDate(endDate.getDate() - 1);
-                    periods.push({ index: i, startDate, endDate, days: daysInXun });
-                }
-                return periods;
-            }
-
-            function getCurrentXun(periods) {
-                const now = new Date();
-                if (now.getFullYear() !== YEAR) return null;
-                return periods.find(p => now >= p.startDate && now <= p.endDate) || null;
-            }
-
-            function saveUserData() {
-                localStorage.setItem('xun_calendar_data_v2', JSON.stringify(userData));
-                // Update macro view checkboxes if visible
-                if (!macroView.classList.contains('hidden')) {
-                     // Optimistic update or full re-render? Full re-render is safest for consistency
-                     // But might lose input focus.
-                     // Better to just update specific row or rely on user navigating back.
-                     // Since modal covers everything, when modal closes, we can refresh.
-                }
-            }
-
-            function saveMacroGoals() {
-                localStorage.setItem('xun_macro_goals', JSON.stringify(macroGoals));
-            }
-            
-            // --- View Management ---
-            let hasScrolledToCurrentXun = false;
-
-            window.scrollToCurrentXun = (force = false) => {
-                // If already scrolled and not forced, skip
-                if (hasScrolledToCurrentXun && !force) return;
-                
-                // 1. URL Param
-                const urlParams = new URLSearchParams(window.location.search);
-                let targetXun = parseInt(urlParams.get('xun'));
-                
-                // 2. Local Cache
-                if (!targetXun) {
-                    const cached = localStorage.getItem('xun_last_viewed_index');
-                    if (cached) targetXun = parseInt(cached);
-                }
-
-                // 3. Fallback to Today's Xun
-                if (!targetXun && currentXun) {
-                    targetXun = currentXun.index;
-                }
-                
-                if (targetXun) {
-                    // Mark as scrolled
-                    hasScrolledToCurrentXun = true;
-                    // Save to cache for next time
-                    localStorage.setItem('xun_last_viewed_index', targetXun);
-                    
-                    setTimeout(() => {
-                        const el = document.getElementById(`xun-row-${targetXun}`);
-                        if (el) {
-                            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // Highlight effect
-                            const originalBg = el.style.backgroundColor;
-                            el.style.transition = 'background-color 0.5s';
-                            el.style.backgroundColor = '#eff6ff'; // blue-50
-                            setTimeout(() => {
-                                el.style.backgroundColor = originalBg;
-                            }, 1000);
-                        }
-                    }, 300);
-                }
-            };
-
-            function showView(viewName, data) {
-                console.log('Showing view:', viewName, data);
-                // Hide main views
-                [overviewView, summaryView, macroView].forEach(v => v.classList.add('hidden'));
-                
-                // Reset Nav State
-                const baseNavClass = "px-3 md:px-6 py-2 text-xs md:text-sm font-medium focus:outline-none cursor-pointer transition-colors";
-                const inactiveClass = "text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
-                const activeClass = "text-blue-600 border-b-2 border-blue-600";
-
-                navMacro.className = `${baseNavClass} ${inactiveClass}`;
-                navOverview.className = `${baseNavClass} ${inactiveClass}`;
-                navMacro.style.borderBottom = ""; // Clear inline style if any (though we use class now for border, but JS logic used inline style previously)
-                navOverview.style.borderBottom = "";
-
-                if (viewName === 'macro') {
-                    macroView.classList.remove('hidden');
-                    navMacro.className = `${baseNavClass} ${activeClass}`;
-                    renderMacroView();
-                    window.scrollToCurrentXun();
-                } else if (viewName === 'overview') {
-                    overviewView.classList.remove('hidden');
-                    navOverview.className = `${baseNavClass} ${activeClass}`;
-                    renderOverview();
-            // Always show detail view
-            if (data) {
-                renderDetailView(data);
-            } else if (currentDetailPeriod) {
-                renderDetailView(currentDetailPeriod);
-            } else if (currentXun) {
-                renderDetailView(currentXun);
-            } else if (xunPeriods.length > 0) {
-                 renderDetailView(xunPeriods[0]);
-            }
-        } else if (viewName === 'detail') {
-                    // Detail is now part of Overview
-                    overviewView.classList.remove('hidden');
-                    // Use same active class as overview
-                    const baseNavClass = "px-3 md:px-6 py-2 text-xs md:text-sm font-medium focus:outline-none cursor-pointer transition-colors";
-                    const activeClass = "text-blue-600 border-b-2 border-blue-600";
-                    navOverview.className = `${baseNavClass} ${activeClass}`;
-                    navOverview.style.borderBottom = "";
-                    
-                    // Render Grid (if not already there? It's cheap)
-                    renderOverview();
-                    
-                    // Handle missing data/fallback
-                    if (!data) {
-                        if (currentDetailPeriod) {
-                            data = currentDetailPeriod;
-                        } else {
-                            // Fallback to current date's Xun
-                            const todayStr = formatLocalDate(new Date());
-                            const foundXun = xunPeriods.find(p => {
-                                const start = formatLocalDate(new Date(p.startDate));
-                                const end = formatLocalDate(new Date(p.endDate));
-                                return todayStr >= start && todayStr <= end;
-                            });
-                            data = foundXun || xunPeriods[0];
-                        }
-                    }
-
-                    currentDetailPeriod = data;
-                    renderDetailView(data);
-                    
-                    // Scroll to detail section
-                    detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                } else if (viewName === 'summary') {
-                    const view = document.getElementById('summary-view');
-                    view.classList.remove('hidden');
-                    renderSummaryView(data);
-                }
-                // window.scrollTo(0, 0); // Remove auto scroll top, let user context decide
-            }
-
-            // --- Rendering ---
-            function renderMacroView() {
-                macroList.innerHTML = '';
-                const todayStr = formatLocalDate(new Date()); // Added for today highlighting
-                const todayStart = new Date();
-                todayStart.setHours(0, 0, 0, 0);
-                const tomorrowStart = new Date(todayStart);
-                tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-                xunPeriods.forEach((period, index) => {
-                    const row = document.createElement('div');
-                    row.id = `xun-row-${period.index}`; // Add ID for scrolling
-                    row.className = "grid grid-cols-1 md:grid-cols-12 gap-0 text-sm group hover:bg-opacity-80 transition-colors border-b border-gray-100 md:border-none relative";
-                    
-                    // Gradient Background
-                    const hue = (index * 10) % 360;
-                    row.style.backgroundColor = `hsl(${hue}, 70%, 96%)`;
-                    
-                    // Check if current xun
-                    if (currentXun && currentXun.index === period.index) {
-                         row.classList.add('ring-2', 'ring-blue-400', 'z-10');
-                    }
-
-                    // Format Date
-                    const startStr = `${String(period.startDate.getMonth()+1).padStart(2, '0')}.${String(period.startDate.getDate()).padStart(2, '0')}`;
-                    const endStr = `${String(period.endDate.getMonth()+1).padStart(2, '0')}.${String(period.endDate.getDate()).padStart(2, '0')}`;
-                    
-                    // Goal & Remarks
-                    const goal = macroGoals[period.index]?.goal || '';
-                    const remark = macroGoals[period.index]?.remark || '';
-
-                    // Progress (Checkboxes - Now Interactive Goal Check-in)
-                    let progressHtml = '<div class="flex items-center justify-center h-full space-x-[2px]">';
-                    let tempDate = new Date(period.startDate);
-                    while (tempDate <= period.endDate) {
-                        const dStr = formatLocalDate(tempDate);
-                        const data = userData[dStr] || {};
-                        const isChecked = data.goal_checkin === true;
-                        const isFuture = tempDate >= tomorrowStart;
-                        const isToday = dStr === todayStr;
-                        
-                        let bgClass = isChecked ? '' : 'bg-white';
-                        let borderClass = isChecked ? '' : 'border-gray-300';
-                        let opacityClass = isFuture ? 'opacity-40 cursor-not-allowed' : 'opacity-100 cursor-pointer hover:scale-110';
-                        let additionalClass = '';
-                        
-                        const xunColor = `hsl(${hue}, 80%, 60%)`;
-                        let style = isChecked 
-                            ? `background-color: ${xunColor}; border-color: ${xunColor};` 
-                            : `border-color: #d1d5db;`;
-                        
-                        if (isToday) {
-                             borderClass = 'border-2 border-blue-500 z-10';
-                             additionalClass = 'ring-2 ring-blue-200 shadow-md animate-pulse';
-                             // Ensure inline style doesn't override border color for today
-                             style = isChecked 
-                                ? `background-color: ${xunColor}; border-color: #3b82f6;` 
-                                : `border-color: #3b82f6;`;
-                        }
-                        
-                        const tip = isFuture 
-                            ? `${dStr} (尚未到来)` 
-                            : (isChecked ? `${dStr}: 已打卡 - ${goal || '完成目标'}` : `${dStr}: 点击打卡 - ${goal || '记录今日成果'}`);
-
-                        const clickHandler = isFuture ? '' : `onclick="window.toggleGoalCheckin('${dStr}', ${index})"`;
-
-                        // Mobile: larger touch targets (w-4 h-4), Desktop: compact (w-2.5 h-2.5)
-                        progressHtml += `<div class="w-5 h-5 md:w-2.5 md:h-2.5 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} transition-all duration-200 flex-shrink-0" 
-                            style="${style}" 
-                            title="${tip}"
-                            ${clickHandler}></div>`;
-                            
-                        tempDate.setDate(tempDate.getDate() + 1);
-                    }
-                    progressHtml += '</div>';
-
-                    row.innerHTML = `
-                        <!-- Index & Date (Mobile: Header, Desktop: Col 1 & 2) -->
-                        <div class="col-span-1 md:col-span-1 flex items-center justify-between md:justify-center p-3 md:py-3 md:px-0 bg-gray-50/50 md:bg-transparent border-b md:border-b-0 md:border-r border-black/5 cursor-pointer hover:bg-black/5" onclick="window.showXunDetail(${index})">
-                            <span class="font-mono text-gray-900 font-extrabold md:font-bold">第 ${period.index} 旬</span>
-                            <span class="md:hidden text-xs text-gray-400 font-mono">${startStr} - ${endStr}</span>
-                        </div>
-                        
-                        <div class="hidden md:flex col-span-2 items-center justify-center font-mono text-gray-600 border-r border-black/5 text-xs">
-                            ${startStr} - ${endStr}
-                        </div>
-
-                        <!-- Goal Input -->
-                        <div class="col-span-1 md:col-span-4 border-b md:border-b-0 md:border-r border-black/5 p-3 md:p-1 flex flex-col justify-center">
-                            <label class="md:hidden text-xs text-gray-400 font-bold mb-1">核心目标</label>
-                            <textarea class="w-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400/70 text-sm resize-none overflow-hidden" 
-                                placeholder="本旬核心目标..." rows="1" 
-                                oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"
-                                onchange="window.updateMacroGoal(${period.index}, 'goal', this.value)">${goal}</textarea>
-                        </div>
-
-                        <!-- Check-in Dots -->
-                        <div class="col-span-1 md:col-span-3 border-b md:border-b-0 md:border-r border-black/5 py-3 md:py-1 flex flex-col md:flex-row items-center justify-center overflow-x-auto">
-                            <label class="md:hidden text-xs text-gray-400 font-bold mb-2">每日打卡</label>
-                            ${progressHtml}
-                        </div>
-
-                        <!-- Remark -->
-                        <div class="col-span-1 md:col-span-2 p-3 md:p-1 flex flex-col justify-center">
-                            <label class="md:hidden text-xs text-gray-400 font-bold mb-1">备注</label>
-                            <textarea class="w-full bg-transparent border-none focus:ring-0 text-gray-500 text-xs md:text-center resize-none overflow-hidden" 
-                                placeholder="备注" rows="1" 
-                                oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'"
-                                onchange="window.updateMacroGoal(${period.index}, 'remark', this.value)">${remark}</textarea>
-                        </div>
-                    `;
-                    
-                    macroList.appendChild(row);
-                });
-                
-                // Expose helper to global scope for onclick
-                window.showXunDetail = (index) => {
-                    showView('detail', xunPeriods[index]); 
-                };
-
-                window.showView = showView; // Expose showView for inline onclick handlers
-
-                window.scrollToGrid = () => {
-                    const grid = document.getElementById('overview-grid');
-                    if (grid) {
-                        grid.scrollIntoView({ behavior: 'smooth' });
-                    }
-                };
-
-                window.goToMacro = () => {
-                    showView('macro');
-                };
-
-
-                window.updateMacroGoal = (xunIndex, field, value) => {
-                    if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
-                    macroGoals[xunIndex][field] = value;
-                    saveMacroGoals();
-                    renderMacroView(); // Re-render to update tooltips
-                };
-
-                window.toggleGoalCheckin = (dateStr, xunIndex) => {
-                    if (!userData[dateStr]) userData[dateStr] = {};
-                    // Toggle
-                    userData[dateStr].goal_checkin = !userData[dateStr].goal_checkin;
-                    saveUserData();
-                    renderMacroView();
-                    // Also update overview if visible? No, this is Macro view.
-                };
-
-                // --- Navigation Helpers ---
-                window.changeXunDetail = (offset) => {
-                    if (!currentDetailPeriod) return;
-                    const newIndex = currentDetailPeriod.index + offset;
-                    if (newIndex < 1 || newIndex > 36) return; // Boundary check
-                    showView('detail', xunPeriods[newIndex - 1]);
-                };
-
-
-            }
-
-            function renderOverview() {
-                overviewGrid.innerHTML = '';
-                overviewGrid.className = 'flex flex-wrap gap-1 justify-center p-2 md:p-4 bg-white rounded-xl shadow-sm border border-gray-100'; 
-                
-                const legend = document.createElement('div');
-                legend.className = "w-full flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-gray-50 gap-2";
-                legend.innerHTML = `
-                    <div class="flex flex-col">
-                        <span class="text-sm font-medium text-gray-500">每日记录（记录热度）</span>
-                        <span class="text-[11px] text-gray-500">点击任意日期，自动打开下方旬日历</span>
-                    </div>
-                    <div class="flex flex-wrap gap-4 text-xs text-gray-500">
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-[1px] bg-gray-50 border border-gray-200"></span> 
-                            <span>未记录</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-[1px] shadow-sm" style="background-color: hsl(210, 85%, 60%)"></span> 
-                            <span>已记录</span>
-                        </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-[1px] border-2 border-blue-400 bg-white"></span> 
-                            <span>今天</span>
-                        </div>
-                    </div>
-                `;
-                overviewGrid.appendChild(legend);
-
-                const start = new Date(YEAR, 0, 1);
-                const end = new Date(YEAR, 11, 31);
-                
-                const dateToXunMap = {};
-                xunPeriods.forEach(p => {
-                    let d = new Date(p.startDate);
-                    while (d <= p.endDate) {
-                        dateToXunMap[formatLocalDate(d)] = p;
-                        d.setDate(d.getDate() + 1);
-                    }
-                });
-
-                const todayStr = formatLocalDate(new Date());
-                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                    const dateStr = formatLocalDate(d);
-                    const xun = dateToXunMap[dateStr];
-                    const xunIndex = xun ? xun.index : 0;
-                    
-                    const el = document.createElement('div');
-                    el.className = 'w-3 h-3 md:w-4 md:h-4 rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-125 relative group';
-                    
-                    // Enhanced Color Saturation/Lightness for "Obvious Gradient"
-                    // Original: hsl(hue, 70%, 96%) / hsl(hue, 70%, 60%)
-                    // New: hsl(hue, 85%, 85%) / hsl(hue, 85%, 55%)
-                    const hue = (xunIndex * 10) % 360;
-                    
-                    const data = userData[dateStr];
-                    const hasIndicators = data && Array.isArray(data.indicator_checkins) && data.indicator_checkins.some(v => v === true);
-                    const hasGoalActions = data && Array.isArray(data.goal_actions) && data.goal_actions.length > 0;
-                    const hasKeywords = data && Array.isArray(data.keywords) && data.keywords.length > 0;
-                    const hasData = data && (data.mood || data.journal || data.weather || data.goal_checkin || data.goal_confidence || data.goal_blockers || hasGoalActions || hasIndicators || hasKeywords);
-                    
-                    if (hasData) {
-                         el.style.backgroundColor = `hsl(${hue}, 85%, 60%)`; // Stronger saturation
-                         el.style.boxShadow = `0 0 2px hsl(${hue}, 85%, 40%)`;
-                    } else {
-                         el.style.backgroundColor = `hsl(${hue}, 85%, 90%)`; // Slightly more visible base
-                    }
-
-                    if (dateStr === todayStr) {
-                         el.style.border = '2px solid #3b82f6'; // blue-500
-                         el.classList.add('z-10');
-                    }
-                    
-                    // Mood Emoji Map
-                    const moodEmojis = {1: '😫', 2: '😞', 3: '😐', 4: '🙂', 5: '🤩'};
-                    const moodEmoji = data && data.mood ? moodEmojis[data.mood] : (data && data.emoji ? data.emoji : '');
-                    
-                    // Tooltip
-                    const keywordsStr = data && data.keywords ? ` [${data.keywords.join(' ')}]` : '';
-                    const goalStr = data && data.goal_checkin ? ' 🎯' : '';
-                    const xunIndicators = Array.isArray(macroGoals[xunIndex]?.indicators) ? macroGoals[xunIndex].indicators : [];
-                    const indicatorTotal = xunIndicators.length;
-                    const indicatorDone = data && Array.isArray(data.indicator_checkins)
-                        ? data.indicator_checkins.slice(0, indicatorTotal).filter(v => v === true).length
-                        : 0;
-                    const indicatorStr = indicatorTotal > 0 ? ` 📌${indicatorDone}/${indicatorTotal}` : '';
-                    el.title = `${dateStr} ${moodEmoji}${goalStr}${indicatorStr}${keywordsStr} (第 ${xunIndex} 旬)`;
-                    
-                    // Click to go to detail (which is now below)
-                    if (xun) {
-                        el.onclick = () => {
-                             currentDetailPeriod = xun;
-                             renderDetailView(xun);
-                             // Optional: Scroll to detail?
-                             // detailSection.scrollIntoView({ behavior: 'smooth' });
-                        };
-                    }
-
-                    overviewGrid.appendChild(el);
-                }
-            }
-
-            function renderDetailView(period) {
-                try {
-                    const detailTitle = document.getElementById('detail-title');
-                    const container = document.getElementById('detail-calendars-container');
-                    const detailContent = document.getElementById('detail-content');
-                    
-                    detailContent.classList.remove('hidden');
-
-                    container.innerHTML = '';
-                    currentDetailPeriod = period; // Sync state
-
-                    const startMonth = period.startDate.getMonth();
-                    const endMonth = period.endDate.getMonth();
-                    
-                    const startMonthDisplay = startMonth + 1;
-                    const endMonthDisplay = endMonth + 1;
-                    const monthDisplay = startMonth === endMonth ? `${startMonthDisplay}月` : `${startMonthDisplay}月 - ${endMonthDisplay}月`;
-                    
-                    // Enhanced Header with Xun Color
-                    const hue = (period.index * 10) % 360;
-                    const xunColor = `hsl(${hue}, 85%, 60%)`;
-                    // Stronger gradient for background
-                    const xunBg = `linear-gradient(to bottom, hsl(${hue}, 85%, 98%), #f9fafb)`;
-                    
-                    // Apply gradient to the section
-                    detailContent.style.background = xunBg;
-
-                    detailTitle.innerHTML = `
-                        <div class="flex items-center justify-between w-full">
-                            <button onclick="window.changeXunDetail(-1)" class="p-2 text-gray-400 hover:text-blue-500 transition-colors rounded-full hover:bg-white/50" title="上一旬">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                                </svg>
-                            </button>
-                            <div class="flex items-center gap-3">
-                                <span class="px-3 py-1 rounded-full text-xs font-bold text-white shadow-sm" style="background-color: ${xunColor}">
-                                    第 ${period.index} 旬
-                                </span>
-                                <span class="text-xl font-light text-gray-800">2026年 ${monthDisplay}</span>
-                            </div>
-                            <button onclick="window.changeXunDetail(1)" class="p-2 text-gray-400 hover:text-blue-500 transition-colors rounded-full hover:bg-white/50" title="下一旬">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </button>
-                        </div>
-                    `;
-                    
-                    // Update Summary Button
-                    const summaryBtn = document.getElementById('show-summary-btn');
-                    if(summaryBtn) {
-                         summaryBtn.onclick = () => showView('summary', period);
-                         summaryBtn.style.backgroundColor = xunColor;
-                         summaryBtn.className = "px-3 py-1 text-sm text-white rounded-md hover:opacity-90 shadow-sm transition-colors";
-                    }
-
-                    // 确定需要渲染的月份列表
-                    const monthsToRender = [];
-                    monthsToRender.push(new Date(period.startDate.getFullYear(), startMonth, 1));
-                    if (startMonth !== endMonth) {
-                        monthsToRender.push(new Date(period.startDate.getFullYear(), endMonth, 1));
-                    }
-
-                    monthsToRender.forEach(monthStart => {
-                        const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0);
-                        
-                        // 月份容器
-                        const monthWrapper = document.createElement('div');
-                        monthWrapper.className = 'bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100/50 overflow-hidden mb-6';
-                        
-                        // 月份标题
-                        const monthHeader = document.createElement('div');
-                        monthHeader.className = 'bg-white/50 px-4 py-3 md:px-6 md:py-4 border-b border-gray-50 font-light text-xl text-gray-800 flex justify-between items-center';
-                        monthHeader.innerHTML = `<span>${monthStart.getMonth() + 1}月</span><span class="text-xs text-gray-300 font-mono">${monthStart.getFullYear()}</span>`;
-                        monthWrapper.appendChild(monthHeader);
-
-                        // 星期表头
-                        const gridHeader = document.createElement('div');
-                        gridHeader.className = 'grid grid-cols-7 bg-gray-50/30 border-b border-gray-100';
-                        gridHeader.innerHTML = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(d => `<div class="text-center font-medium text-[8px] md:text-[10px] text-gray-400 py-2 md:py-3 tracking-wider">${d}</div>`).join('');
-                        monthWrapper.appendChild(gridHeader);
-
-                        // 日期网格
-                        const gridBody = document.createElement('div');
-                        gridBody.className = 'grid grid-cols-7 bg-white/60';
-                        
-                        // 补齐月初空白
-                        for (let i = 0; i < monthStart.getDay(); i++) {
-                            const empty = document.createElement('div');
-                            empty.className = "border-t border-r border-gray-50 bg-gray-50/10 h-20 md:h-28";
-                            gridBody.appendChild(empty);
-                        }
-
-                        let currentDate = new Date(monthStart);
-                        while (currentDate <= monthEnd) {
-                            const dateStr = formatLocalDate(currentDate);
-                            const dayData = userData[dateStr] || {};
-                            const isWithinXun = currentDate >= period.startDate && currentDate <= period.endDate;
-                            
-                            let jieQi = '', lunarDay = '';
-                            let holidayName = '';
-                            let isHoliday = false;
-                            
-                            const dayEl = document.createElement('div');
-
-                            if (typeof Solar !== 'undefined') {
-                                const solar = Solar.fromYmd(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
-                                const lunar = solar.getLunar();
-                                jieQi = lunar.getJieQi();
-                                lunarDay = lunar.getDayInChinese() === '初一' ? lunar.getMonthInChinese() + '月' : lunar.getDayInChinese();
-                                
-                                if (typeof HolidayUtil !== 'undefined') {
-                                    const h = HolidayUtil.getHoliday(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
-                                    if (h) {
-                                        holidayName = h.getName();
-                                        isHoliday = !h.isWork();
-                                    }
-                                }
-                            }
-
-                            // Style update: Dynamic height and width logic
-                            const baseClass = `p-1 md:p-3 border-t border-r border-gray-50 min-h-[5rem] md:min-h-[7rem] max-h-[20rem] overflow-y-auto h-auto flex flex-col relative transition-all duration-200 group`;
-                            const activeClass = `cursor-pointer`; // We set BG manually
-                            const inactiveClass = `bg-gray-50/40 text-gray-300 grayscale opacity-50`;
-
-                            dayEl.className = `${baseClass} ${isWithinXun ? activeClass : inactiveClass}`;
-                            
-                            // Xun color gradient
-                            if (isWithinXun) {
-                                // Stronger gradient
-                                dayEl.style.background = `linear-gradient(135deg, hsl(${hue}, 90%, 96%) 0%, hsl(${hue}, 80%, 92%) 100%)`;
-                                dayEl.style.boxShadow = `inset 0 0 0 1px hsl(${hue}, 80%, 80%)`;
-                            } else {
-                                dayEl.style.background = 'white';
-                            }
-
-                            if (dayData.mood) {
-                                dayEl.classList.add(`mood-${dayData.mood}`); 
-                            }
-                            
-                            // Date Number
-                            const dateColor = isWithinXun ? (dayData.mood ? 'text-gray-800' : 'text-gray-700') : 'text-gray-300';
-                            const subText = holidayName 
-                                ? `<span class="${isHoliday ? 'text-red-500 font-bold' : 'text-gray-500'}">${holidayName}</span>` 
-                                : (jieQi ? `<span class="text-blue-500 font-medium">${jieQi}</span>` : lunarDay);
-
-                            // Mood Emoji Map
-                            const moodEmojis = {1: '😫', 2: '😞', 3: '😐', 4: '🙂', 5: '🤩'};
-                            const displayEmoji = dayData.mood ? moodEmojis[dayData.mood] : (dayData.emoji || '');
-
-                            let indicators = [];
-                            if (dayData.goal_checkin) indicators.push('<span title="核心目标">🎯</span>');
-                            if (isWithinXun) {
-                                const xunIndicators = Array.isArray(macroGoals[period.index]?.indicators) ? macroGoals[period.index].indicators : [];
-                                const checkins = Array.isArray(dayData.indicator_checkins) ? dayData.indicator_checkins : [];
-                                const marks = ['①', '②', '③'];
-                                for (let i = 0; i < 3; i++) {
-                                    if (checkins[i] === true) {
-                                        const title = xunIndicators[i] ? `指标：${xunIndicators[i]}` : `指标${i + 1}`;
-                                        indicators.push(`<span title="${title}">${marks[i]}</span>`);
-                                    }
-                                }
-                            }
-                            if (dayData.goal_actions && dayData.goal_actions.length > 0) indicators.push('<span title="最小行动">✅</span>');
-                            if (dayData.goal_blockers) indicators.push('<span title="阻碍">🚧</span>');
-                            if (dayData.metrics) {
-                                if (dayData.metrics.exercise > 0) indicators.push('<span title="运动">🏃</span>');
-                                if (dayData.metrics.reading > 0) indicators.push('<span title="阅读">📚</span>');
-                            }
-                            if (dayData.journal || (dayData.emotions && dayData.emotions.length > 0)) {
-                                indicators.push('<span title="日记/情绪">📝</span>');
-                            }
-                            
-                            // Weather Icon Helper
-                            const getWeatherIcon = (w) => {
-                                const map = { 'Sunny': '☀️', 'Cloudy': '☁️', 'Overcast': '🌥️', 'Rainy': '🌧️', 'Snowy': '❄️', 'Windy': '🌬️', 'Foggy': '🌫️', 'Thunder': '⚡' };
-                                return map[w] || '';
-                            };
-
-                            dayEl.innerHTML = `
-                                <div class="flex justify-between items-start mb-1">
-                                    <span class="text-xs md:text-sm font-medium ${dateColor} group-hover:text-blue-600 transition-colors">${currentDate.getDate()}</span>
-                                    <span class="text-[8px] md:text-[10px] ${holidayName ? '' : 'text-gray-400'} scale-90 origin-right transform">${subText}</span>
-                                </div>
-                                <div class="flex-1 flex flex-col items-center justify-center w-full">
-                                     ${displayEmoji ? `<div class="text-xl md:text-2xl filter drop-shadow-sm transform group-hover:scale-110 transition-transform mb-1">${displayEmoji}</div>` : ''}
-                                     
-                                     ${dayData.keywords && dayData.keywords.length > 0 ? `
-                                        <div class="flex flex-wrap justify-center gap-0.5 mb-1 w-full px-0.5">
-                                            ${dayData.keywords.slice(0, 3).map(k => `<span class="text-[8px] leading-tight text-gray-500 bg-white/50 px-1 rounded-sm border border-gray-100/50 break-words whitespace-normal max-w-full text-center">${k}</span>`).join('')}
-                                        </div>
-                                     ` : ''}
-
-                                     <div class="flex gap-0.5 md:gap-1 text-[8px] md:text-[10px] opacity-70 flex-wrap justify-center mt-auto">
-                                        ${indicators.join('')}
-                                        ${dayData.weather ? `<span title="${dayData.weather}">${getWeatherIcon(dayData.weather)}</span>` : ''}
-                                     </div>
-                                </div>
-                            `;
-
-                            if (isWithinXun) {
-                                const dStr = dateStr;
-                                dayEl.addEventListener('click', () => openModal(dStr));
-                            }
-                            
-                            gridBody.appendChild(dayEl);
-                            currentDate.setDate(currentDate.getDate() + 1);
-                        }
-
-                        monthWrapper.appendChild(gridBody);
-                        container.appendChild(monthWrapper);
-                    });
-                } catch (e) {
-                    console.error('Error rendering detail view:', e);
-                }
-            }
-
-            function renderSummaryView(period) {
-                const summaryTitle = document.getElementById('summary-title');
-                const summaryContent = document.getElementById('summary-content');
-                
-                // Title Styling
-                const startStr = `${period.startDate.getMonth()+1}.${period.startDate.getDate()}`;
-                const endStr = `${period.endDate.getMonth()+1}.${period.endDate.getDate()}`;
-                const hue = (period.index * 10) % 360;
-                
-                summaryTitle.innerHTML = `
-                    <div class="flex flex-col items-center mb-8">
-                        <div class="px-4 py-1 rounded-full text-xs font-medium bg-white border shadow-sm mb-3" style="color: hsl(${hue}, 70%, 40%); border-color: hsl(${hue}, 70%, 80%)">
-                            ${startStr} - ${endStr}
-                        </div>
-                        <h2 class="text-3xl font-light text-gray-800">第 ${period.index} 旬回顾</h2>
-                    </div>
-                `;
-                
-                summaryContent.innerHTML = '';
-                summaryContent.className = "max-w-4xl mx-auto space-y-8"; // Reset and add layout classes
-
-                const xunData = [];
-                let currentDate = new Date(period.startDate);
-                while (currentDate <= period.endDate) {
-                    const dateStr = formatLocalDate(currentDate);
-                    // Always push a record for every day in the Xun, even if empty
-                    if (userData[dateStr]) {
-                        xunData.push({ date: dateStr, ...userData[dateStr], hasData: true });
-                    } else {
-                        xunData.push({ date: dateStr, hasData: false });
-                    }
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-
-                if (xunData.every(d => !d.hasData)) {
-                    summaryContent.innerHTML = `
-                        <div class="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-gray-100 shadow-sm text-center">
-                            <div class="text-6xl mb-4 opacity-20">📝</div>
-                            <p class="text-gray-500 font-light text-lg">本旬暂无记录，休息一下吧。</p>
-                            <button onclick="window.showView('detail')" class="mt-6 px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-md">去记录</button>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const stats = {
-                    moodCounts: [0, 0, 0, 0, 0],
-                    emotionCounts: {},
-                    sleep: { total: 0, count: 0 },
-                    exercise: { total: 0, count: 0 },
-                    reading: { total: 0, count: 0 },
-                    wealth: 0,
-                    customActivities: {},
-                    journals: [],
-                    dates: xunData.map(d => d.date.slice(5)), // Now contains all dates
-                    sleepData: [],
-                    exerciseData: [],
-                    readingData: [],
-                };
-
-                xunData.forEach(data => {
-                    if (data.hasData) {
-                        if (data.mood) stats.moodCounts[data.mood - 1]++;
-                        if (data.emotions) {
-                            data.emotions.forEach(tag => {
-                                stats.emotionCounts[tag] = (stats.emotionCounts[tag] || 0) + 1;
-                            });
-                        }
-                        if (data.metrics) {
-                            if (data.metrics.sleep) { stats.sleep.total += data.metrics.sleep; stats.sleep.count++; }
-                            if (data.metrics.exercise) { stats.exercise.total += data.metrics.exercise; stats.exercise.count++; }
-                            if (data.metrics.reading) { stats.reading.total += data.metrics.reading; stats.reading.count++; }
-                            if (data.metrics.wealth) stats.wealth += data.metrics.wealth;
-                        }
-                        if (data.custom_activities) {
-                            data.custom_activities.forEach(act => {
-                                stats.customActivities[act.name] = (stats.customActivities[act.name] || 0) + 1;
-                            });
-                        }
-                        if (data.journal) stats.journals.push({ date: data.date, content: data.journal });
-                        
-                        stats.sleepData.push(data.metrics?.sleep || null);
-                        stats.exerciseData.push(data.metrics?.exercise || null);
-                        stats.readingData.push(data.metrics?.reading || null);
-                    } else {
-                        // For days with no data, push null to charts to maintain x-axis alignment
-                        stats.sleepData.push(null);
-                        stats.exerciseData.push(null);
-                        stats.readingData.push(null);
-                    }
-                });
-
-                // Layout Structure
-                summaryContent.innerHTML = `
-                    <!-- 1. Stats Cards -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                            <span class="text-2xl mb-2">😴</span>
-                            <span class="text-sm text-gray-400 mb-1">平均睡眠</span>
-                            <span class="text-xl font-semibold text-gray-700">${(stats.sleep.count > 0 ? (stats.sleep.total / stats.sleep.count).toFixed(1) : '-')} <span class="text-xs font-normal text-gray-400">h</span></span>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                            <span class="text-2xl mb-2">🏃</span>
-                            <span class="text-sm text-gray-400 mb-1">总运动</span>
-                            <span class="text-xl font-semibold text-gray-700">${stats.exercise.total} <span class="text-xs font-normal text-gray-400">min</span></span>
-                        </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                            <span class="text-2xl mb-2">📚</span>
-                            <span class="text-sm text-gray-400 mb-1">总阅读</span>
-                            <span class="text-xl font-semibold text-gray-700">${stats.reading.total} <span class="text-xs font-normal text-gray-400">min</span></span>
-                        </div>
-                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-                            <span class="text-2xl mb-2">💰</span>
-                            <span class="text-sm text-gray-400 mb-1">财富变动</span>
-                            <span class="text-xl font-semibold ${stats.wealth >= 0 ? 'text-green-500' : 'text-red-500'}">${stats.wealth > 0 ? '+' : ''}${stats.wealth.toFixed(0)}</span>
-                        </div>
-                    </div>
-
-                    <!-- 1.5 Emotion Keywords -->
-                    ${Object.keys(stats.emotionCounts).length > 0 ? `
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                             <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2">
-                                <span class="w-1 h-4 rounded-full bg-pink-400"></span> 情绪关键词
-                            </h4>
-                            <div class="flex flex-wrap gap-2">
-                                ${Object.entries(stats.emotionCounts).sort((a,b) => b[1] - a[1]).map(([tag, count]) => `
-                                    <span class="px-3 py-1 bg-gray-50 text-gray-600 rounded-full text-sm border border-gray-100 flex items-center gap-2">
-                                        ${tag} <span class="text-xs bg-gray-200 text-gray-500 rounded-full px-1.5 py-0.5">${count}</span>
-                                    </span>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    <!-- 2. Charts Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Mood Chart -->
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col relative z-0 overflow-visible">
-                            <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2 relative z-10">
-                                <span class="w-1 h-4 rounded-full bg-blue-400"></span> 心情分布
-                                <div class="ml-auto group relative">
-                                    <span class="text-xs font-normal text-gray-400 cursor-help border-b border-dashed border-gray-300">来自“今日整体感受”</span>
-                                    <!-- Tooltip -->
-                                    <div class="hidden group-hover:block absolute right-0 top-full mt-2 w-64 p-3 bg-gray-800 text-white text-xs rounded-xl shadow-xl z-50 text-left leading-relaxed">
-                                        <p class="mb-2">• 它会读取您在这10天（一旬）内每一次打卡记录的“今日整体感受”。</p>
-                                        <p>• 它统计的是这5种心情出现的频率。（例如：这10天里有3天“不错”、2天“平淡”，图表上就会直观地显示出这种比例）。</p>
-                                        <!-- Arrow -->
-                                        <div class="absolute -top-1 right-8 w-2 h-2 bg-gray-800 transform rotate-45"></div>
-                                    </div>
-                                </div>
-                            </h4>
-                            <div class="flex-1 min-h-[200px] relative z-0">
-                                <canvas id="mood-chart"></canvas>
-                            </div>
-                        </div>
-                        
-                        <!-- Trends Chart -->
-                        <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col">
-                            <h4 class="font-medium text-gray-700 mb-4 flex items-center gap-2">
-                                <span class="w-1 h-4 rounded-full bg-green-400"></span> 趋势追踪
-                            </h4>
-                            <div class="flex-1 min-h-[200px] relative">
-                                <canvas id="metrics-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3. Journals & Highlights -->
-                    ${stats.journals.length > 0 ? `
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                             <h4 class="font-medium text-gray-700 mb-6 flex items-center gap-2">
-                                <span class="w-1 h-4 rounded-full bg-purple-400"></span> 闪念与复盘
-                            </h4>
-                            <div class="grid grid-cols-1 gap-4">
-                                ${stats.journals.map(j => `
-                                    <div class="flex gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 hover:shadow-sm transition-shadow">
-                                        <div class="flex-shrink-0 flex flex-col items-center w-12 pt-1">
-                                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${new Date(j.date).toLocaleString('en-US', {month:'short'})}</span>
-                                            <span class="text-xl font-light text-gray-800">${new Date(j.date).getDate()}</span>
-                                        </div>
-                                        <div class="flex-1">
-                                            <p class="text-gray-600 leading-relaxed text-sm">${j.content}</p>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-                `;
-
-                // Render Charts
-                setTimeout(() => {
-                    const moodChartEl = document.getElementById('mood-chart');
-                    const metricsChartEl = document.getElementById('metrics-chart');
-                    
-                    if (typeof Chart !== 'undefined') {
-                        if (moodChartEl) {
-                            new Chart(moodChartEl, {
-                                type: 'doughnut',
-                                data: {
-                                    labels: ['1分', '2分', '3分', '4分', '5分'],
-                                    datasets: [{
-                                        data: stats.moodCounts,
-                                        backgroundColor: ['#F3F4F6', '#E5E7EB', '#D1D5DB', '#9CA3AF', '#6B7280'], // Grey scale for minimalist
-                                        hoverBackgroundColor: [`hsl(${hue}, 70%, 90%)`, `hsl(${hue}, 70%, 80%)`, `hsl(${hue}, 70%, 70%)`, `hsl(${hue}, 70%, 60%)`, `hsl(${hue}, 70%, 50%)`],
-                                        borderWidth: 0
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    cutout: '70%',
-                                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } }
-                                }
-                            });
-                        }
-
-                        if (metricsChartEl) {
-                            new Chart(metricsChartEl, {
-                                type: 'line',
-                                data: {
-                                    labels: stats.dates,
-                                    datasets: [
-                                        { label: '睡眠', data: stats.sleepData, borderColor: '#60A5FA', tension: 0.4, pointRadius: 2 },
-                                        { label: '运动', data: stats.exerciseData, borderColor: '#34D399', tension: 0.4, pointRadius: 2 },
-                                        { label: '阅读', data: stats.readingData, borderColor: '#FBBF24', tension: 0.4, pointRadius: 2 }
-                                    ]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    scales: { y: { display: false }, x: { grid: { display: false } } },
-                                    plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, usePointStyle: true } } }
-                                }
-                            });
-                        }
-                    }
-                }, 100);
-            }
-
-            // --- Modal Helpers ---
-            function getXunPeriodByDateStr(dateStr) {
-                const d = new Date(`${dateStr}T00:00:00`);
-                return xunPeriods.find(p => d >= p.startDate && d <= p.endDate) || null;
-            }
-
-            function saveCustomEmotions() {
-                localStorage.setItem('xun_custom_emotions', JSON.stringify(customEmotions));
-            }
-
-            function renderEmotionTags() {
-                const container = document.getElementById('emotion-tags');
-                if (!container) return;
-
-                const allEmotions = [...defaultEmotions, ...customEmotions.map(t => ({ text: t, value: t }))];
-                
-                let html = allEmotions.map(emotion => `
-                    <button type="button" class="emotion-tag px-3 py-1.5 text-sm border border-gray-200 rounded-full text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" data-tag="${emotion.value}" aria-pressed="false">
-                        ${emotion.text}
-                    </button>
-                `).join('');
-
-                // Add "Add Custom" button
-                html += `
-                    <button type="button" id="add-custom-emotion-btn" class="px-3 py-1.5 text-sm border border-dashed border-gray-300 rounded-full text-gray-500 hover:bg-gray-50 hover:text-blue-500 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" title="添加自定义标签">
-                        + 自定义
-                    </button>
-                `;
-
-                container.innerHTML = html;
-            }
-
-            function addCustomEmotion() {
-                const btn = document.getElementById('add-custom-emotion-btn');
-                if (!btn) return;
-
-                const container = document.createElement('div');
-                container.className = 'inline-flex items-center gap-1 ml-1 align-middle';
-                container.innerHTML = `
-                    <input type="text" id="custom-emotion-input" class="w-24 px-2 py-1 text-xs border border-blue-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-400 placeholder-gray-400" placeholder="新标签" autocomplete="off">
-                    <button type="button" id="save-custom-emotion" class="p-1 text-green-600 hover:text-green-700 rounded-full hover:bg-green-50" title="确认">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    </button>
-                    <button type="button" id="cancel-custom-emotion" class="p-1 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-50" title="取消">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                `;
-
-                btn.replaceWith(container);
-
-                const input = container.querySelector('input');
-                input.focus();
-
-                const handleConfirm = () => confirmAddCustomEmotion(input.value);
-                const handleCancel = () => renderEmotionTags();
-
-                input.onkeydown = (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleConfirm();
-                    } else if (e.key === 'Escape') {
-                        handleCancel();
-                    }
-                };
-
-                container.querySelector('#save-custom-emotion').onclick = (e) => {
-                    e.stopPropagation();
-                    handleConfirm();
-                };
-
-                container.querySelector('#cancel-custom-emotion').onclick = (e) => {
-                    e.stopPropagation();
-                    handleCancel();
-                };
-            }
-
-            function confirmAddCustomEmotion(tag) {
-                if (tag && tag.trim()) {
-                    const cleanTag = tag.trim();
-                    if (defaultEmotions.some(e => e.value === cleanTag) || customEmotions.includes(cleanTag)) {
-                        alert('该标签已存在！');
-                        return;
-                    }
-
-                    // Capture current selection before re-rendering
-                    const selectedTags = Array.from(document.querySelectorAll('.emotion-tag[aria-pressed="true"]')).map(el => el.dataset.tag);
-
-                    customEmotions.push(cleanTag);
-                    saveCustomEmotions();
-                    renderEmotionTags();
-
-                    // Restore selection + Select new
-                    selectedTags.push(cleanTag);
-
-                    selectedTags.forEach(t => {
-                        const el = document.querySelector(`.emotion-tag[data-tag="${t}"]`);
-                        if (el) {
-                             el.classList.remove('text-gray-600', 'border-gray-200');
-                             el.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
-                             el.setAttribute('aria-pressed', 'true');
-                        }
-                    });
-                } else {
-                    renderEmotionTags(); // Empty input, just cancel
-                }
-            }
-
-            // --- Nourishment Helpers ---
-            function saveCustomNourishments() {
-                localStorage.setItem('xun_custom_nourishments', JSON.stringify(customNourishments));
-            }
-
-            function renderNourishmentTags() {
-                const container = document.getElementById('nourishment-tags-container');
-                if (!container) return;
-
-                const allNourishments = [...defaultNourishments, ...customNourishments.map(t => ({ text: t, value: t }))];
-                
-                let html = allNourishments.map(item => `
-                    <button type="button" class="nourishment-tag px-3 py-1 text-xs rounded-full border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors" data-tag="${item.value}" aria-pressed="false">
-                        ${item.text}
-                    </button>
-                `).join('');
-
-                // Add "Add Custom" button
-                html += `
-                    <button type="button" id="add-custom-nourishment-btn" class="px-3 py-1 text-xs border border-dashed border-gray-300 rounded-full text-gray-500 hover:bg-gray-50 hover:text-blue-500 hover:border-blue-300 transition-all focus:outline-none focus:ring-2 focus:ring-blue-200" title="添加自定义活动">
-                        + 自定义
-                    </button>
-                `;
-
-                container.innerHTML = html;
-            }
-
-            function addCustomNourishment() {
-                const btn = document.getElementById('add-custom-nourishment-btn');
-                if (!btn) return;
-
-                const container = document.createElement('div');
-                container.className = 'inline-flex items-center gap-1 ml-1 align-middle';
-                container.innerHTML = `
-                    <input type="text" id="custom-nourishment-input" class="w-24 px-2 py-1 text-xs border border-blue-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-400 placeholder-gray-400" placeholder="新活动" autocomplete="off">
-                    <button type="button" id="save-custom-nourishment" class="p-1 text-green-600 hover:text-green-700 rounded-full hover:bg-green-50" title="确认">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                    </button>
-                    <button type="button" id="cancel-custom-nourishment" class="p-1 text-gray-400 hover:text-gray-500 rounded-full hover:bg-gray-50" title="取消">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                `;
-
-                btn.replaceWith(container);
-
-                const input = container.querySelector('input');
-                input.focus();
-
-                const handleConfirm = () => confirmAddCustomNourishment(input.value);
-                const handleCancel = () => renderNourishmentTags();
-
-                input.onkeydown = (e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleConfirm();
-                    } else if (e.key === 'Escape') {
-                        handleCancel();
-                    }
-                };
-
-                container.querySelector('#save-custom-nourishment').onclick = (e) => {
-                    e.stopPropagation();
-                    handleConfirm();
-                };
-
-                container.querySelector('#cancel-custom-nourishment').onclick = (e) => {
-                    e.stopPropagation();
-                    handleCancel();
-                };
-            }
-
-            function confirmAddCustomNourishment(tag) {
-                if (tag && tag.trim()) {
-                    const cleanTag = tag.trim();
-                    if (defaultNourishments.some(e => e.value === cleanTag) || customNourishments.includes(cleanTag)) {
-                        alert('该活动已存在！');
-                        return;
-                    }
-
-                    // Capture current selection before re-rendering
-                    const selectedTags = Array.from(document.querySelectorAll('.nourishment-tag[aria-pressed="true"]')).map(el => el.dataset.tag);
-
-                    customNourishments.push(cleanTag);
-                    saveCustomNourishments();
-                    renderNourishmentTags();
-
-                    // Restore selection + Select new
-                    selectedTags.push(cleanTag);
-
-                    selectedTags.forEach(t => {
-                        const el = document.querySelector(`.nourishment-tag[data-tag="${t}"]`);
-                        if (el) {
-                             el.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
-                             el.classList.remove('bg-gray-50', 'text-gray-600', 'border-gray-200');
-                             el.setAttribute('aria-pressed', 'true');
-                        }
-                    });
-                } else {
-                    renderNourishmentTags(); // Empty input, just cancel
-                }
-            }
-
-            function openModal(dateStr) {
-                selectedDate = dateStr;
-                const data = userData[dateStr] || {};
-                document.getElementById('modal-date').textContent = dateStr;
-                
-                // Reset mood
-                document.querySelectorAll('.mood-btn').forEach(btn => {
-                    btn.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400', 'ring-blue-400', 'bg-blue-50', 'selected', 'bg-opacity-100');
-                    const span = btn.querySelector('span.filter');
-                    if (span) span.classList.add('grayscale');
-                });
-                
-                if (data.mood) {
-                    const activeMood = document.querySelector(`.mood-btn[data-mood="${data.mood}"]`);
-                    if (activeMood) {
-                        activeMood.classList.add('ring-2', 'ring-offset-2', 'ring-blue-400', 'bg-blue-50', 'selected');
-                        const span = activeMood.querySelector('span.filter');
-                        if (span) span.classList.remove('grayscale');
-                    }
-                }
-
-                // Emotions Tags
-                renderEmotionTags();
-                document.querySelectorAll('.emotion-tag').forEach(tag => {
-                    tag.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
-                    tag.classList.add('text-gray-600', 'border-gray-200');
-                    tag.setAttribute('aria-pressed', 'false');
-                });
-                
-                if (data.emotions && Array.isArray(data.emotions)) {
-                    data.emotions.forEach(tagText => {
-                        const tagEl = document.querySelector(`.emotion-tag[data-tag="${tagText}"]`);
-                        if (tagEl) {
-                            tagEl.classList.remove('text-gray-600', 'border-gray-200');
-                            tagEl.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
-                            tagEl.setAttribute('aria-pressed', 'true');
-                        }
-                    });
-                }
-
-                document.getElementById('keywords-input').value = data.keywords ? data.keywords.join(', ') : '';
-                document.getElementById('journal-input').value = data.journal || '';
-                
-                const xunPeriod = getXunPeriodByDateStr(dateStr);
-                const xunIndex = xunPeriod ? xunPeriod.index : null;
-                const xunGoalInput = document.getElementById('xun-goal-input');
-                const xunGoalDisplay = document.getElementById('xun-goal-display');
-                const xunGoalContainer = document.getElementById('xun-goal-container');
-                // const xunGoalMeta = document.getElementById('xun-goal-meta'); // Removed
-                // const goalCheckinInput = document.getElementById('goal-checkin-input'); // Removed
-                // const goalConfidenceInput = document.getElementById('goal-confidence-input'); // Removed
-                // const goalActionsInput = document.getElementById('goal-actions-input'); // Removed
-                // const goalBlockersInput = document.getElementById('goal-blockers-input'); // Removed
-
-                // if (xunGoalMeta) { ... } // Removed
-
-                if (xunGoalInput) {
-                    if (xunIndex) {
-                        xunGoalInput.disabled = false;
-                        const currentGoal = macroGoals[xunIndex]?.goal || '';
-                        xunGoalInput.value = currentGoal;
-                        if (xunGoalDisplay) xunGoalDisplay.textContent = currentGoal || '（本旬未设置核心目标）';
-                        if (xunGoalContainer) xunGoalContainer.classList.remove('hidden');
-                        
-                        // We use input for storage but display for view in minimalist mode
-                        // If we want to allow edit, we can add an edit button, but for now let's just use the inputs hidden logic or similar
-                    } else {
-                         if (xunGoalContainer) xunGoalContainer.classList.add('hidden');
-                    }
-                }
-
-                const indicatorInput1 = document.getElementById('xun-indicator-1');
-                const indicatorInput2 = document.getElementById('xun-indicator-2');
-                const indicatorInput3 = document.getElementById('xun-indicator-3');
-                const dayIndicatorLabel1 = document.getElementById('day-indicator-label-1');
-                const dayIndicatorLabel2 = document.getElementById('day-indicator-label-2');
-                const dayIndicatorLabel3 = document.getElementById('day-indicator-label-3');
-                const dayIndicatorCheck1 = document.getElementById('day-indicator-check-1');
-                const dayIndicatorCheck2 = document.getElementById('day-indicator-check-2');
-                const dayIndicatorCheck3 = document.getElementById('day-indicator-check-3');
-                const dayIndicatorRow1 = document.getElementById('day-indicator-row-1');
-                const dayIndicatorRow2 = document.getElementById('day-indicator-row-2');
-                const dayIndicatorRow3 = document.getElementById('day-indicator-row-3');
-
-                const applyIndicatorState = () => {
-                    const names = [
-                        indicatorInput1 ? indicatorInput1.value.trim() : '',
-                        indicatorInput2 ? indicatorInput2.value.trim() : '',
-                        indicatorInput3 ? indicatorInput3.value.trim() : ''
-                    ];
-
-                    const setRow = (i, labelEl, checkEl, rowEl) => {
-                        const name = names[i] || '';
-                        if (labelEl) labelEl.textContent = name ? `今日打卡：${name}` : `今日打卡`;
-                        if (checkEl) {
-                            checkEl.disabled = !name;
-                            if (!name) checkEl.checked = false;
-                        }
-                        if (rowEl) {
-                            if (name) {
-                                rowEl.classList.remove('hidden');
-                            } else {
-                                rowEl.classList.add('hidden');
-                            }
-                        }
-                    };
-
-                    setRow(0, dayIndicatorLabel1, dayIndicatorCheck1, dayIndicatorRow1);
-                    setRow(1, dayIndicatorLabel2, dayIndicatorCheck2, dayIndicatorRow2);
-                    setRow(2, dayIndicatorLabel3, dayIndicatorCheck3, dayIndicatorRow3);
-
-                    if (xunIndex) {
-                        if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
-                        macroGoals[xunIndex].indicators = names.filter(Boolean).slice(0, 3);
-                        saveMacroGoals();
-                        renderMacroView();
-                        if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
-                        renderOverview();
-                    }
-                };
-
-                if (indicatorInput1 && indicatorInput2 && indicatorInput3) {
-                    if (xunIndex) {
-                        const indicators = Array.isArray(macroGoals[xunIndex]?.indicators) ? macroGoals[xunIndex].indicators : [];
-                        indicatorInput1.disabled = false;
-                        indicatorInput2.disabled = false;
-                        indicatorInput3.disabled = false;
-                        indicatorInput1.value = indicators[0] || '';
-                        indicatorInput2.value = indicators[1] || '';
-                        indicatorInput3.value = indicators[2] || '';
-                        indicatorInput1.oninput = applyIndicatorState;
-                        indicatorInput2.oninput = applyIndicatorState;
-                        indicatorInput3.oninput = applyIndicatorState;
-                    } else {
-                        indicatorInput1.disabled = true;
-                        indicatorInput2.disabled = true;
-                        indicatorInput3.disabled = true;
-                        indicatorInput1.value = '';
-                        indicatorInput2.value = '';
-                        indicatorInput3.value = '';
-                        indicatorInput1.oninput = null;
-                        indicatorInput2.oninput = null;
-                        indicatorInput3.oninput = null;
-                    }
-                }
-
-                const checkins = Array.isArray(data.indicator_checkins) ? data.indicator_checkins : [];
-                if (dayIndicatorCheck1) dayIndicatorCheck1.checked = checkins[0] === true;
-                if (dayIndicatorCheck2) dayIndicatorCheck2.checked = checkins[1] === true;
-                if (dayIndicatorCheck3) dayIndicatorCheck3.checked = checkins[2] === true;
-                applyIndicatorState();
-
-                // if (goalCheckinInput) goalCheckinInput.checked = data.goal_checkin === true;
-                // if (goalConfidenceInput) goalConfidenceInput.value = Number.isFinite(data.goal_confidence) ? String(data.goal_confidence) : '';
-                // if (goalActionsInput) goalActionsInput.value = Array.isArray(data.goal_actions) ? data.goal_actions.join(', ') : '';
-                // if (goalBlockersInput) goalBlockersInput.value = data.goal_blockers || '';
-
-                // Weather
-                document.querySelectorAll('#weather-selector button').forEach(btn => btn.classList.remove('bg-gray-200'));
-                if (data.weather) {
-                    const btn = document.querySelector(`#weather-selector button[data-weather="${data.weather}"]`);
-                    if (btn) btn.classList.add('bg-gray-200');
-                }
-
-                // Vitality (Energy)
-                document.getElementById('energy-level').value = data.energy_level !== undefined ? data.energy_level : 50;
-
-                // Nourishment Tags
-                renderNourishmentTags();
-                const savedTags = data.nourishment_tags || [];
-                
-                // Reset all first
-                document.querySelectorAll('.nourishment-tag').forEach(btn => {
-                    btn.classList.remove('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
-                    btn.classList.add('bg-gray-50', 'text-gray-600', 'border-gray-200');
-                    btn.setAttribute('aria-pressed', 'false');
-                });
-
-                // Apply saved selection
-                savedTags.forEach(tag => {
-                    const btn = document.querySelector(`.nourishment-tag[data-tag="${tag}"]`);
-                    if (btn) {
-                        btn.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
-                        btn.classList.remove('bg-gray-50', 'text-gray-600', 'border-gray-200');
-                        btn.setAttribute('aria-pressed', 'true');
-                    }
-                });
-
-                // Metrics
-                const m = data.metrics || {};
-                document.getElementById('metric-sleep').value = m.sleep || '';
-                document.getElementById('metric-exercise').value = m.exercise || '';
-                document.getElementById('metric-reading').value = m.reading || '';
-                document.getElementById('metric-wealth').value = m.wealth || '';
-                document.getElementById('metric-social').value = m.social || '';
-
-                // Three Good Things
-                const goodThings = data.three_good_things || [];
-                document.getElementById('good-thing-1').value = goodThings[0] || '';
-                document.getElementById('good-thing-2').value = goodThings[1] || '';
-                document.getElementById('good-thing-3').value = goodThings[2] || '';
-
-                // Custom activities
-                const container = document.getElementById('custom-activities-container');
-                container.querySelectorAll('.custom-activity-item').forEach(el => el.remove());
-                if (data.custom_activities) {
-                    data.custom_activities.forEach(act => addCustomActivityInput(act.name, act.value));
-                }
-
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
-
-            function addCustomActivityInput(name = '', value = '') {
-                const div = document.createElement('div');
-                div.className = 'custom-activity-item flex items-center space-x-2';
-                div.innerHTML = `
-                    <input type="text" placeholder="活动名称" class="custom-name w-1/2 p-1 border rounded-md" value="${name}">
-                    <input type="text" placeholder="值" class="custom-value w-1/3 p-1 border rounded-md" value="${value}">
-                    <button class="text-red-400 hover:text-red-600">&times;</button>
-                `;
-                div.querySelector('button').onclick = () => div.remove();
-                document.getElementById('custom-activities-container').insertBefore(div, document.getElementById('add-custom-activity'));
-            }
-
-            function closeModal() {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-            }
-
-            function saveModalData() {
-                const moodEl = document.querySelector('.mood-btn.ring-2');
-                const weatherEl = document.querySelector('#weather-selector button.bg-gray-200');
-                
-                // Get selected emotions
-                const selectedEmotions = Array.from(document.querySelectorAll('.emotion-tag.bg-blue-100'))
-                    .map(el => el.dataset.tag);
-
-                const xunGoalInput = document.getElementById('xun-goal-input'); // Added back for saving logic
-                // const goalCheckinInput = document.getElementById('goal-checkin-input'); // Removed
-                // const goalConfidenceInput = document.getElementById('goal-confidence-input'); // Removed
-                // const goalActionsInput = document.getElementById('goal-actions-input'); // Removed
-                // const goalBlockersInput = document.getElementById('goal-blockers-input'); // Removed
-                const indicatorInput1 = document.getElementById('xun-indicator-1');
-                const indicatorInput2 = document.getElementById('xun-indicator-2');
-                const indicatorInput3 = document.getElementById('xun-indicator-3');
-                const dayIndicatorCheck1 = document.getElementById('day-indicator-check-1');
-                const dayIndicatorCheck2 = document.getElementById('day-indicator-check-2');
-                const dayIndicatorCheck3 = document.getElementById('day-indicator-check-3');
-                // const rawGoalConfidence = goalConfidenceInput ? parseInt(goalConfidenceInput.value, 10) : NaN;
-                // const goalConfidence = Number.isFinite(rawGoalConfidence)
-                //    ? Math.max(0, Math.min(100, rawGoalConfidence))
-                //    : undefined;
-
-                const xunPeriod = getXunPeriodByDateStr(selectedDate);
-                const xunIndex = xunPeriod ? xunPeriod.index : null;
-
-                // Save Goal if modified in modal (though it's hidden now, logic remains if we re-enable)
-                if (xunIndex && xunGoalInput && xunGoalInput.value !== (macroGoals[xunIndex]?.goal || '')) {
-                     if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
-                     macroGoals[xunIndex].goal = xunGoalInput.value;
-                     saveMacroGoals();
-                }
-
-                const indicatorNames = [
-                    indicatorInput1 ? indicatorInput1.value.trim() : '',
-                    indicatorInput2 ? indicatorInput2.value.trim() : '',
-                    indicatorInput3 ? indicatorInput3.value.trim() : ''
-                ].filter(Boolean).slice(0, 3);
-
-                if (xunIndex) {
-                    if (!macroGoals[xunIndex]) macroGoals[xunIndex] = {};
-                    macroGoals[xunIndex].indicators = indicatorNames;
-                    saveMacroGoals();
-                }
-
-                const indicatorCheckins = [
-                    dayIndicatorCheck1 ? dayIndicatorCheck1.checked : false,
-                    dayIndicatorCheck2 ? dayIndicatorCheck2.checked : false,
-                    dayIndicatorCheck3 ? dayIndicatorCheck3.checked : false
-                ];
-
-                userData[selectedDate] = {
-                    mood: moodEl ? parseInt(moodEl.dataset.mood) : undefined,
-                    emotions: selectedEmotions,
-                    energy_level: parseInt(document.getElementById('energy-level').value) || 50,
-                    nourishment_tags: Array.from(document.querySelectorAll('.nourishment-tag.bg-blue-100')).map(btn => btn.dataset.tag),
-                    three_good_things: [
-                        document.getElementById('good-thing-1').value,
-                        document.getElementById('good-thing-2').value,
-                        document.getElementById('good-thing-3').value
-                    ].filter(Boolean),
-                    // Keywords: allow 3 items, relax separator splitting to allow idioms?
-                    // Actually, simple space/comma split is fine for "idioms" if they don't have spaces within.
-                    // But English idioms have spaces.
-                    // Let's use comma as primary separator if present, otherwise space?
-                    // Or just let user manage it.
-                    // User said: "not limited to 2 bytes or Chinese", "English words or idioms".
-                    // Code below splits by space or comma. "Carpe Diem" would become "Carpe", "Diem".
-                    // We should probably split by comma ONLY if user uses commas?
-                    // Or maybe just use comma as separator?
-                    // Let's stick to comma for idioms, or let user input freely.
-                    // Let's try splitting by comma first.
-                    keywords: document.getElementById('keywords-input').value.split(/[,，]/).map(k => k.trim()).filter(k => k.length > 0).slice(0, 3),
-                    emoji: undefined, // Deprecated in favor of mood/keywords
-                    weather: weatherEl ? weatherEl.dataset.weather : undefined,
-                    journal: document.getElementById('journal-input').value,
-                    // goal_checkin: goalCheckinInput ? goalCheckinInput.checked : undefined, // Removed
-                    // goal_confidence: goalConfidence, // Removed
-                    // goal_actions: goalActionsInput ? goalActionsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k.length > 0).slice(0, 3) : undefined, // Removed
-                    // goal_blockers: goalBlockersInput ? (goalBlockersInput.value.trim() || undefined) : undefined, // Removed
-                    indicator_checkins: indicatorCheckins,
-                    metrics: {
-                        sleep: parseFloat(document.getElementById('metric-sleep').value) || undefined,
-                        exercise: parseInt(document.getElementById('metric-exercise').value) || undefined,
-                        reading: parseInt(document.getElementById('metric-reading').value) || undefined,
-                        wealth: parseFloat(document.getElementById('metric-wealth').value) || undefined,
-                        social: document.getElementById('metric-social').value || undefined,
-                    },
-                    custom_activities: Array.from(document.querySelectorAll('.custom-activity-item')).map(item => ({
-                        name: item.querySelector('.custom-name').value,
-                        value: item.querySelector('.custom-value').value,
-                    })).filter(i => i.name)
-                };
-                
-                saveUserData();
-                closeModal();
-                if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
-                renderOverview();
-                renderMacroView();
-            }
-
-            function deleteModalData() {
-                if (confirm('确定删除本日所有记录吗？')) {
-                    delete userData[selectedDate];
-                    saveUserData();
-                    closeModal();
-                    if (currentDetailPeriod) renderDetailView(currentDetailPeriod);
-                    renderOverview();
-                    renderMacroView();
-                }
-            }
-
-            function initScrollControls() {
-                const backToTopContainer = document.getElementById('macro-back-to-top-container');
-                const scrollDownContainer = document.getElementById('macro-scroll-down-container');
-                const backToTopBtn = document.getElementById('macro-back-to-top');
-                const scrollDownBtn = document.getElementById('macro-scroll-down');
-                const macroView = document.getElementById('macro-view');
-
-                if (backToTopBtn && scrollDownBtn && backToTopContainer && scrollDownContainer) {
-                    const handleScroll = () => {
-                        // 1. Check if we are in Macro View
-                        const isMacroView = !macroView.classList.contains('hidden');
-                        
-                        if (!isMacroView) {
-                            // Hide both if not in macro view
-                            backToTopContainer.classList.add('opacity-0', 'pointer-events-none');
-                            scrollDownContainer.classList.add('opacity-0', 'pointer-events-none');
-                            backToTopContainer.setAttribute('aria-hidden', 'true');
-                            scrollDownContainer.setAttribute('aria-hidden', 'true');
-                            backToTopBtn.tabIndex = -1;
-                            scrollDownBtn.tabIndex = -1;
-                            return;
-                        }
-
-                        // 2. We are in Macro View
-                        // Scroll Down button always visible
-                        scrollDownContainer.classList.remove('opacity-0', 'pointer-events-none');
-                        scrollDownContainer.setAttribute('aria-hidden', 'false');
-                        scrollDownBtn.tabIndex = 0;
-
-                        // 3. Back to Top Logic
-                        if (window.scrollY > 300) {
-                            backToTopContainer.classList.remove('opacity-0', 'pointer-events-none');
-                            backToTopContainer.setAttribute('aria-hidden', 'false');
-                            backToTopBtn.tabIndex = 0;
-                        } else {
-                            backToTopContainer.classList.add('opacity-0', 'pointer-events-none');
-                            backToTopContainer.setAttribute('aria-hidden', 'true');
-                            backToTopBtn.tabIndex = -1;
-                        }
-                    };
-                    
-                    // Add listeners for view changes
-                    const observer = new MutationObserver(handleScroll);
-                    observer.observe(macroView, { attributes: true, attributeFilter: ['class'] });
-                    window.addEventListener('scroll', handleScroll);
-                    
-                    // Initial check
-                    handleScroll();
-
-                    backToTopBtn.addEventListener('click', () => {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    });
-                    
-                    scrollDownBtn.addEventListener('click', () => {
-                        // Find next xun row
-                        const rows = Array.from(document.querySelectorAll('[id^="xun-row-"]'));
-                        // Current center line
-                        const centerLine = window.scrollY + (window.innerHeight / 2);
-                        
-                        // Find the first row that is below the center line
-                        let nextRow = rows.find(row => {
-                            const rect = row.getBoundingClientRect();
-                            // rect.top is relative to viewport
-                            return rect.top > (window.innerHeight * 0.6); 
-                        });
-                        
-                        if (nextRow) {
-                            nextRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        } else {
-                             // If no next row, scroll to bottom
-                             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                        }
-                    });
-                }
-            }
-
-            // --- Theme Management ---
-            const themeBtn = document.getElementById('theme-btn');
-            const themeMenu = document.getElementById('theme-menu');
-            
-            if (themeBtn && themeMenu) {
-                themeBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    themeMenu.classList.toggle('hidden');
-                };
-
-                document.addEventListener('click', (e) => {
-                    if (!themeMenu.contains(e.target) && !themeBtn.contains(e.target)) {
-                        themeMenu.classList.add('hidden');
-                    }
-                });
-            }
-
-            window.setTheme = function(theme) {
-                document.body.className = document.body.className.replace(/theme-\w+/g, '').trim();
-                
-                // Keep base classes
-                if (!document.body.classList.contains('bg-gray-50')) document.body.classList.add('bg-gray-50');
-                if (!document.body.classList.contains('text-gray-800')) document.body.classList.add('text-gray-800');
-                if (!document.body.classList.contains('antialiased')) document.body.classList.add('antialiased');
-                if (!document.body.classList.contains('overflow-x-hidden')) document.body.classList.add('overflow-x-hidden');
-
-                if (theme !== 'default') {
-                    document.body.classList.add(`theme-${theme}`);
-                }
-                
-                localStorage.setItem('user_theme', theme);
-                if (themeMenu) themeMenu.classList.add('hidden');
-            };
-
-            // Load saved theme
-            const savedTheme = localStorage.getItem('user_theme');
-            if (savedTheme) {
-                setTheme(savedTheme);
-            }
-
-            // --- Initialization ---
-            function init() {
-                xunPeriods = getXunPeriods(YEAR);
-                currentXun = getCurrentXun(xunPeriods);
-                document.getElementById('current-xun-info').textContent = currentXun ? `当前是第 ${currentXun.index} 旬` : `当前不在 ${YEAR} 年范围内`;
-                
-                // Set default view to Macro
-                showView('macro');
-                window.openModal = openModal;
-                window.closeModal = closeModal;
-
-                // Events
-                document.getElementById('nav-macro').onclick = () => showView('macro');
-                document.getElementById('nav-overview').onclick = () => showView('overview');
-                
-                const backToOverviewBtn = document.getElementById('back-to-overview');
-                if (backToOverviewBtn) backToOverviewBtn.onclick = () => showView('overview');
-
-                const showSummaryBtn = document.getElementById('show-summary-btn');
-                if (showSummaryBtn) showSummaryBtn.onclick = () => showView('summary', currentDetailPeriod);
-
-                const backToDetailBtn = document.getElementById('back-to-detail');
-                if (backToDetailBtn) backToDetailBtn.onclick = () => showView('detail', currentDetailPeriod);
-
-                document.getElementById('modal-close').onclick = closeModal;
-                document.getElementById('modal-save').onclick = saveModalData;
-                document.getElementById('modal-delete').onclick = deleteModalData;
-                document.getElementById('add-custom-activity').onclick = () => addCustomActivityInput();
-
-                document.getElementById('mood-selector').onclick = (e) => {
-                    const btn = e.target.closest('.mood-btn');
-                    if (btn && btn.dataset.mood) {
-                        document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('ring-2', 'ring-offset-2', 'ring-gray-400'));
-                        btn.classList.add('ring-2', 'ring-offset-2', 'ring-gray-400');
-                    }
-                };
-
-                // Emotion Tags Listener
-                const moodSelector = document.getElementById('mood-selector');
-                if (moodSelector) {
-                    moodSelector.onclick = (e) => {
-                        const btn = e.target.closest('.mood-btn');
-                        if (btn) {
-                             // Reset all
-                             document.querySelectorAll('.mood-btn').forEach(b => {
-                                 b.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-400', 'bg-blue-50', 'selected');
-                                 // Reset grayscale for all
-                                 const span = b.querySelector('span.filter');
-                                 if (span) span.classList.add('grayscale');
-                             });
-                             
-                             // Activate current
-                             btn.classList.add('ring-2', 'ring-offset-2', 'ring-blue-400', 'bg-blue-50', 'selected');
-                             // Remove grayscale
-                             const span = btn.querySelector('span.filter');
-                             if (span) span.classList.remove('grayscale');
-                        }
-                    };
-                }
-
-                const emotionTagsContainer = document.getElementById('emotion-tags');
-                if (emotionTagsContainer) {
-                    emotionTagsContainer.onclick = (e) => {
-                        // Handle Custom Button
-                        if (e.target.closest('#add-custom-emotion-btn')) {
-                            addCustomEmotion();
-                            return;
-                        }
-
-                        const btn = e.target.closest('.emotion-tag');
-                        if (btn) {
-                            // Toggle active class
-                            const isPressed = btn.getAttribute('aria-pressed') === 'true';
-                            if (isPressed) {
-                                btn.classList.remove('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
-                                btn.classList.add('text-gray-600', 'border-gray-200');
-                                btn.setAttribute('aria-pressed', 'false');
-                            } else {
-                                btn.classList.remove('text-gray-600', 'border-gray-200');
-                                btn.classList.add('bg-blue-100', 'text-blue-700', 'border-blue-300', 'ring-1', 'ring-blue-300');
-                                btn.setAttribute('aria-pressed', 'true');
-                            }
-                        }
-                    };
-                }
-
-                // Nourishment Tags Listener (New)
-                const nourishmentContainer = document.getElementById('nourishment-tags-container');
-                if (nourishmentContainer) {
-                    nourishmentContainer.onclick = (e) => {
-                        // Handle Custom Button
-                        if (e.target.closest('#add-custom-nourishment-btn')) {
-                            addCustomNourishment();
-                            return;
-                        }
-
-                        const btn = e.target.closest('.nourishment-tag');
-                        if (btn) {
-                            // Toggle state
-                            const isPressed = btn.getAttribute('aria-pressed') === 'true';
-                            if (isPressed) {
-                                // Unselect
-                                btn.classList.remove('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
-                                btn.classList.add('bg-gray-50', 'text-gray-600', 'border-gray-200');
-                                btn.setAttribute('aria-pressed', 'false');
-                            } else {
-                                // Select
-                                btn.classList.add('bg-blue-100', 'border-blue-400', 'text-blue-800', 'ring-1', 'ring-blue-400');
-                                btn.classList.remove('bg-gray-50', 'text-gray-600', 'border-gray-200');
-                                btn.setAttribute('aria-pressed', 'true');
-                            }
-                        }
-                    };
-                }
-                
-                document.getElementById('weather-selector').onclick = (e) => {
-                    const btn = e.target.closest('button');
-                    if (btn && btn.dataset.weather) {
-                        document.querySelectorAll('#weather-selector button').forEach(b => b.classList.remove('bg-gray-200'));
-                        btn.classList.add('bg-gray-200');
-                    }
-                };
-
-                // Initialize Quote System
-                if (typeof QuoteSystem !== 'undefined') {
-                    QuoteSystem.init();
-                }
-
-                window.onclick = (e) => {
-                    if (e.target === modal) closeModal();
-                };
-
-                updateYearProgress();
-                renderYearPixelGrid();
-                initScrollControls();
-            }
-
-
-
-
-            function updateYearProgress() {
-                const now = new Date();
-                const start = new Date(YEAR, 0, 1);
-                const end = new Date(YEAR, 11, 31);
-                
-                let current = now;
-                if (current.getFullYear() < YEAR) current = new Date(YEAR, 0, 1);
-                if (current.getFullYear() > YEAR) current = new Date(YEAR, 11, 31);
-                
-                const total = end - start;
-                const progress = current - start;
-                const percentage = Math.max(0, Math.min(100, (progress / total) * 100));
-                
-                const dayOfYear = Math.floor((current - start) / (1000 * 60 * 60 * 24)) + 1;
-                
-                const totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                const remainingDays = totalDays - dayOfYear;
-                
-                const progressBar = document.getElementById('year-progress-bar');
-                const progressWalker = document.getElementById('year-progress-walker');
-                const progressText = document.getElementById('year-progress-text');
-                
-                if (progressBar) progressBar.style.width = `${percentage}%`;
-                if (progressWalker) progressWalker.style.left = `${percentage}%`;
-                if (progressText) progressText.textContent = `已过 ${dayOfYear} 天 · 剩余 ${remainingDays} 天 · ${percentage.toFixed(1)}%`;
-
-                const walker = document.getElementById('year-progress-walker');
-                const bubble = document.getElementById('walker-bubble');
-                if (walker && bubble) {
-                    walker.addEventListener('mouseenter', () => bubble.classList.remove('opacity-0'));
-                    walker.addEventListener('mouseleave', () => bubble.classList.add('opacity-0'));
-                }
-            }
-
-            function renderYearPixelGrid() {
-                const container = document.getElementById('year-pixel-grid');
-                const wrapper = document.getElementById('year-pixel-grid-container');
-                if (!container || !wrapper) return;
-                
-                wrapper.classList.remove('hidden');
-                container.innerHTML = '';
-
-                const now = new Date();
-                const todayStart = new Date(now);
-                todayStart.setHours(0, 0, 0, 0);
-                const start = new Date(YEAR, 0, 1);
-                const end = new Date(YEAR, 11, 31);
-                
-                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                    const dateStr = formatLocalDate(d);
-                    const cellStart = new Date(d);
-                    cellStart.setHours(0, 0, 0, 0);
-                    const isToday = cellStart.getTime() === todayStart.getTime();
-                    const isPast = cellStart.getTime() < todayStart.getTime();
-                    const isFuture = cellStart.getTime() > todayStart.getTime();
-                    
-                    const cell = document.createElement('div');
-                    let className = "w-2.5 h-2.5 rounded-[1px] transition-all duration-300 ";
-
-                    if (isToday) {
-                        className += "shadow-md scale-110 z-10 animate-pulse border border-black/10";
-                        cell.style.backgroundColor = `#2563EB`;
-                        cell.title = `${dateStr}（今天）`;
-                    } else if (isPast) {
-                        cell.style.backgroundColor = `#DBEAFE`;
-                        className += "opacity-90 hover:opacity-100";
-                        cell.title = `${dateStr}（过去）`;
-                    } else {
-                        cell.style.backgroundColor = `#F3F4F6`;
-                        className += "hover:bg-gray-200";
-                        cell.title = `${dateStr}（未来）`;
-                    }
-                    
-                    cell.className = className;
-                    container.appendChild(cell);
-                }
-            }
-
-            init();
-        });
+        if (window.document.documentMode || /Edge/.test(navigator.userAgent)) {
+            // Check for Grid support roughly or just UA
+             if (!('grid' in document.body.style)) {
+                 var div = document.createElement('div');
+                 div.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;background:#fff3cd;color:#856404;padding:10px;text-align:center;z-index:9999;border-top:1px solid #ffeeba;';
+                 div.innerHTML = '您正在使用旧版浏览器，建议使用 Chrome, Edge, Safari 或 Firefox 最新版本以获得最佳体验。 <span style="cursor:pointer;float:right;margin-right:20px;" onclick="this.parentElement.style.display=\'none\'">&times;</span>';
+                 document.body.appendChild(div);
+             }
+        }
     </script>
+    
+    <!-- App Entry -->
+    <script type="module" src="src/core/app.js"></script>
+</body>
+</html>                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <span class="text-[10px] mt-1">36旬</span>
+            </button>
+            <button id="mobile-nav-overview" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="text-[10px] mt-1">全景</span>
+            </button>
+             <button id="mobile-nav-settings" class="flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="text-[10px] mt-1">设置</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Bottom Spacer for Mobile Nav -->
+    <div class="h-16 md:hidden"></div>
+
+
+    <!-- Core App Logic -->
+    <script type="module" src="src/core/app.js"></script>
 </body>
 </html>

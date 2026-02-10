@@ -1,4 +1,5 @@
-const QuoteSystem = require('./quote.js');
+import { QuoteSystem } from './quote.js';
+import { jest } from '@jest/globals';
 
 describe('QuoteSystem', () => {
     let fetchMock;

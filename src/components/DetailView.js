@@ -188,6 +188,31 @@ export class DetailView {
                 const dayData = userData[dateStr] || {};
                 const isWithinXun = currentDate >= period.startDate && currentDate <= period.endDate;
                 
+                // Menstrual Logic
+                const menstrualData = state.menstrualData || { cycles: [] };
+                let isPeriod = false;
+                let isPredicted = false;
+                
+                // Check History
+                for (const cycle of menstrualData.cycles) {
+                    // If cycle has end date
+                    if (cycle.end) {
+                        if (dateStr >= cycle.start && dateStr <= cycle.end) {
+                            isPeriod = true;
+                            break;
+                        }
+                    } else {
+                        // Ongoing cycle: from start to today (inclusive)
+                        const todayStr = Calendar.formatLocalDate(new Date());
+                        if (dateStr >= cycle.start && dateStr <= todayStr) {
+                            isPeriod = true;
+                            break;
+                        }
+                    }
+                }
+                
+
+
                 let jieQi = '', lunarDay = '';
                 let holidayName = '';
                 let isHoliday = false;
@@ -215,7 +240,9 @@ export class DetailView {
 
                 dayEl.className = `${baseClass} ${isWithinXun ? activeClass : inactiveClass}`;
                 
-                if (isWithinXun) {
+                if (isPeriod && state.settings.showMenstrualCycle) {
+                    dayEl.style.background = 'rgba(252, 211, 241, 0.3)'; // A light pink background
+                } else if (isWithinXun) {
                     dayEl.style.background = `linear-gradient(135deg, hsl(${hue}, 90%, 96%) 0%, hsl(${hue}, 80%, 92%) 100%)`;
                     dayEl.style.boxShadow = `inset 0 0 0 1px hsl(${hue}, 80%, 80%)`;
                 } else {
@@ -235,6 +262,7 @@ export class DetailView {
                 const displayEmoji = dayData.mood ? moodEmojis[dayData.mood] : (dayData.emoji || '');
 
                 let indicators = [];
+                if (isPeriod && state.settings.showMenstrualCycle) indicators.push('<span title="经期">🩸</span>');
                 if (dayData.goal_checkin) indicators.push('<span title="核心目标">🎯</span>');
                 if (isWithinXun) {
                     const xunIndicators = Array.isArray(macroGoals[period.index]?.indicators) ? macroGoals[period.index].indicators : [];

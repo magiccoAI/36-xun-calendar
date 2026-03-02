@@ -54,5 +54,26 @@ export const Calendar = {
     getXunPeriodByDateStr(periods, dateStr) {
         const d = new Date(dateStr);
         return periods.find(p => d >= p.startDate && d <= p.endDate);
+    },
+
+    // Date helpers
+    addDays(dateStr, days) {
+        const d = new Date(dateStr);
+        d.setDate(d.getDate() + days);
+        return this.formatLocalDate(d);
+    },
+
+    diffDays(dateStr1, dateStr2) {
+        const d1 = new Date(dateStr1);
+        const d2 = new Date(dateStr2);
+        return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+    },
+
+    isSameOrAfter(dateStr1, dateStr2) {
+        return new Date(dateStr1) >= new Date(dateStr2);
+    },
+    
+    isSameOrBefore(dateStr1, dateStr2) {
+        return new Date(dateStr1) <= new Date(dateStr2);
     }
 };

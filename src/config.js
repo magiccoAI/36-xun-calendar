@@ -8,6 +8,7 @@ export const CONFIG = {
         MACRO_GOALS: 'xun_macro_goals',
         CUSTOM_EMOTIONS: 'xun_custom_emotions',
         CUSTOM_NOURISHMENTS: 'xun_custom_nourishments',
+        SETTINGS: 'xun_settings',
         LAST_VIEWED_XUN: 'xun_last_viewed_index'
     },
     DEFAULT_EMOTIONS: [

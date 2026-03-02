@@ -8,6 +8,7 @@ import { DetailView } from '../components/DetailView.js';
 import { SummaryView } from '../components/SummaryView.js';
 import { Modal } from '../components/Modal.js';
 import { BackupModal } from '../components/BackupModal.js';
+import { SettingsModal } from '../components/SettingsModal.js';
 import { QuoteSystem } from '../quote.js';
 
 class App {
@@ -16,10 +17,12 @@ class App {
         this.initViews();
         this.initModal();
         this.initBackup();
+        this.initSettings();
         this.initTheme();
         this.initYearProgress();
         this.initNavigation();
         this.initEnergySlider();
+        this.initPixelFarm();
         QuoteSystem.init();
         
         // Subscribe to store
@@ -28,23 +31,17 @@ class App {
         // Initial Render
         this.render(store.getState());
         
-        // Check for saved view state or default
-        const lastView = localStorage.getItem('xun_last_viewed_view') || 'macro';
-        const lastIndex = parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.LAST_VIEWED_XUN)) || 1;
-        
-        // If hash exists, it overrides
-        // (Optional: handle hash routing)
-
+        // Force initial view to macro and scroll to current xun
         const currentXun = Calendar.getCurrentXun(this.xunPeriods);
-        const initialXunIndex = currentXun ? currentXun.index : (parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.LAST_VIEWED_XUN)) || 1);
+        const initialXunIndex = currentXun ? currentXun.index : 1;
 
         store.setState({ 
-            currentView: lastView, 
+            currentView: 'macro', 
             viewedXunIndex: initialXunIndex 
         });
 
-        // Auto-scroll to current xun on initial load of macro view
-        if (lastView === 'macro' && currentXun) {
+        // Auto-scroll to current xun on initial load
+        if (currentXun) {
             this.scrollToXun(currentXun.index);
         }
     }
@@ -92,6 +89,55 @@ class App {
         this.modal = new Modal('modal', () => {
             // On save/delete, store updates, which triggers render
         });
+
+        // The logic for the modal's internal elements is being initialized here.
+        // This is a temporary placement to follow the current refactoring step.
+        const moodButtons = document.querySelectorAll('.mood-btn');
+        const seedPacketContainer = document.getElementById('seed-packet-selection');
+        const seedPackets = document.querySelectorAll('.seed-packet');
+        let selectedMood = null;
+        let selectedCrop = null;
+
+        moodButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                selectedMood = button.dataset.mood;
+                moodButtons.forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'ring-green-400'));
+                button.classList.add('ring-2', 'ring-offset-2', 'ring-green-400');
+
+                if (selectedMood === '5') {
+                    seedPacketContainer.classList.remove('hidden');
+                } else {
+                    seedPacketContainer.classList.add('hidden');
+                    selectedCrop = null; // Reset crop if mood changes
+                    seedPackets.forEach(p => p.classList.remove('ring-2', 'ring-yellow-400'));
+                }
+            });
+        });
+
+        seedPackets.forEach(packet => {
+            packet.addEventListener('click', () => {
+                selectedCrop = packet.dataset.crop;
+                seedPackets.forEach(p => p.classList.remove('ring-2', 'ring-yellow-400'));
+                packet.classList.add('ring-2', 'ring-yellow-400');
+            });
+        });
+
+        this.modal.elements.saveBtn.addEventListener('click', () => {
+            const date = this.modal.elements.dateTitle.textContent;
+            const dayData = store.getDay(date) || {};
+
+            // Combine existing data with new data
+            const newData = {
+                ...dayData,
+                mood: parseInt(selectedMood, 10),
+                crop: selectedMood === '5' ? selectedCrop : dayData.crop, // Keep old crop if mood is no longer superb
+                // ... gather other data from modal inputs ...
+            };
+
+            store.updateDay(date, newData);
+            this.modal.close();
+            this.initPixelFarm(); // Re-render the farm to show the new crop
+        });
         
         // Expose openModal to window if needed by inline onclicks (though we should avoid them)
         // Or better, views should handle clicks and call app.openModal
@@ -112,6 +158,14 @@ class App {
         const backupBtn = document.getElementById('backup-btn');
         if (backupBtn) {
             backupBtn.onclick = () => this.backupModal.open();
+        }
+    }
+
+    initSettings() {
+        this.settingsModal = new SettingsModal('settings-modal');
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            settingsBtn.onclick = () => this.settingsModal.open();
         }
     }
 
@@ -247,11 +301,9 @@ class App {
         // Mobile Navigation
         const mobNavMacro = document.getElementById('mobile-nav-macro');
         const mobNavOverview = document.getElementById('mobile-nav-overview');
-        const mobNavSettings = document.getElementById('mobile-nav-settings');
 
         if (mobNavMacro) mobNavMacro.onclick = () => store.setState({ currentView: 'macro' });
         if (mobNavOverview) mobNavOverview.onclick = () => store.setState({ currentView: 'overview' });
-        if (mobNavSettings) mobNavSettings.onclick = () => this.backupModal.open();
     }
 
     initEnergySlider() {
@@ -281,6 +333,131 @@ class App {
 
         updateEnergyFeel(); // Initial call
     }
+
+    initPixelFarm() {
+        const grid = document.getElementById('pixel-farm-grid');
+        if (!grid) return;
+        grid.innerHTML = ''; // Clear grid before redraw
+
+        const year = CONFIG.YEAR;
+        const totalDays = 365;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const allData = store.getAllData();
+
+        for (let i = 0; i < totalDays; i++) {
+            const dayDate = new Date(year, 0, i + 1);
+            const dateStr = Calendar.formatLocalDate(dayDate);
+
+            const plot = document.createElement('div');
+            plot.id = `plot-${dateStr}`;
+            // 自检修复：确保边框清晰可见，移除任何可能冲突的背景色类
+            // 更改为实心土地背景色 bg-yellow-200
+            plot.className = 'w-4 h-4 bg-amber-300 cursor-pointer hover:ring-2 hover:ring-amber-400 border border-amber-400/50 flex items-center justify-center rounded-sm';
+            plot.dataset.date = dateStr;
+            plot.onclick = (e) => {
+                e.stopPropagation();
+                this.showCropSelection(dateStr, plot);
+            };
+
+            const dayData = allData[dateStr];
+            const crop = dayData ? dayData.crop : null;
+
+            // 重置样式，为状态化渲染做准备
+            plot.textContent = ''; // Use textContent instead of innerHTML for emojis
+            plot.style.backgroundImage = '';
+            plot.style.backgroundSize = '';
+            plot.style.backgroundPosition = '';
+            plot.style.backgroundRepeat = '';
+
+            if (crop) {
+                if (crop.includes('/')) { // 作物是图片
+                    plot.style.backgroundImage = `url('${crop}')`;
+                    plot.style.backgroundSize = 'contain';
+                    plot.style.backgroundPosition = 'center';
+                    plot.style.backgroundRepeat = 'no-repeat';
+                } else { // Emoji crop
+                    plot.textContent = crop;
+                }
+                // 为已种植的地块加深背景色
+                plot.classList.remove('bg-amber-300', 'border-amber-400/50');
+                plot.classList.add('bg-amber-600', 'border-amber-700/50');
+
+            } else if (dayDate < today) { // 过去的日子，默认显示嫩芽
+                plot.innerHTML = '<div class="w-1 h-1 bg-green-500 rounded-full"></div>';
+                // 为过去未种植的地块也加深背景色
+                plot.classList.remove('bg-amber-300', 'border-amber-400/50');
+                plot.classList.add('bg-amber-600', 'border-amber-700/50');
+            } 
+
+            if (dayDate.getTime() === today.getTime()) {
+                plot.classList.add('ring-2', 'ring-blue-500');
+            }
+
+            grid.appendChild(plot);
+        }
+    }
+
+    showCropSelection(dateStr, element) {
+        const menu = document.getElementById('crop-selection-menu');
+        if (!menu) return;
+
+        const rect = element.getBoundingClientRect();
+        menu.style.top = `${window.scrollY + rect.bottom + 5}px`;
+        menu.style.left = `${window.scrollX + rect.left}px`;
+        menu.classList.remove('hidden');
+
+        const newMenu = menu.cloneNode(true);
+        menu.parentNode.replaceChild(newMenu, menu);
+
+        newMenu.querySelectorAll('.seed-packet').forEach(packet => {
+            packet.onclick = () => {
+                const crop = packet.dataset.crop;
+                const dayData = store.getAllData()[dateStr] || {};
+                const currentData = store.getAllData();
+                const updatedData = { 
+                    ...currentData, 
+                    [dateStr]: { ...dayData, crop: crop } 
+                };
+                store.setState({ userData: updatedData });
+                newMenu.classList.add('hidden');
+                this.initPixelFarm();
+            };
+        });
+
+        const hideMenu = (e) => {
+            if (!newMenu.contains(e.target)) {
+                newMenu.classList.add('hidden');
+                document.body.removeEventListener('click', hideMenu);
+            }
+        };
+        document.body.addEventListener('click', hideMenu);
+    }
+
+    showCropDisplay(dateStr) {
+        const panel = document.getElementById('crop-display-panel');
+        const dateEl = document.getElementById('crop-display-date');
+        const imageContainer = document.getElementById('crop-display-image-container');
+        if (!panel || !dateEl || !imageContainer) return;
+
+        const dayData = store.getAllData()[dateStr] || {};
+        const cropImage = dayData.crop ? `<img src="${dayData.crop}" class="w-full h-full object-contain"/>` : '<span class="text-gray-400 text-xs">未种植</span>';
+
+        dateEl.textContent = dateStr;
+        imageContainer.innerHTML = cropImage;
+
+        panel.classList.remove('hidden');
+
+        // Optional: auto-hide after a few seconds
+        setTimeout(() => {
+            panel.classList.add('hidden');
+        }, 4000);
+    }
+
+
+
+
 
     scrollToXun(xunIndex) {
         // Use a timeout to ensure the element is in the DOM after a render
@@ -315,11 +492,21 @@ class App {
             'detail': document.getElementById('detail-view'), // detail view
             'summary': document.getElementById('summary-view')
         };
+        const farmContainer = document.getElementById('pixel-farm-container');
         
         // Hide all first
         Object.values(views).forEach(el => {
             if (el) el.classList.add('hidden');
         });
+
+        // Show/Hide Farm based on view
+        if (farmContainer) {
+            if (state.currentView === 'macro') {
+                farmContainer.classList.remove('hidden');
+            } else {
+                farmContainer.classList.add('hidden');
+            }
+        }
 
         // Navigation State
         const navMacro = document.getElementById('nav-macro');

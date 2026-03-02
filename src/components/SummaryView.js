@@ -66,6 +66,7 @@ export class SummaryView {
                 wealth: 0,
                 customActivities: {},
                 journals: [],
+                three_good_things: [],
                 dates: xunData.map(d => d.date.slice(5)), // Now contains all dates
                 sleepData: [],
                 exerciseData: [],
@@ -92,6 +93,9 @@ export class SummaryView {
                         });
                     }
                     if (data.journal) stats.journals.push({ date: data.date, content: data.journal });
+                    if (data.three_good_things) {
+                        stats.three_good_things.push(...data.three_good_things.filter(t => t.trim() !== ''));
+                    }
                     
                     stats.sleepData.push(data.metrics?.sleep || null);
                     stats.exerciseData.push(data.metrics?.exercise || null);
@@ -143,6 +147,18 @@ export class SummaryView {
                                     </span>
                                 `).join('')}
                             </div>
+                        </div>
+                    ` : ''}
+
+                    <!-- 4. Three Good Things -->
+                    ${stats.three_good_things.length > 0 ? `
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                             <h4 class="font-medium text-gray-700 mb-6 flex items-center gap-2">
+                                <span class="w-1 h-4 rounded-full bg-amber-400"></span> ✨ 本旬好事回顾
+                            </h4>
+                            <ul class="space-y-3 list-disc list-inside text-gray-600 text-sm pl-2">
+                                ${stats.three_good_things.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
                         </div>
                     ` : ''}
 

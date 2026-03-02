@@ -49,6 +49,8 @@ export class Modal {
             ],
             customActivitiesContainer: document.getElementById('custom-activities-container'),
             addActivityBtn: document.getElementById('add-custom-activity'),
+            cycleStart: document.getElementById('cycle-start'),
+            cycleEnd: document.getElementById('cycle-end'),
             journalInput: document.getElementById('journal-input'),
             deleteBtn: document.getElementById('modal-delete'),
             saveBtn: document.getElementById('modal-save')
@@ -97,6 +99,14 @@ export class Modal {
         const state = store.getState();
         const data = state.userData[dateStr] || {};
         const macroGoal = state.macroGoals[xunIndex] || {};
+
+        // Show/Hide Menstrual Tracker based on settings
+        const trackerContainer = document.getElementById('menstrual-tracker-container');
+        if (state.settings.showMenstrualCycle) {
+            trackerContainer.classList.remove('hidden');
+        } else {
+            trackerContainer.classList.add('hidden');
+        }
 
         // Reset UI
         this.resetUI();
@@ -196,6 +206,8 @@ export class Modal {
         this.elements.weatherBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
         this.elements.keywordsInput.value = '';
         this.elements.energyInput.value = 50;
+        this.elements.cycleStart.checked = false;
+        this.elements.cycleEnd.checked = false;
         Object.values(this.elements.metrics).forEach(el => el.value = '');
         this.elements.goodThings.forEach(el => el.value = '');
         this.elements.journalInput.value = '';
@@ -397,6 +409,19 @@ export class Modal {
                 data.custom_activities.push({ name, value: val });
             }
         });
+        
+        // Cycle Data Logic
+        const isStart = this.elements.cycleStart.checked;
+        const isEnd = this.elements.cycleEnd.checked;
+        const currentCycles = store.getState().menstrualData.cycles;
+        const wasStart = currentCycles.some(c => c.start === this.currentDateStr);
+        const wasEnd = currentCycles.some(c => c.end === this.currentDateStr);
+
+        if (isStart && !wasStart) store.addPeriodStart(this.currentDateStr);
+        if (!isStart && wasStart) store.removePeriodStart(this.currentDateStr);
+        
+        if (isEnd && !wasEnd) store.addPeriodEnd(this.currentDateStr);
+        if (!isEnd && wasEnd) store.removePeriodEnd(this.currentDateStr);
         
         // Save Habits Definition as well (Update Macro Goals)
         const habits = this.elements.habitInputs.map(el => el.value.trim());

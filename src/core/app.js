@@ -19,6 +19,7 @@ class App {
         this.initTheme();
         this.initYearProgress();
         this.initNavigation();
+        this.initEnergySlider();
         QuoteSystem.init();
         
         // Subscribe to store
@@ -34,10 +35,18 @@ class App {
         // If hash exists, it overrides
         // (Optional: handle hash routing)
 
+        const currentXun = Calendar.getCurrentXun(this.xunPeriods);
+        const initialXunIndex = currentXun ? currentXun.index : (parseInt(localStorage.getItem(CONFIG.STORAGE_KEYS.LAST_VIEWED_XUN)) || 1);
+
         store.setState({ 
             currentView: lastView, 
-            viewedXunIndex: lastIndex 
+            viewedXunIndex: initialXunIndex 
         });
+
+        // Auto-scroll to current xun on initial load of macro view
+        if (lastView === 'macro' && currentXun) {
+            this.scrollToXun(currentXun.index);
+        }
     }
 
     initViews() {
@@ -204,12 +213,22 @@ class App {
             // Spring Festival Theme Check (Approx. Late Jan to Feb)
             // 2026 CNY is Feb 17. We enable it for Feb and late Jan.
             const isSpringFestival = (now.getMonth() === 1) || (now.getMonth() === 0 && now.getDate() > 20);
+            const isMarch = now.getMonth() === 2; // March is month 2
             const header = document.querySelector('header');
+            const flower = document.querySelector('.flower-path');
+
             if (header) {
                 if (isSpringFestival) {
                     header.classList.add('spring-festival-theme');
                 } else {
                     header.classList.remove('spring-festival-theme');
+                }
+            }
+            if (flower) {
+                if (isMarch) {
+                    flower.classList.remove('hidden');
+                } else {
+                    flower.classList.add('hidden');
                 }
             }
         };
@@ -233,6 +252,53 @@ class App {
         if (mobNavMacro) mobNavMacro.onclick = () => store.setState({ currentView: 'macro' });
         if (mobNavOverview) mobNavOverview.onclick = () => store.setState({ currentView: 'overview' });
         if (mobNavSettings) mobNavSettings.onclick = () => this.backupModal.open();
+    }
+
+    initEnergySlider() {
+        const slider = document.getElementById('energy-level');
+        if (!slider) return;
+
+        const updateEnergyFeel = () => {
+            const value = slider.value;
+            const percentage = (value / slider.max) * 100;
+            // Gradient from a tired green to a vibrant yellow/orange
+            const color = `linear-gradient(90deg, #86efac ${percentage}%, #e5e7eb ${percentage}%)`;
+            slider.style.background = color;
+        };
+
+        slider.addEventListener('input', updateEnergyFeel);
+        
+        // Also update when modal opens and sets the value
+        // We can use a MutationObserver on the slider's value attribute
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                    updateEnergyFeel();
+                }
+            });
+        });
+        observer.observe(slider, { attributes: true });
+
+        updateEnergyFeel(); // Initial call
+    }
+
+    scrollToXun(xunIndex) {
+        // Use a timeout to ensure the element is in the DOM after a render
+        setTimeout(() => {
+            const element = document.getElementById(`xun-row-${xunIndex}`);
+            if (element) {
+                element.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                // Highlight the row briefly
+                element.style.transition = 'background-color 0.5s ease-in-out';
+                element.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'; // blue-500 with 10% opacity
+                setTimeout(() => {
+                    element.style.backgroundColor = '';
+                }, 2000);
+            }
+        }, 100); // A short delay
     }
 
     render(state, key, value) {

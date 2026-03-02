@@ -119,7 +119,7 @@ export class MacroView {
             
             // Check if current xun
             if (currentXun && currentXun.index === period.index) {
-                 row.classList.add('ring-2', 'ring-blue-400', 'z-10');
+                 row.classList.add('current-xun-highlight');
             }
 
             // Format Date
@@ -199,9 +199,9 @@ export class MacroView {
                         <span class="text-3xl font-black text-gray-800 font-serif tracking-tight" style="font-family: 'Times New Roman', serif;">${period.index}</span>
                         <span class="text-[10px] text-gray-400 font-serif ml-1">旬</span>
                     </div>
-                    <div class="md:hidden text-xs text-gray-400 font-mono">
+                    <div class="md:hidden text-sm text-gray-600 font-mono">
                         <span>${startStr} - ${endStr}</span>
-                        <span class="font-bold text-gray-500 ml-2">${progressText}</span>
+                        <span class="font-bold text-gray-700 ml-2">${progressText}</span>
                     </div>
                 </div>
                 

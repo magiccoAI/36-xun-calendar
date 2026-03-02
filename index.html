@@ -45,78 +45,90 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* 1. Spring (Vitality) - Oil Painting / Watercolor Effect */
+        /* 1. Spring (Vitality) - New background */
         body.theme-spring {
-            background-color: #ecfdf5;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(252, 231, 243, 0.6) 0%, transparent 40%),
-                radial-gradient(circle at 80% 10%, rgba(209, 250, 229, 0.7) 0%, transparent 30%),
-                radial-gradient(circle at 40% 80%, rgba(254, 243, 199, 0.5) 0%, transparent 50%),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3Cpath d='M50,150 Q100,100 150,150 T250,150' stroke='rgba(167, 243, 208, 0.4)' stroke-width='2' fill='none'/%3E%3Cpath d='M-50,350 Q50,300 150,350 T350,350' stroke='rgba(252, 165, 165, 0.2)' stroke-width='20' stroke-linecap='round' fill='none' filter='blur(10px)'/%3E%3C/svg%3E");
-            background-size: cover, cover, cover, 600px 600px;
+            background-image: url('src/images/spring-bg.jpg');
+            background-size: cover;
+            background-position: center bottom; /* Adjusted to hide text */
+            background-attachment: fixed;
+            background-color: #f0f9ff; /* A light sky blue fallback */
         }
-        body.theme-spring .bg-gray-50 { background-color: rgba(255, 255, 255, 0.7); backdrop-filter: blur(5px); }
+        body.theme-spring .bg-gray-50 { 
+            background-color: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(191, 219, 254, 0.5);
+        }
 
-        /* 2. Summer (Fresh Vitality) - Mint & Lemon | Watercolor Style */
+        /* 2. Summer (Fresh Vitality) - New background */
         body.theme-summer {
-            background-color: #eef7f1;
-            color: #103b2f;
-            background-image: 
-                radial-gradient(circle at 0% 0%, rgba(255, 249, 196, 0.35) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(178, 223, 219, 0.35) 0%, transparent 50%),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cfilter id='water'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01' numOctaves='3'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='20'/%3E%3CfeGaussianBlur stdDeviation='2'/%3E%3C/filter%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='100' fill='rgba(0, 150, 136, 0.05)' filter='url(%23water)'/%3E%3Cpath d='M300 300 Q 350 200 400 300' stroke='rgba(255, 235, 59, 0.2)' stroke-width='40' filter='blur(10px)'/%3E%3C/svg%3E");
-            background-size: cover, cover, cover;
+            background-image: url('src/images/summer-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #0c4a6e; /* A deep ocean blue */
         }
-        body.theme-summer .text-gray-800 { color: #103b2f; }
-        body.theme-summer .text-gray-700 { color: #0b2e24; }
-        body.theme-summer .text-gray-500 { color: #0f5a4d; }
-        body.theme-summer .text-gray-400 { color: #2f7f73; }
+        body.theme-summer .text-gray-800 { color: #0c4a6e; }
+        body.theme-summer .text-gray-700 { color: #075985; }
+        body.theme-summer .text-gray-500 { color: #0369a1; }
+        body.theme-summer .text-gray-400 { color: #0ea5e9; }
         body.theme-summer .bg-gray-50 { 
-            background-color: rgba(255, 255, 255, 0.92); 
-            border: 1px solid rgba(0, 77, 64, 0.25);
-            box-shadow: 0 4px 20px rgba(0, 77, 64, 0.07);
+            background-color: rgba(255, 255, 255, 0.85); 
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 6px 25px rgba(14, 165, 233, 0.1);
+            backdrop-filter: blur(10px);
         }
 
-        /* 3. Autumn (Warm Steady) - Maple & Parchment | Oil Canvas Style */
+        /* 3. Autumn (Warm Steady) - New background */
         body.theme-autumn {
-            background-color: #fff8e1; /* Amber 50 */
-            color: #3e2723; /* Dark Brown */
-            background-image: 
-                linear-gradient(135deg, rgba(255, 243, 224, 0.8) 0%, rgba(255, 255, 255, 0) 100%),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='canvas'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23canvas)'/%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 20 Q 70 5 80 30 T 60 60' stroke='rgba(230, 81, 0, 0.08)' stroke-width='8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-size: cover, 200px 200px, 150px 150px;
+            background-image: url('src/images/autumn-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #4e342e; /* A warm, dark brown */
         }
-        body.theme-autumn .text-gray-800 { color: #3e2723; }
-        body.theme-autumn .text-gray-700 { color: #4e342e; }
+        body.theme-autumn .text-gray-800 { color: #4e342e; }
+        body.theme-autumn .text-gray-700 { color: #5d4037; }
         body.theme-autumn .text-gray-500 { color: #795548; }
         body.theme-autumn .text-gray-400 { color: #a1887f; }
         body.theme-autumn .bg-gray-50 { 
-            background-color: rgba(255, 253, 231, 0.9); 
-            border: 1px solid rgba(255, 224, 178, 0.4);
-            box-shadow: 0 4px 15px rgba(62, 39, 35, 0.05);
+            background-color: rgba(255, 248, 225, 0.85); /* A creamy, parchment color */
+            border: 1px solid rgba(213, 166, 109, 0.5);
+            box-shadow: 0 6px 25px rgba(78, 52, 46, 0.1);
+            backdrop-filter: blur(8px);
         }
 
-        /* 4. Winter (Quiet Deep) - Snow & Ink | Washi/Frosted Style */
+        /* 4. Winter (Quiet Deep) - Combined background effect */
         body.theme-winter {
-            background-color: #f5f7fa; /* Snow Gray */
-            color: #2c3e50; /* Ink Blue */
-            background-image: 
-                linear-gradient(to bottom, #f5f7fa 0%, #e3e8ee 100%),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='washi'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23washi)' opacity='0.5'/%3E%3C/svg%3E"),
-                url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='100' cy='100' r='60' fill='rgba(44, 62, 80, 0.03)' filter='blur(20px)'/%3E%3Cpath d='M250,250 Q300,300 350,250' stroke='rgba(38, 50, 56, 0.05)' stroke-width='2' fill='none' filter='blur(2px)'/%3E%3Ctext x='50' y='350' font-size='40' fill='rgba(255,255,255,0.4)'%3E❄%3C/text%3E%3Ctext x='300' y='50' font-size='60' fill='rgba(255,255,255,0.3)'%3E❄%3C/text%3E%3C/svg%3E");
-            background-size: cover, 150px 150px, cover;
-            background-blend-mode: multiply;
+            color: #1d2c3a;
+            background-color: #e0f2f7;
+            background-image: url('src/images/winter-body.jpg');
+            background-repeat: repeat;
+            background-size: 300px 300px;
+            position: relative;
         }
-        body.theme-winter .text-gray-800 { color: #2c3e50; }
-        body.theme-winter .text-gray-700 { color: #37474f; }
-        body.theme-winter .text-gray-500 { color: #546e7a; }
-        body.theme-winter .text-gray-400 { color: #607d8b; }
+        body.theme-winter::after { /* Using ::after to not conflict with noise overlay */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 450px; /* Height of the top image area */
+            background-image: url('src/images/winter-top.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+        body.theme-winter .text-gray-800 { color: #1d2c3a; }
+        body.theme-winter .text-gray-700 { color: #2c3e50; }
+        body.theme-winter .text-gray-500 { color: #475569; }
+        body.theme-winter .text-gray-400 { color: #64748b; }
         body.theme-winter .bg-gray-50 { 
-            background-color: rgba(255, 255, 255, 0.8); 
-            border: 1px solid rgba(207, 216, 220, 0.5);
-            box-shadow: 0 4px 20px rgba(38, 50, 56, 0.05);
-            backdrop-filter: blur(8px);
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(207, 216, 220, 0.4);
+            box-shadow: 0 6px 25px rgba(38, 50, 56, 0.08);
+            backdrop-filter: blur(10px);
         }
 
         /* 5. Liqiu Theme (Beginning of Autumn) */
@@ -214,6 +226,77 @@
             from { transform: rotate(-5deg); transform-origin: 12px 10px; }
             to { transform: rotate(5deg); transform-origin: 12px 10px; }
         }
+
+        /* Custom highlight for the current xun */
+        .current-xun-highlight {
+            position: relative;
+            background-color: rgba(239, 246, 255, 0.7) !important; /* blue-50 with opacity */
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4), 0 4px 12px rgba(59, 130, 246, 0.1);
+            z-index: 10;
+        }
+        .current-xun-highlight::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: #3b82f6; /* blue-500 */
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Custom styles for the energy slider */
+        #energy-level {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb; /* gray-200 */
+            border-radius: 9999px;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        #energy-level::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border: 2px solid #3b82f6; /* blue-500 */
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+        }
+
+        #energy-level::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border: 2px solid #3b82f6;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* Winter header image styles */
+        body.theme-winter #winter-header-image {
+            display: block;
+            background-image: url('src/images/winter-header.png');
+            background-size: cover;
+            background-position: center;
+            height: 250px; /* Increased height */
+            width: 100%;
+            margin-bottom: 2rem; /* Add space below the header */
+            border-radius: 0 0 20px 20px; /* Rounded bottom corners */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased overflow-x-hidden">
@@ -297,6 +380,16 @@
                                 <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-md">
                                     <circle cx="12" cy="6" r="4" fill="#2563EB" class="walker-head transition-colors duration-300"/>
                                     <path d="M12 10V20M12 20L8 30M12 20L16 30M12 13L7 16M12 13L17 16" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="walker-body transition-colors duration-300"/>
+                                    <!-- Flower for March -->
+                                    <g class="flower-path hidden" fill="#f43f5e">
+                                        <path d="M17 16 L19 14" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/>
+                                        <circle cx="19.5" cy="13.5" r="1.5"/>
+                                        <circle cx="18" cy="12" r="1.5"/>
+                                        <circle cx="21" cy="12" r="1.5"/>
+                                        <circle cx="18" cy="15" r="1.5"/>
+                                        <circle cx="21" cy="15" r="1.5"/>
+                                        <circle cx="19.5" cy="13.5" r="0.5" fill="yellow"/>
+                                    </g>
                                     <!-- Scarf Path (Hidden by default) -->
                                     <path d="M10 10 Q 12 14 14 10 L 15 11 L 15 18 L 12 18 L 12 12 L 10 12 Z" fill="#EF4444" class="scarf-path hidden"/>
                                     <path d="M14 11 L 16 20" stroke="#EF4444" stroke-width="2" stroke-linecap="round" class="scarf-path hidden"/>
@@ -452,18 +545,18 @@
                         <span class="text-[10px] text-gray-400">习惯、待办或任何你想提醒的事</span>
                     </div>
 
-                    <div class="grid grid-cols-1 gap-2" id="day-indicator-container">
-                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm focus-within:border-blue-300 transition-colors">
-                            <input type="text" id="day-indicator-input-1" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-xs placeholder-gray-400" placeholder="">
-                            <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300">
+                    <div class="space-y-2" id="day-indicator-container">
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded-lg border border-gray-200 shadow-sm focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all">
+                            <input type="text" id="day-indicator-input-1" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm placeholder-gray-400" placeholder="自定义提醒...">
+                            <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300 cursor-pointer">
                         </div>
-                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm focus-within:border-blue-300 transition-colors">
-                            <input type="text" id="day-indicator-input-2" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-xs placeholder-gray-400" placeholder="Habits">
-                            <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300">
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded-lg border border-gray-200 shadow-sm focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all">
+                            <input type="text" id="day-indicator-input-2" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm placeholder-gray-400" placeholder="例如：早起">
+                            <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300 cursor-pointer">
                         </div>
-                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded border border-gray-100 shadow-sm focus-within:border-blue-300 transition-colors">
-                            <input type="text" id="day-indicator-input-3" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-xs placeholder-gray-400" placeholder=" (To-do)">
-                            <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300">
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white p-2 rounded-lg border border-gray-200 shadow-sm focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all">
+                            <input type="text" id="day-indicator-input-3" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm placeholder-gray-400" placeholder="例如：阅读 30 分钟">
+                            <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300 cursor-pointer">
                         </div>
                     </div>
                 </div>

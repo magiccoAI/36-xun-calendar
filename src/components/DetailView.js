@@ -195,6 +195,7 @@ export class DetailView {
                 
                 // Check History
                 for (const cycle of menstrualData.cycles) {
+                    if (!cycle.start) continue;
                     // If cycle has end date
                     if (cycle.end) {
                         if (dateStr >= cycle.start && dateStr <= cycle.end) {
@@ -202,9 +203,8 @@ export class DetailView {
                             break;
                         }
                     } else {
-                        // Ongoing cycle: from start to today (inclusive)
-                        const todayStr = Calendar.formatLocalDate(new Date());
-                        if (dateStr >= cycle.start && dateStr <= todayStr) {
+                        // 未设置结束日期时，只高亮起始当日，等待用户手动标记结束
+                        if (dateStr === cycle.start) {
                             isPeriod = true;
                             break;
                         }
@@ -262,7 +262,7 @@ export class DetailView {
                 const displayEmoji = dayData.mood ? moodEmojis[dayData.mood] : (dayData.emoji || '');
 
                 let indicators = [];
-                if (isPeriod && state.settings.showMenstrualCycle) indicators.push('<span title="经期">🩸</span>');
+        
                 if (dayData.goal_checkin) indicators.push('<span title="核心目标">🎯</span>');
                 if (isWithinXun) {
                     const xunIndicators = Array.isArray(macroGoals[period.index]?.indicators) ? macroGoals[period.index].indicators : [];

@@ -50,6 +50,26 @@ class Store {
         return this.state.userData;
     }
 
+    getDay(dateStr) {
+        return this.state.userData[dateStr] || null;
+    }
+
+    updateDay(dateStr, dayData) {
+        const newUserData = { ...this.state.userData };
+        if (!dayData || Object.keys(dayData).length === 0) {
+            delete newUserData[dateStr];
+        } else {
+            newUserData[dateStr] = dayData;
+        }
+        this.setState({ userData: newUserData });
+    }
+
+    deleteDay(dateStr) {
+        const newUserData = { ...this.state.userData };
+        delete newUserData[dateStr];
+        this.setState({ userData: newUserData });
+    }
+
     persist(newState) {
         if (newState.userData) {
             localStorage.setItem(CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(newState.userData));
@@ -168,7 +188,7 @@ class Store {
         let totalDays = 0;
         let count = 0;
         // Use last 6 cycles max
-        const recentCycles = cycles.slice(-7); 
+        const recentCycles = cycles.slice(-6); 
         
         for (let i = 0; i < recentCycles.length - 1; i++) {
             const current = recentCycles[i];

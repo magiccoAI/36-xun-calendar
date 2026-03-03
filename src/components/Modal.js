@@ -66,8 +66,20 @@ export class Modal {
         // Mood Buttons
         this.elements.moodBtns.forEach(btn => {
             btn.onclick = () => {
-                this.elements.moodBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
+                this.elements.moodBtns.forEach(b => {
+                    b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300');
+                    const emojiSpan = b.querySelector('span');
+                    if (emojiSpan) {
+                        emojiSpan.classList.add('grayscale');
+                        emojiSpan.classList.remove('grayscale-0');
+                    }
+                });
                 btn.classList.add('bg-blue-100', 'ring-2', 'ring-blue-300');
+                const emojiSpan = btn.querySelector('span');
+                if (emojiSpan) {
+                    emojiSpan.classList.remove('grayscale');
+                    emojiSpan.classList.add('grayscale-0');
+                }
                 this.currentMood = parseInt(btn.dataset.mood);
             };
         });

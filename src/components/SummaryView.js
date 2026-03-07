@@ -67,6 +67,12 @@ export class SummaryView {
                 customActivities: {},
                 journals: [],
                 three_good_things: [],
+                three_good_things_by_date: {}, // 按日期分组
+                good_things_stats: {
+                    total_days: 0,
+                    total_items: 0,
+                    keywords: {}
+                },
                 dates: xunData.map(d => d.date.slice(5)), // Now contains all dates
                 sleepData: [],
                 exerciseData: [],
@@ -87,6 +93,12 @@ export class SummaryView {
                         if (data.metrics.reading) { stats.reading.total += data.metrics.reading; stats.reading.count++; }
                         if (data.metrics.wealth) stats.wealth += data.metrics.wealth;
                     }
+                    
+                    // 新的睡眠数据结构
+                    if (data.sleepData && data.sleepData.totalHours) {
+                        stats.sleep.total += data.sleepData.totalHours;
+                        stats.sleep.count++;
+                    }
                     if (data.custom_activities) {
                         data.custom_activities.forEach(act => {
                             stats.customActivities[act.name] = (stats.customActivities[act.name] || 0) + 1;
@@ -94,7 +106,26 @@ export class SummaryView {
                     }
                     if (data.journal) stats.journals.push({ date: data.date, content: data.journal });
                     if (data.three_good_things) {
-                        stats.three_good_things.push(...data.three_good_things.filter(t => t.trim() !== ''));
+                        const goodThings = data.three_good_things.filter(t => t.trim() !== '');
+                        if (goodThings.length > 0) {
+                            stats.three_good_things_by_date[data.date] = goodThings;
+                            stats.three_good_things.push(...goodThings);
+                            stats.good_things_stats.total_days++;
+                            stats.good_things_stats.total_items += goodThings.length;
+                            
+                            // 提取关键词
+                            goodThings.forEach(thing => {
+                                // 简单的关键词提取，去除常见停用词
+                                const keywords = thing
+                                    .replace(/[，。！？；：""''（）【】《》、]/g, ' ')
+                                    .split(/\s+/)
+                                    .filter(word => word.length > 1 && !['的', '了', '是', '在', '有', '和', '与', '或', '但', '而', '也', '就', '都', '很', '非常', '特别', '今天', '昨天', '明天'].includes(word));
+                                
+                                keywords.forEach(keyword => {
+                                    stats.good_things_stats.keywords[keyword] = (stats.good_things_stats.keywords[keyword] || 0) + 1;
+                                });
+                            });
+                        }
                     }
                     
                     stats.sleepData.push(data.metrics?.sleep || null);
@@ -150,17 +181,8 @@ export class SummaryView {
                         </div>
                     ` : ''}
 
-                    <!-- 4. Three Good Things -->
-                    ${stats.three_good_things.length > 0 ? `
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                             <h4 class="font-medium text-gray-700 mb-6 flex items-center gap-2">
-                                <span class="w-1 h-4 rounded-full bg-amber-400"></span> ✨ 本旬好事回顾
-                            </h4>
-                            <ul class="space-y-3 list-disc list-inside text-gray-600 text-sm pl-2">
-                                ${stats.three_good_things.map(item => `<li>${item}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
+                    <!-- 4. Three Good Things Enhanced -->
+                    ${this.generateGoodThingsSection(stats)}
 
                     <!-- 2. Charts Row -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -246,6 +268,99 @@ export class SummaryView {
         });
     }
 
+    generateGoodThingsSection(stats) {
+        if (stats.three_good_things.length === 0) return '';
+
+        const topKeywords = Object.entries(stats.good_things_stats.keywords)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 8)
+            .map(([word, count]) => ({ word, count }));
+
+        const completionRate = Math.round((stats.good_things_stats.total_days / 10) * 100);
+
+        return `
+            <!-- 4. Three Good Things Enhanced -->
+            <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl shadow-sm border border-amber-100 relative overflow-hidden">
+                <!-- 背景装饰 -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-amber-100 rounded-full opacity-20 -translate-y-16 translate-x-16"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-orange-100 rounded-full opacity-20 translate-y-12 -translate-x-12"></div>
+                
+                <div class="relative z-10">
+                    <!-- 标题和统计 -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h4 class="font-medium text-gray-700 flex items-center gap-2">
+                            <span class="w-1 h-4 rounded-full bg-amber-400"></span> 
+                            <span class="text-lg">✨ 本旬美好回顾</span>
+                        </h4>
+                        <div class="flex items-center gap-4 text-sm">
+                            <div class="flex items-center gap-1 text-amber-600">
+                                <span class="text-xs">📝</span>
+                                <span class="font-medium">${stats.good_things_stats.total_days}/10 天</span>
+                            </div>
+                            <div class="flex items-center gap-1 text-orange-600">
+                                <span class="text-xs">🎯</span>
+                                <span class="font-medium">${completionRate}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <!-- 时间线展示 -->
+                    <div class="space-y-4">
+                        ${Object.entries(stats.three_good_things_by_date)
+                            .sort(([a], [b]) => a.localeCompare(b))
+                            .map(([date, things]) => {
+                                const dateObj = new Date(date);
+                                const monthDay = `${dateObj.getMonth() + 1}.${dateObj.getDate()}`;
+                                const weekDay = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][dateObj.getDay()];
+                                
+                                return `
+                                    <div class="bg-white/60 rounded-xl p-4 border border-amber-100/50 hover:shadow-md transition-all duration-300 hover:bg-white/80">
+                                        <div class="flex items-start gap-3">
+                                            <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                                ${dateObj.getDate()}
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <span class="text-sm font-medium text-gray-700">${monthDay}</span>
+                                                    <span class="text-xs text-gray-400">${weekDay}</span>
+                                                    ${things.length >= 3 ? '<span class="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">满记录</span>' : ''}
+                                                </div>
+                                                <div class="space-y-2">
+                                                    ${things.map((thing, index) => `
+                                                        <div class="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+                                                            <span class="flex-shrink-0 w-5 h-5 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xs font-medium mt-0.5">
+                                                                ${index + 1}
+                                                            </span>
+                                                            <span class="flex-1 hover:text-amber-700 transition-colors">${thing}</span>
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                    </div>
+
+                    <!-- 感恩寄语 -->
+                    <div class="mt-6 p-4 bg-gradient-to-r from-amber-100/50 to-orange-100/50 rounded-xl border border-amber-200/50">
+                        <div class="flex items-start gap-2">
+                            <span class="text-2xl">💝</span>
+                            <div class="flex-1">
+                                <div class="text-sm font-medium text-amber-800 mb-1">感恩时刻</div>
+                                <p class="text-xs text-amber-600 leading-relaxed">
+                                    这${stats.good_things_stats.total_days}天里，您记录了${stats.good_things_stats.total_items}件美好小事。
+                                    ${stats.good_things_stats.total_days >= 7 ? '您真是个善于发现美好的生活观察家！' : '继续保持这份发现美好的心，让每个日子都闪闪发光。'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     initCharts(stats, hue) {
         const moodChartEl = document.getElementById('mood-chart');
         const metricsChartEl = document.getElementById('metrics-chart');
@@ -283,15 +398,45 @@ export class SummaryView {
                     data: {
                         labels: stats.dates,
                         datasets: [
-                            { label: '睡眠', data: stats.sleepData, borderColor: '#60A5FA', tension: 0.4, pointRadius: 2 },
-                            { label: '运动', data: stats.exerciseData, borderColor: '#34D399', tension: 0.4, pointRadius: 2 },
-                            { label: '阅读', data: stats.readingData, borderColor: '#FBBF24', tension: 0.4, pointRadius: 2 }
+                            { label: '睡眠(h)', data: stats.sleepData, borderColor: '#60A5FA', tension: 0.4, pointRadius: 2, yAxisID: 'y' },
+                            { label: '运动(min)', data: stats.exerciseData, borderColor: '#34D399', tension: 0.4, pointRadius: 2, yAxisID: 'y1' },
+                            { label: '阅读(min)', data: stats.readingData, borderColor: '#FBBF24', tension: 0.4, pointRadius: 2, yAxisID: 'y2' }
                         ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        scales: { y: { display: false }, x: { grid: { display: false } } },
+                        scales: { 
+                            y: { 
+                                display: true,
+                                position: 'left',
+                                title: { display: true, text: '睡眠(h)', color: '#60A5FA', font: { size: 10 } },
+                                ticks: { color: '#60A5BA', font: { size: 9 } },
+                                grid: { color: 'rgba(96, 165, 250, 0.1)' },
+                                min: 0,
+                                max: 12,
+                                suggestedMin: 4
+                            },
+                            y1: { 
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: '运动(min)', color: '#34D399', font: { size: 10 } },
+                                ticks: { color: '#34D399', font: { size: 9 } },
+                                grid: { display: false },
+                                min: 0,
+                                suggestedMax: 120
+                            },
+                            y2: { 
+                                display: true,
+                                position: 'right',
+                                title: { display: true, text: '阅读(min)', color: '#FBBF24', font: { size: 10 } },
+                                ticks: { color: '#FBBF24', font: { size: 9 } },
+                                grid: { display: false },
+                                min: 0,
+                                suggestedMax: 120
+                            },
+                            x: { grid: { display: false } } 
+                        },
                         plugins: { legend: { position: 'top', align: 'end', labels: { boxWidth: 8, usePointStyle: true } } }
                     }
                 });

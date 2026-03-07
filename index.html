@@ -689,9 +689,12 @@
 
                 <!-- Detailed Metrics (Simplified) -->
                 <div class="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-md">
-                    <div class="flex items-center justify-between">
-                        <label for="metric-sleep" class="text-xs text-gray-500">睡眠 (h)</label>
-                        <input type="number" id="metric-sleep" step="0.5" class="w-16 p-1 border rounded text-xs bg-white">
+                    <div class="col-span-2">
+                        <label class="text-xs text-gray-500 block mb-2">睡眠时间</label>
+                        <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <!-- Circular Sleep Selector Container -->
+                            <div id="sleep-selector-container"></div>
+                        </div>
                     </div>
                      <div class="flex items-center justify-between">
                         <label for="metric-exercise" class="text-xs text-gray-500">运动 (min)</label>

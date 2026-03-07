@@ -2,6 +2,7 @@
 import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
+import { CircularSleepSelector } from './CircularSleepSelector.js';
 
 export class Modal {
     constructor(modalId, onSave) {
@@ -12,6 +13,7 @@ export class Modal {
         
         this.initElements();
         this.initListeners();
+        this.sleepSelector = new CircularSleepSelector('sleep-selector-container');
     }
 
     initElements() {
@@ -36,7 +38,7 @@ export class Modal {
             energyInput: document.getElementById('energy-level'),
             nourishmentTags: document.getElementById('nourishment-tags-container'),
             metrics: {
-                sleep: document.getElementById('metric-sleep'),
+                // sleep: document.getElementById('metric-sleep'), // 已替换为睡眠滑块
                 exercise: document.getElementById('metric-exercise'),
                 reading: document.getElementById('metric-reading'),
                 wealth: document.getElementById('metric-wealth'),
@@ -112,6 +114,8 @@ export class Modal {
         const data = state.userData[dateStr] || {};
         const macroGoal = state.macroGoals[xunIndex] || {};
 
+        console.log('Modal open:', dateStr, 'sleepData:', data.sleepData);
+
         // Show/Hide Menstrual Tracker based on settings
         const trackerContainer = document.getElementById('menstrual-tracker-container');
         if (state.settings.showMenstrualCycle) {
@@ -166,11 +170,16 @@ export class Modal {
         
         // Metrics
         if (data.metrics) {
-            this.elements.metrics.sleep.value = data.metrics.sleep || '';
-            this.elements.metrics.exercise.value = data.metrics.exercise || '';
-            this.elements.metrics.reading.value = data.metrics.reading || '';
-            this.elements.metrics.wealth.value = data.metrics.wealth || '';
-            this.elements.metrics.social.value = data.metrics.social || '';
+            // this.elements.metrics.sleep.value = data.metrics.sleep || ''; // 已替换为睡眠滑块
+            if (this.elements.metrics.exercise) this.elements.metrics.exercise.value = data.metrics.exercise || '';
+            if (this.elements.metrics.reading) this.elements.metrics.reading.value = data.metrics.reading || '';
+            if (this.elements.metrics.wealth) this.elements.metrics.wealth.value = data.metrics.wealth || '';
+            if (this.elements.metrics.social) this.elements.metrics.social.value = data.metrics.social || '';
+        }
+        
+        // Sleep Data (new format)
+        if (data.sleepData) {
+            this.sleepSelector.setSleepData(data.sleepData);
         }
 
         // Good Things
@@ -220,10 +229,20 @@ export class Modal {
         this.elements.energyInput.value = 50;
         this.elements.cycleStart.checked = false;
         this.elements.cycleEnd.checked = false;
-        Object.values(this.elements.metrics).forEach(el => el.value = '');
+        Object.values(this.elements.metrics).forEach(el => {
+            if (el && el.id && el.id !== 'metric-sleep') { // 跳过已删除的睡眠输入
+                el.value = '';
+            }
+        });
         this.elements.goodThings.forEach(el => el.value = '');
         this.elements.journalInput.value = '';
         this.elements.habitChecks.forEach(el => el.checked = false);
+        
+        // 重置睡眠选择器
+        if (this.sleepSelector) {
+            this.sleepSelector.reset();
+        }
+        
         // Clear tags selection visual
         this.selectedEmotions = new Set();
         this.selectedNourishments = new Set();
@@ -399,12 +418,13 @@ export class Modal {
             energy_level: this.elements.energyInput.value,
             nourishments: Array.from(this.selectedNourishments),
             metrics: {
-                sleep: parseFloat(this.elements.metrics.sleep.value) || 0,
-                exercise: parseInt(this.elements.metrics.exercise.value) || 0,
-                reading: parseInt(this.elements.metrics.reading.value) || 0,
-                wealth: parseFloat(this.elements.metrics.wealth.value) || 0,
-                social: this.elements.metrics.social.value
+                // sleep: this.elements.metrics.sleep.value || 0, // 已替换为睡眠滑块
+                exercise: (this.elements.metrics.exercise && parseInt(this.elements.metrics.exercise.value)) || 0,
+                reading: (this.elements.metrics.reading && parseInt(this.elements.metrics.reading.value)) || 0,
+                wealth: (this.elements.metrics.wealth && parseFloat(this.elements.metrics.wealth.value)) || 0,
+                social: (this.elements.metrics.social && this.elements.metrics.social.value) || ''
             },
+            sleepData: this.sleepSelector.getSleepData(), // 新的睡眠数据
             three_good_things: this.elements.goodThings.map(el => el.value).filter(v => v),
             journal: this.elements.journalInput.value,
             indicator_checkins: this.elements.habitChecks.map(el => el.checked),

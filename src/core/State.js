@@ -180,6 +180,91 @@ class Store {
         this.removePeriodEnd(dateStr);
     }
 
+    // Atomic operations for period marking
+    markPeriodStart(dateStr) {
+        const { menstrualData, userData } = this.state;
+        const cycles = [...menstrualData.cycles];
+        
+        // Check if there is an ongoing cycle (no end date)
+        const ongoing = cycles.find(c => !c.end);
+        if (ongoing) {
+            // If new start date is before ongoing start, update start
+            if (dateStr < ongoing.start) {
+                ongoing.start = dateStr;
+            }
+        }
+        
+        // Filter out any cycle that starts on same date
+        const existingIndex = cycles.findIndex(c => c.start === dateStr);
+        if (existingIndex === -1) {
+            cycles.push({ start: dateStr, end: null });
+            // Sort by date
+            cycles.sort((a, b) => a.start.localeCompare(b.start));
+        }
+        
+        // Update both cycles and userData atomically
+        const newUserData = { ...userData };
+        newUserData[dateStr] = { ...newUserData[dateStr], isPeriod: true, isPeriodStart: true, isPeriodEnd: false };
+        
+        this.setState({ 
+            menstrualData: { ...menstrualData, cycles },
+            userData: newUserData
+        });
+        
+        this.recalculateMenstrualStats(cycles);
+    }
+
+    markPeriodEnd(dateStr) {
+        const { menstrualData, userData } = this.state;
+        const cycles = [...menstrualData.cycles];
+        
+        // Find the latest cycle that started before or on dateStr
+        const relevantCycles = cycles.filter(c => dateStr >= c.start);
+        if (relevantCycles.length > 0) {
+            const lastCycle = relevantCycles[relevantCycles.length - 1];
+            lastCycle.end = dateStr;
+        }
+        
+        // Update both cycles and userData atomically
+        const newUserData = { ...userData };
+        newUserData[dateStr] = { ...newUserData[dateStr], isPeriod: true, isPeriodEnd: true };
+        
+        this.setState({ 
+            menstrualData: { ...menstrualData, cycles },
+            userData: newUserData
+        });
+        
+        this.recalculateMenstrualStats(cycles);
+    }
+
+    clearPeriodMark(dateStr) {
+        const { menstrualData, userData } = this.state;
+        const dayData = userData[dateStr] || {};
+        const { isPeriod, isPeriodStart, isPeriodEnd, ...rest } = dayData;
+        
+        // Remove from cycles
+        let cycles = [...menstrualData.cycles];
+        cycles = cycles.filter(c => c.start !== dateStr);
+        cycles.forEach(c => {
+            if (c.end === dateStr) c.end = null;
+        });
+        
+        // Update userData
+        const newUserData = { ...userData };
+        if (Object.keys(rest).length === 0) {
+            delete newUserData[dateStr];
+        } else {
+            newUserData[dateStr] = rest;
+        }
+        
+        this.setState({ 
+            menstrualData: { ...menstrualData, cycles },
+            userData: newUserData
+        });
+        
+        this.recalculateMenstrualStats(cycles);
+    }
+
     recalculateMenstrualStats(cycles) {
         // 1. Clean up invalid cycles (end < start)
         cycles = cycles.filter(c => !c.end || c.end >= c.start);

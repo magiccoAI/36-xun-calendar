@@ -109,9 +109,9 @@ class App {
                 moodButtons.forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'ring-green-400'));
                 button.classList.add('ring-2', 'ring-offset-2', 'ring-green-400');
 
-                if (selectedMood === '5') {
+                if (selectedMood === '5' && seedPacketContainer) {
                     seedPacketContainer.classList.remove('hidden');
-                } else {
+                } else if (seedPacketContainer) {
                     seedPacketContainer.classList.add('hidden');
                     selectedCrop = null; // Reset crop if mood changes
                     seedPackets.forEach(p => p.classList.remove('ring-2', 'ring-yellow-400'));
@@ -321,6 +321,37 @@ class App {
 
         if (mobNavMacro) mobNavMacro.onclick = () => store.setState({ currentView: 'macro' });
         if (mobNavOverview) mobNavOverview.onclick = () => store.setState({ currentView: 'overview' });
+    }
+
+    updateNavigation(currentView) {
+        const macroBtn = document.getElementById('nav-macro');
+        const overviewBtn = document.getElementById('nav-overview');
+
+        if (currentView === 'macro') {
+            macroBtn.className = 'nav-item nav-item-active';
+            overviewBtn.className = 'nav-item nav-item-inactive';
+        } else {
+            macroBtn.className = 'nav-item nav-item-inactive';
+            overviewBtn.className = 'nav-item nav-item-active';
+        }
+
+        // Mobile Navigation Highlight (保持原有的移动端逻辑)
+        const mobNavMacro = document.getElementById('mobile-nav-macro');
+        const mobNavOverview = document.getElementById('mobile-nav-overview');
+
+        if (mobNavMacro && mobNavOverview) {
+            if (currentView === 'macro') {
+                mobNavMacro.classList.add('text-blue-600');
+                mobNavMacro.classList.remove('text-gray-400', 'hover:text-gray-600');
+                mobNavOverview.classList.remove('text-blue-600');
+                mobNavOverview.classList.add('text-gray-400', 'hover:text-gray-600');
+            } else {
+                mobNavOverview.classList.add('text-blue-600');
+                mobNavOverview.classList.remove('text-gray-400', 'hover:text-gray-600');
+                mobNavMacro.classList.remove('text-blue-600');
+                mobNavMacro.classList.add('text-gray-400', 'hover:text-gray-600');
+            }
+        }
     }
 
     initEnergySlider() {
@@ -592,40 +623,7 @@ class App {
         }
 
         // Navigation State
-        const navMacro = document.getElementById('nav-macro');
-        const navOverview = document.getElementById('nav-overview');
-        
-        // Mobile Navigation Highlight
-        const mobNavMacro = document.getElementById('mobile-nav-macro');
-        const mobNavOverview = document.getElementById('mobile-nav-overview');
-
-        if (navMacro && navOverview) {
-            if (state.currentView === 'macro') {
-                navMacro.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-                navMacro.classList.remove('text-gray-500');
-                navOverview.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-                navOverview.classList.add('text-gray-500');
-                
-                if (mobNavMacro && mobNavOverview) {
-                    mobNavMacro.classList.add('text-blue-600');
-                    mobNavMacro.classList.remove('text-gray-400', 'hover:text-gray-600');
-                    mobNavOverview.classList.remove('text-blue-600');
-                    mobNavOverview.classList.add('text-gray-400', 'hover:text-gray-600');
-                }
-            } else {
-                navOverview.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-                navOverview.classList.remove('text-gray-500');
-                navMacro.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-                navMacro.classList.add('text-gray-500');
-
-                if (mobNavMacro && mobNavOverview) {
-                    mobNavOverview.classList.add('text-blue-600');
-                    mobNavOverview.classList.remove('text-gray-400', 'hover:text-gray-600');
-                    mobNavMacro.classList.remove('text-blue-600');
-                    mobNavMacro.classList.add('text-gray-400', 'hover:text-gray-600');
-                }
-            }
-        }
+        this.updateNavigation(state.currentView);
 
         // Render Specific View
         if (state.currentView === 'macro') {

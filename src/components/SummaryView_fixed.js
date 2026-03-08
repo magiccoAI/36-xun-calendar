@@ -75,7 +75,8 @@ export class SummaryView {
                 dates: xunData.map(d => d.date.slice(5)), // Now contains all dates
                 sleepData: [],
                 exerciseData: [],
-                readingData: []
+                readingData: [],
+                wakeStates: [], // 新增：醒觉状态数据
             };
 
             xunData.forEach(data => {
@@ -119,6 +120,13 @@ export class SummaryView {
                     // 运动和阅读数据
                     stats.exerciseData.push(data.metrics?.exercise || null);
                     stats.readingData.push(data.metrics?.reading || null);
+                    
+                    // 醒觉状态数据
+                    if (data.sleepData && data.sleepData.wakeState) {
+                        stats.wakeStates.push(data.sleepData.wakeState);
+                    } else {
+                        stats.wakeStates.push(null);
+                    }
                     if (data.custom_activities) {
                         data.custom_activities.forEach(act => {
                             stats.customActivities[act.name] = (stats.customActivities[act.name] || 0) + 1;
@@ -152,6 +160,7 @@ export class SummaryView {
                     stats.sleepData.push(null);
                     stats.exerciseData.push(null);
                     stats.readingData.push(null);
+                    stats.wakeStates.push(null);
                 }
             });
 
@@ -405,6 +414,24 @@ export class SummaryView {
             }
 
             if (metricsChartEl) {
+                // 创建emoji映射
+                const wakeStateEmojis = {
+                    1: '😵',
+                    2: '😴', 
+                    3: '😐',
+                    4: '😊',
+                    5: '🤩'
+                };
+                
+                // 为睡眠数据点添加emoji标签
+                const sleepDataWithLabels = stats.sleepData.map((value, index) => {
+                    if (value !== null && stats.wakeStates[index]) {
+                        const emoji = wakeStateEmojis[stats.wakeStates[index]];
+                        return `${value} ${emoji}`;
+                    }
+                    return value;
+                });
+                
                 new Chart(metricsChartEl, {
                     type: 'line',
                     data: {
@@ -412,11 +439,11 @@ export class SummaryView {
                         datasets: [
                             { 
                                 label: '睡眠(h)', 
-                                data: stats.sleepData, 
+                                data: sleepDataWithLabels,
                                 borderColor: '#60A5FA', 
                                 tension: 0.4, 
-                                pointRadius: 4,
-                                pointHoverRadius: 6,
+                                pointRadius: 6,
+                                pointHoverRadius: 8,
                                 yAxisID: 'y',
                                 borderWidth: 2
                             },
@@ -432,7 +459,18 @@ export class SummaryView {
                             mode: 'index'
                         },
                         plugins: { 
-                            legend: { position: 'top', align: 'end', labels: { boxWidth: 8, usePointStyle: true } }
+                            legend: { position: 'top', align: 'end', labels: { boxWidth: 8, usePointStyle: true } },
+                            tooltip: {
+                                callbacks: {
+                                    afterLabel: function(context) {
+                                        if (context.datasetIndex === 0 && stats.wakeStates[context.dataIndex]) {
+                                            const emoji = wakeStateEmojis[stats.wakeStates[context.dataIndex]];
+                                            return `恢复状态: ${emoji}`;
+                                        }
+                                        return '';
+                                    }
+                                }
+                            }
                         },
                         scales: { 
                             y: { 

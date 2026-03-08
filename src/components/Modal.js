@@ -2,7 +2,6 @@
 import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
-import { CircularSleepSelector } from './CircularSleepSelector.js';
 
 export class Modal {
     constructor(modalId, onSave) {
@@ -13,7 +12,6 @@ export class Modal {
         
         this.initElements();
         this.initListeners();
-        this.sleepSelector = new CircularSleepSelector('sleep-selector-container');
     }
 
     initElements() {
@@ -179,7 +177,7 @@ export class Modal {
         
         // Sleep Data (new format)
         if (data.sleepData) {
-            this.sleepSelector.setSleepData(data.sleepData);
+            // Sleep data exists but no selector to display it
         }
 
         // Good Things
@@ -237,11 +235,6 @@ export class Modal {
         this.elements.goodThings.forEach(el => el.value = '');
         this.elements.journalInput.value = '';
         this.elements.habitChecks.forEach(el => el.checked = false);
-        
-        // 重置睡眠选择器
-        if (this.sleepSelector) {
-            this.sleepSelector.reset();
-        }
         
         // Clear tags selection visual
         this.selectedEmotions = new Set();
@@ -424,7 +417,7 @@ export class Modal {
                 wealth: (this.elements.metrics.wealth && parseFloat(this.elements.metrics.wealth.value)) || 0,
                 social: (this.elements.metrics.social && this.elements.metrics.social.value) || ''
             },
-            sleepData: this.sleepSelector.getSleepData(), // 新的睡眠数据
+            sleepData: {}, // Sleep data placeholder - no selector available
             three_good_things: this.elements.goodThings.map(el => el.value).filter(v => v),
             journal: this.elements.journalInput.value,
             indicator_checkins: this.elements.habitChecks.map(el => el.checked),

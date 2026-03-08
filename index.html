@@ -193,6 +193,91 @@
             }
         }
 
+        /* Modern Navigation Component Classes - Desktop Only */
+        @media (min-width: 768px) {
+            .nav-container {
+                background: rgba(255, 255, 255, 0.9) !important;
+                backdrop-filter: blur(10px) !important;
+                border: 1px solid rgba(0, 0, 0, 0.1) !important;
+                border-radius: 8px 8px 0 0 !important;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+                padding: 12px 32px !important;
+                margin-bottom: 24px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 16px !important;
+            }
+
+            .nav-item {
+                padding: 8px 20px !important;
+                border-radius: 20px !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                border: none !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+            }
+
+            .nav-item-active {
+                background: white !important;
+                color: #2563eb !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .nav-item-inactive {
+                background: rgba(255, 255, 255, 0.6) !important;
+                color: #6b7280 !important;
+                backdrop-filter: blur(8px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            }
+
+            .nav-item-inactive:hover {
+                background: rgba(255, 255, 255, 0.8) !important;
+                color: #111827 !important;
+                backdrop-filter: blur(12px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.5) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                transform: translateY(-1px) !important;
+            }
+
+            .nav-item:active {
+                transform: scale(0.95) !important;
+            }
+        }
+
+        /* Apple-style navigation enhancements */
+        .nav-enhanced {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-button-apple {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            letter-spacing: -0.01em;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.4;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .nav-button-apple:hover {
+            transform: translateY(-1px);
+        }
+        
+        .nav-divider-apple {
+            background: rgba(0, 0, 0, 0.1);
+            opacity: 0.8;
+        }
+
+        /* Custom border thickness for navigation */
+        .border-b-3 {
+            border-bottom-width: 3px;
+        }
+
         /* Spring Festival Theme - Redesigned */
         .spring-festival-theme #year-progress-bar {
             background: linear-gradient(90deg, #fde68a 0%, #f59e0b 50%, #fde68a 100%);
@@ -470,12 +555,13 @@
         </div>
 
         <!-- Navigation Tabs -->
-        <div class="hidden md:flex justify-center mb-6 border-b border-gray-200">
-            <button id="nav-macro" class="px-6 py-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600 focus:outline-none">
-                36旬 (36-Xun)
+        <div class="hidden md:flex nav-container mb-6">
+            <button id="nav-macro" class="nav-item nav-item-active">
+                36旬
             </button>
-            <button id="nav-overview" class="px-6 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none">
-                全景 & 旬 (Overview & Xun)
+            <div class="w-px h-8 bg-gray-200 mx-4 self-center"></div>
+            <button id="nav-overview" class="nav-item nav-item-inactive">
+                全景
             </button>
         </div>
 
@@ -837,7 +923,7 @@
                 <p>平均周期: <span id="menstrual-avg-cycle">--</span> 天</p>
                 <p>平均持续: <span id="menstrual-avg-duration">--</span> 天</p>
                 <p>平均间隔: <span id="menstrual-avg-interval">--</span> 天
-                    <span class="ml-1 text-[10px] text-gray-400">(最近三次起始间隔的加权平均)</span>
+                    <span class="ml-1 text-[10px] text-gray-400">(最近2-3次起始间隔的加权平均)</span>
                 </p>
                 <button id="menstrual-clear-all" class="mt-2 w-full text-center px-3 py-1.5 rounded-md border border-gray-200 text-[11px] text-gray-500 hover:bg-gray-50 hover:border-gray-300" aria-label="清除所有经期记录">
                     清除所有经期记录

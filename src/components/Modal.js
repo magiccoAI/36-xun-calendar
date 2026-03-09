@@ -2,6 +2,7 @@
 import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
+import { CircularSleepSelector } from './sleep/CircularSleepSelector.js';
 
 export class Modal {
     constructor(modalId, onSave) {
@@ -9,6 +10,7 @@ export class Modal {
         this.panel = document.getElementById('modal-panel');
         this.onSave = onSave;
         this.currentDateStr = null;
+        this.sleepSelector = null;
         
         this.initElements();
         this.initListeners();
@@ -35,6 +37,7 @@ export class Modal {
             weatherBtns: document.querySelectorAll('#weather-selector button'),
             energyInput: document.getElementById('energy-level'),
             nourishmentTags: document.getElementById('nourishment-tags-container'),
+            sleepSelectorContainer: document.getElementById('sleep-selector-container'),
             metrics: {
                 // sleep: document.getElementById('metric-sleep'), // 已替换为睡眠滑块
                 exercise: document.getElementById('metric-exercise'),
@@ -175,10 +178,7 @@ export class Modal {
             if (this.elements.metrics.social) this.elements.metrics.social.value = data.metrics.social || '';
         }
         
-        // Sleep Data (new format)
-        if (data.sleepData) {
-            // Sleep data exists but no selector to display it
-        }
+        this.initSleepSelector(data.sleepData || {});
 
         // Good Things
         if (data.three_good_things) {
@@ -239,6 +239,24 @@ export class Modal {
         // Clear tags selection visual
         this.selectedEmotions = new Set();
         this.selectedNourishments = new Set();
+    }
+
+    initSleepSelector(savedSleepData = {}) {
+        const initialData = {
+            bedtimeMinutes: savedSleepData.bedtimeMinutes,
+            wakeMinutes: savedSleepData.wakeMinutes
+        };
+
+        if (this.sleepSelector) {
+            this.sleepSelector.restore(initialData);
+            return;
+        }
+
+        if (!this.elements.sleepSelectorContainer) return;
+
+        this.sleepSelector = new CircularSleepSelector(this.elements.sleepSelectorContainer, {
+            initialData
+        });
     }
 
     renderEmotionTags(selectedTags = []) {
@@ -417,7 +435,7 @@ export class Modal {
                 wealth: (this.elements.metrics.wealth && parseFloat(this.elements.metrics.wealth.value)) || 0,
                 social: (this.elements.metrics.social && this.elements.metrics.social.value) || ''
             },
-            sleepData: {}, // Sleep data placeholder - no selector available
+            sleepData: this.sleepSelector ? this.sleepSelector.getValue() : {},
             three_good_things: this.elements.goodThings.map(el => el.value).filter(v => v),
             journal: this.elements.journalInput.value,
             indicator_checkins: this.elements.habitChecks.map(el => el.checked),

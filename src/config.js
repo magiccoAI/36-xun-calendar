@@ -32,6 +32,8 @@ export const CONFIG = {
         { text: '🧘 冥想', value: '冥想' },
         { text: '🏃 运动', value: '运动' },
         { text: '🥗 健康饮食', value: '健康饮食' },
+        { text: '🥚 蛋白质', value: '蛋白质' },
+        { text: '🥬 蔬菜', value: '蔬菜' },
         { text: '🌲 大自然', value: '大自然' },
         { text: '☕ 社交', value: '社交' },
         { text: '🎨 创作', value: '创作' }

@@ -2,7 +2,7 @@
 import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
-import { CircularSleepSelector } from './sleep/CircularSleepSelector.js';
+import { CompleteSleepModule } from './CompleteSleepModule.js';
 
 export class Modal {
     constructor(modalId, onSave) {
@@ -239,23 +239,35 @@ export class Modal {
         // Clear tags selection visual
         this.selectedEmotions = new Set();
         this.selectedNourishments = new Set();
+        
+        // Reset sleep selector
+        if (this.sleepSelector) {
+            this.sleepSelector.reset();
+        }
     }
 
     initSleepSelector(savedSleepData = {}) {
         const initialData = {
-            bedtimeMinutes: savedSleepData.bedtimeMinutes,
-            wakeMinutes: savedSleepData.wakeMinutes
+            sleepData: savedSleepData,
+            quality: savedSleepData.quality || null
         };
 
         if (this.sleepSelector) {
-            this.sleepSelector.restore(initialData);
+            this.sleepSelector.setValue(initialData);
             return;
         }
 
         if (!this.elements.sleepSelectorContainer) return;
 
-        this.sleepSelector = new CircularSleepSelector(this.elements.sleepSelectorContainer, {
-            initialData
+        this.sleepSelector = new CompleteSleepModule(this.elements.sleepSelectorContainer, {
+            initialSleepData: savedSleepData,
+            initialQuality: savedSleepData.quality,
+            onSleepChange: (sleepData) => {
+                // 可以在这里处理睡眠时间变化的逻辑
+            },
+            onQualityChange: (quality, option) => {
+                // 可以在这里处理睡眠质量变化的逻辑
+            }
         });
     }
 
@@ -268,19 +280,52 @@ export class Modal {
         const allEmotions = [...CONFIG.DEFAULT_EMOTIONS, ...state.customEmotions];
 
         allEmotions.forEach(emo => {
-            const btn = document.createElement('button');
+            const btn = document.createElement('div');
+            btn.className = 'inline-flex items-center gap-1';
+            
+            const tagBtn = document.createElement('button');
             const isSelected = this.selectedEmotions.has(emo.value);
-            btn.className = `px-3 py-1 rounded-full text-xs border transition-colors ${isSelected ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`;
-            btn.textContent = emo.text;
-            btn.onclick = () => {
+            tagBtn.className = `px-3 py-1 rounded-full text-xs border transition-colors ${isSelected ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`;
+            tagBtn.textContent = emo.text;
+            tagBtn.onclick = () => {
                 if (this.selectedEmotions.has(emo.value)) {
                     this.selectedEmotions.delete(emo.value);
-                    btn.className = 'px-3 py-1 rounded-full text-xs border bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors';
+                    tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors';
                 } else {
                     this.selectedEmotions.add(emo.value);
-                    btn.className = 'px-3 py-1 rounded-full text-xs border bg-blue-100 border-blue-300 text-blue-700 transition-colors';
+                    tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-blue-100 border-blue-300 text-blue-700 transition-colors';
                 }
             };
+            
+            btn.appendChild(tagBtn);
+            
+            // Add delete button for custom emotions only
+            const isCustomEmotion = state.customEmotions.some(custom => custom.value === emo.value);
+            if (isCustomEmotion) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-400 hover:text-red-600 p-0.5 rounded-full hover:bg-red-50 transition-colors';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.title = '删除自定义情绪';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    
+                    // Remove from custom emotions
+                    const currentState = store.getState();
+                    const newCustoms = currentState.customEmotions.filter(custom => custom.value !== emo.value);
+                    store.setState({ customEmotions: newCustoms });
+                    
+                    // Remove from selected if it was selected
+                    if (this.selectedEmotions.has(emo.value)) {
+                        this.selectedEmotions.delete(emo.value);
+                    }
+                    
+                    // Re-render tags
+                    this.renderEmotionTags(Array.from(this.selectedEmotions));
+                };
+                
+                btn.appendChild(deleteBtn);
+            }
+            
             container.appendChild(btn);
         });
         
@@ -289,17 +334,34 @@ export class Modal {
         addBtn.className = "px-3 py-1 rounded-full text-xs border border-dashed border-gray-300 text-gray-400 hover:text-blue-500 hover:border-blue-300";
         addBtn.textContent = "+ 自定义";
         addBtn.onclick = () => {
-            // Replace button with input
+            // Replace button with input form
             const form = document.createElement('form');
             form.className = "inline-flex items-center gap-1";
             form.innerHTML = `
-                <input type="text" class="w-24 px-2 py-1 text-xs border border-blue-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="🤔 思考">
-                <button type="submit" class="text-blue-500 hover:text-blue-700 p-1">✓</button>
-                <button type="button" class="text-gray-400 hover:text-gray-600 p-1">✕</button>
+                <input type="text" class="w-24 px-2 py-1 text-xs border border-blue-300 rounded-full focus:outline-none focus:ring-1 focus:ring-blue-400" placeholder="🤔 思考" value="🤔 思考">
+                <button type="button" class="quick-add text-blue-500 hover:text-blue-700 p-1" title="快速添加默认情绪">⚡</button>
+                <button type="submit" class="text-blue-500 hover:text-blue-700 p-1" title="添加自定义情绪">✓</button>
+                <button type="button" class="text-gray-400 hover:text-gray-600 p-1" title="取消">✕</button>
             `;
             
             const input = form.querySelector('input');
-            const cancelBtn = form.querySelector('button[type="button"]');
+            const quickAddBtn = form.querySelector('.quick-add');
+            const cancelBtn = form.querySelector('button[type="button"]:not(.quick-add)');
+            
+            // Quick add - use default value
+            quickAddBtn.onclick = (e) => {
+                e.preventDefault();
+                const defaultVal = input.value.trim();
+                if (defaultVal && !this.selectedEmotions.has('思考')) {
+                    const newEmo = { text: defaultVal, value: '思考' };
+                    
+                    const currentState = store.getState();
+                    const newCustoms = [...currentState.customEmotions, newEmo];
+                    store.setState({ customEmotions: newCustoms });
+                    
+                    this.renderEmotionTags([...this.selectedEmotions, '思考']);
+                }
+            };
             
             form.onsubmit = (e) => {
                 e.preventDefault();
@@ -325,6 +387,7 @@ export class Modal {
 
             addBtn.replaceWith(form);
             input.focus();
+            input.select(); // 选中默认文本，方便用户直接修改
         };
         container.appendChild(addBtn);
     }
@@ -338,19 +401,52 @@ export class Modal {
         const allNourishments = [...CONFIG.DEFAULT_NOURISHMENTS, ...state.customNourishments];
 
         allNourishments.forEach(item => {
-             const btn = document.createElement('button');
+             const btn = document.createElement('div');
+             btn.className = 'inline-flex items-center gap-1';
+             
+             const tagBtn = document.createElement('button');
             const isSelected = this.selectedNourishments.has(item.value);
-            btn.className = `px-3 py-1 rounded-full text-xs border transition-colors ${isSelected ? 'bg-green-100 border-green-300 text-green-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`;
-            btn.textContent = item.text;
-            btn.onclick = () => {
+            tagBtn.className = `px-3 py-1 rounded-full text-xs border transition-colors ${isSelected ? 'bg-green-100 border-green-300 text-green-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`;
+            tagBtn.textContent = item.text;
+            tagBtn.onclick = () => {
                 if (this.selectedNourishments.has(item.value)) {
                     this.selectedNourishments.delete(item.value);
-                    btn.className = 'px-3 py-1 rounded-full text-xs border bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors';
+                    tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors';
                 } else {
                     this.selectedNourishments.add(item.value);
-                    btn.className = 'px-3 py-1 rounded-full text-xs border bg-green-100 border-green-300 text-green-700 transition-colors';
+                    tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-green-100 border-green-300 text-green-700 transition-colors';
                 }
             };
+            
+            btn.appendChild(tagBtn);
+            
+            // Add delete button for custom tags only
+            const isCustomTag = state.customNourishments.some(custom => custom.value === item.value);
+            if (isCustomTag) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'text-red-400 hover:text-red-600 p-0.5 rounded-full hover:bg-red-50 transition-colors';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.title = '删除自定义标签';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    
+                    // Remove from custom nourishments
+                    const currentState = store.getState();
+                    const newCustoms = currentState.customNourishments.filter(custom => custom.value !== item.value);
+                    store.setState({ customNourishments: newCustoms });
+                    
+                    // Remove from selected if it was selected
+                    if (this.selectedNourishments.has(item.value)) {
+                        this.selectedNourishments.delete(item.value);
+                    }
+                    
+                    // Re-render tags
+                    this.renderNourishmentTags(Array.from(this.selectedNourishments));
+                };
+                
+                btn.appendChild(deleteBtn);
+            }
+            
             container.appendChild(btn);
         });
 
@@ -359,17 +455,34 @@ export class Modal {
         addBtn.className = "px-3 py-1 rounded-full text-xs border border-dashed border-gray-300 text-gray-400 hover:text-blue-500 hover:border-blue-300";
         addBtn.textContent = "+ 自定义";
         addBtn.onclick = () => {
-             // Replace button with input
+             // Replace button with input form
              const form = document.createElement('form');
              form.className = "inline-flex items-center gap-1";
              form.innerHTML = `
-                <input type="text" class="w-24 px-2 py-1 text-xs border border-green-300 rounded-full focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="🎵 听歌">
-                <button type="submit" class="text-green-500 hover:text-green-700 p-1">✓</button>
-                <button type="button" class="text-gray-400 hover:text-gray-600 p-1">✕</button>
+                <input type="text" class="w-24 px-2 py-1 text-xs border border-green-300 rounded-full focus:outline-none focus:ring-1 focus:ring-green-400" placeholder="🎵 听歌" value="🎵 听歌">
+                <button type="button" class="quick-add text-blue-500 hover:text-blue-700 p-1" title="快速添加默认标签">⚡</button>
+                <button type="submit" class="text-green-500 hover:text-green-700 p-1" title="添加自定义标签">✓</button>
+                <button type="button" class="text-gray-400 hover:text-gray-600 p-1" title="取消">✕</button>
              `;
             
              const input = form.querySelector('input');
-             const cancelBtn = form.querySelector('button[type="button"]');
+             const quickAddBtn = form.querySelector('.quick-add');
+             const cancelBtn = form.querySelector('button[type="button"]:not(.quick-add)');
+
+             // Quick add - use default value
+             quickAddBtn.onclick = (e) => {
+                e.preventDefault();
+                const defaultVal = input.value.trim();
+                if (defaultVal && !this.selectedNourishments.has('听歌')) {
+                    const newItem = { text: defaultVal, value: '听歌' };
+                    
+                    const currentState = store.getState();
+                    const newCustoms = [...currentState.customNourishments, newItem];
+                    store.setState({ customNourishments: newCustoms });
+                    
+                    this.renderNourishmentTags([...this.selectedNourishments, '听歌']);
+                }
+             };
 
              form.onsubmit = (e) => {
                 e.preventDefault();
@@ -395,6 +508,7 @@ export class Modal {
 
              addBtn.replaceWith(form);
              input.focus();
+             input.select(); // 选中默认文本，方便用户直接修改
         };
         container.appendChild(addBtn);
     }

@@ -34,7 +34,8 @@ export class DragController {
 
         const { x, y } = this.getRelativePoint(event);
         const angle = TimeMath.pointToAngle(x, y, 120, 120);
-        this.state.setMinutesForHandle(snapshot.activeHandle, TimeMath.angleToMinutes(angle));
+        const minutes = TimeMath.angleToMinutes(angle);
+        this.state.setMinutesForHandle(snapshot.activeHandle, minutes);
     }
 
     handlePointerDown(event) {
@@ -43,8 +44,13 @@ export class DragController {
 
         event.preventDefault();
         this.activePointerId = event.pointerId;
-        this.state.setActiveHandle(handle.getAttribute('data-handle'));
+        const handleName = handle.getAttribute('data-handle');
+        this.state.setActiveHandle(handleName);
         this.svg.setPointerCapture(event.pointerId);
+        
+        // 显示太阳图标的动态刻度
+        this.showAdjustmentRing(handleName);
+        
         this.updateFromEvent(event);
     }
 
@@ -58,6 +64,29 @@ export class DragController {
 
         this.activePointerId = null;
         this.state.setActiveHandle(null);
+        
+        // 隐藏所有动态刻度
+        this.hideAllAdjustmentRings();
+    }
+
+    showAdjustmentRing(handleName) {
+        if (handleName === 'wake') {
+            const wakeHandle = this.svg.querySelector('[data-handle="wake"]');
+            if (wakeHandle) {
+                const adjustmentRing = wakeHandle.querySelector('.adjustment-ring');
+                if (adjustmentRing) {
+                    adjustmentRing.setAttribute('opacity', '1');
+                    adjustmentRing.style.transition = 'opacity 0.3s ease-in-out';
+                }
+            }
+        }
+    }
+
+    hideAllAdjustmentRings() {
+        const adjustmentRings = this.svg.querySelectorAll('.adjustment-ring');
+        adjustmentRings.forEach(ring => {
+            ring.setAttribute('opacity', '0');
+        });
     }
 
     destroy() {

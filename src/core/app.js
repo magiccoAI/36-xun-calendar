@@ -2,6 +2,7 @@
 import { CONFIG } from '../config.js';
 import { store } from './State.js';
 import { Calendar } from './Calendar.js';
+import { backgroundLoader } from './BackgroundLoader.js';
 import { MacroView } from '../components/MacroView.js';
 import { OverviewView } from '../components/OverviewView.js';
 import { DetailView } from '../components/DetailView.js';
@@ -187,13 +188,28 @@ class App {
     }
 
     initTheme() {
+        // Initialize background loader
+        backgroundLoader.seasonalPreload();
+        
         // Expose setTheme to window for legacy onclick
-        window.setTheme = (themeName) => {
-            document.body.className = "bg-gray-50 text-gray-800 antialiased overflow-x-hidden"; // Reset
+        window.setTheme = async (themeName) => {
+            // Reset body classes
+            document.body.className = "bg-gray-50 text-gray-800 antialiased overflow-x-hidden";
+            
             if (themeName !== 'default') {
-                document.body.classList.add(`theme-${themeName}`);
+                // Use background loader for optimized loading
+                await backgroundLoader.loadTheme(themeName);
+            } else {
+                // Clear theme
+                document.body.classList.remove('theme-spring', 'theme-summer', 'theme-autumn', 'theme-winter');
             }
+            
             localStorage.setItem('xun_theme', themeName);
+            
+            // Preload next theme
+            if (themeName !== 'default') {
+                backgroundLoader.preloadNextTheme(themeName);
+            }
             
             // Close menu if open
             const menu = document.getElementById('theme-menu');

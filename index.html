@@ -45,13 +45,12 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* 1. Spring (Vitality) - New background */
+        /* 1. Spring (Vitality) - Background managed by BackgroundLoader */
         body.theme-spring {
-            background-image: url('src/images/spring-bg.jpg');
-            background-size: cover;
-            background-position: center bottom; /* Adjusted to hide text */
-            background-attachment: fixed;
-            background-color: #f0f9ff; /* A light sky blue fallback */
+            background-size: cover !important;
+            background-position: center bottom !important; /* Adjusted to hide text */
+            background-attachment: fixed !important;
+            background-color: #f0f9ff !important; /* A light sky blue fallback */
         }
         body.theme-spring .bg-gray-50 { 
             background-color: rgba(255, 255, 255, 0.8); 
@@ -59,9 +58,8 @@
             border: 1px solid rgba(191, 219, 254, 0.5);
         }
 
-        /* 2. Summer (Fresh Vitality) - New background */
+        /* 2. Summer (Fresh Vitality) - Background managed by BackgroundLoader */
         body.theme-summer {
-            background-image: url('src/images/summer-bg.jpg');
             background-size: cover;
             background-position: center top; /* Adjusted to hide text */
             background-attachment: fixed;
@@ -78,9 +76,8 @@
             backdrop-filter: blur(10px);
         }
 
-        /* 3. Autumn (Warm Steady) - New background */
+        /* 3. Autumn (Warm Steady) - Background managed by BackgroundLoader */
         body.theme-autumn {
-            background-image: url('src/images/autumn-bg.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -97,11 +94,10 @@
             backdrop-filter: blur(8px);
         }
 
-        /* 4. Winter (Quiet Deep) - Combined background effect */
+        /* 4. Winter (Quiet Deep) - Background managed by BackgroundLoader */
         body.theme-winter {
             color: #1d2c3a;
             background-color: #e0f2f7;
-            background-image: url('src/images/winter-body.jpg');
             background-repeat: repeat;
             background-size: 300px 300px;
             position: relative;
@@ -113,7 +109,6 @@
             left: 0;
             right: 0;
             height: 450px; /* Height of the top image area */
-            background-image: url('src/images/winter-top.jpg');
             background-size: cover;
             background-position: center;
             z-index: -1;
@@ -190,6 +185,35 @@
             /* Dim the white containers slightly */
             body[class*="theme-"] .bg-gray-50 {
                 background-color: rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        /* 移动端响应式优化 */
+        @media (max-width: 768px) {
+            .header-container {
+                position: relative;
+                padding-top: 60px; /* 为按钮留出空间 */
+            }
+            
+            .absolute.right-36,
+            .absolute.right-24,
+            .absolute.right-0 {
+                position: fixed;
+                z-index: 20;
+            }
+            
+            h1.text-3xl {
+                margin-top: 20px;
+                padding: 0 60px; /* 避免与按钮重叠 */
+                text-align: center;
+                clear: both;
+            }
+            
+            /* 确保按钮在移动端可见且不重叠 */
+            #backup-btn, #theme-btn, #settings-btn {
+                background-color: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(4px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
         }
 
@@ -447,13 +471,13 @@
                 </button>
             </div>
             <!-- Backup Button -->
-            <div class="absolute right-36 top-0 mr-2">
+            <div class="absolute right-36 top-0 mr-2 z-10">
                 <button id="backup-btn" class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50" title="数据备份">
                     <svg class="h-5 w-5"><use href="#icon-backup"></use></svg>
                 </button>
             </div>
             <!-- Theme Toggle Button -->
-            <div class="absolute right-0 top-0">
+            <div class="absolute right-0 top-0 z-10">
                 <button id="theme-btn" class="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50" title="切换主题">
                     <svg class="h-5 w-5"><use href="#icon-theme"></use></svg>
                 </button>
@@ -477,8 +501,10 @@
                 </div>
             </div>
 
-            <h1 class="text-3xl font-light text-gray-700">2026</h1>
-            <p id="current-xun-info" class="text-gray-500 mt-2"></p>
+            <div class="header-container">
+                <h1 class="text-3xl font-light text-gray-700">2026</h1>
+                <p id="current-xun-info" class="text-gray-500 mt-2"></p>
+            </div>
             <div id="year-progress-container" class="mt-6 max-w-2xl mx-auto px-4">
                 <div class="flex items-center gap-3 text-xs text-gray-400 font-mono">
                     <span class="min-w-[48px] text-left">1月1日</span>

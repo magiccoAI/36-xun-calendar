@@ -1,0 +1,106 @@
+/* 响应式主题背景优化 */
+
+/* 基础加载策略 - 移动端优先 */
+@media (max-width: 768px) {
+  /* 移动端使用更小尺寸的图片 */
+  body.theme-spring {
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ByaW5nIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I2YwZjlmZjtzdG9wLW9wYWNpdHk6MSIgLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZTBlOWY5O3N0b3Atb3BhY2l0eToxIiAvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9InVybCgjc3ByaW5nKSIgLz4KPC9zdmc+');
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll; /* 移动端禁用 fixed */
+    background-color: #f0f9ff;
+  }
+  
+  body.theme-summer {
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ic3VtbWVyIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzBmNzZkOTtzdG9wLW9wYWNpdHk6MSIgLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMDM2OWExO3N0b3Atb3BhY2l0eToxIiAvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9InVybCgjc3VtbWVyKSIgLz4KPC9zdmc+');
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+    background-color: #f0f9ff;
+  }
+  
+  body.theme-autumn {
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYXV0dW1uIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I2ZmZjdmMDtzdG9wLW9wYWNpdHk6MSIgLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZDQ3Njg5O3N0b3Atb3BhY2l0eToxIiAvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9InVybCgjYXV0dW1uKSIgLz4KPC9zdmc+');
+    background-size: cover;
+    background-position: center;
+    background-attachment: scroll;
+    background-color: #fff8e1;
+  }
+  
+  body.theme-winter {
+    background-color: #e0f2f7;
+    background-image: none; /* 移动端暂时禁用复杂背景 */
+  }
+}
+
+/* 桌面端使用完整图片 */
+@media (min-width: 769px) {
+  /* 支持现代浏览器的 WebP 格式 */
+  @supports (background-image: url('image.webp')) {
+    body.theme-spring {
+      background-image: url('src/images/webp/spring-bg.webp');
+    }
+    body.theme-summer {
+      background-image: url('src/images/webp/summer-bg.webp');
+    }
+    body.theme-autumn {
+      background-image: url('src/images/webp/autumn-bg.webp');
+    }
+    body.theme-winter {
+      background-image: url('src/images/webp/winter-body.jpg');
+    }
+    body.theme-winter::after {
+      background-image: url('src/images/webp/winter-top.webp');
+    }
+  }
+  
+  /* 不支持 WebP 的降级方案 */
+  @supports not (background-image: url('image.webp')) {
+    body.theme-spring {
+      background-image: url('src/images/optimized/spring-bg.jpg');
+    }
+    body.theme-summer {
+      background-image: url('src/images/optimized/summer-bg.jpg');
+    }
+    body.theme-autumn {
+      background-image: url('src/images/optimized/autumn-bg.jpg');
+    }
+    body.theme-winter {
+      background-image: url('src/images/optimized/winter-body.jpg');
+    }
+    body.theme-winter::after {
+      background-image: url('src/images/optimized/winter-top.jpg');
+    }
+  }
+}
+
+/* 懒加载动画 */
+body {
+  transition: background-image 0.5s ease-in-out;
+}
+
+.theme-loading {
+  background-image: none !important;
+  background-color: #f3f4f6 !important;
+}
+
+/* 预加载指示器 */
+.theme-loading::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 9999;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}

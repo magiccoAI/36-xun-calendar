@@ -2,78 +2,264 @@ import { CONFIG } from '../config.js';
 
 export const Calendar = {
     pad2(n) {
-        return String(n).padStart(2, '0');
+        try {
+            return String(n).padStart(2, '0');
+        } catch (error) {
+            console.error('Calendar.pad2 error:', error);
+            return String(n).length === 1 ? '0' + n : String(n);
+        }
     },
 
     formatLocalDate(d) {
-        return `${d.getFullYear()}-${this.pad2(d.getMonth() + 1)}-${this.pad2(d.getDate())}`;
+        try {
+            if (!d || isNaN(d.getTime())) {
+                throw new Error('Invalid date object');
+            }
+            return `${d.getFullYear()}-${this.pad2(d.getMonth() + 1)}-${this.pad2(d.getDate())}`;
+        } catch (error) {
+            console.error('Calendar.formatLocalDate error:', error, d);
+            return '2026-01-01'; // 降级到默认日期
+        }
     },
 
     getXunPeriods(year) {
-        const periods = [];
-        let currentDate = new Date(year, 0, 1);
-        
-        for (let i = 1; i <= CONFIG.XUN_COUNT; i++) {
-            const startDate = new Date(currentDate);
-            let daysInXun = CONFIG.XUN_DAYS;
-            
-            // Special handling for the last period to cover the rest of the year
-            if (i === CONFIG.XUN_COUNT) {
-                 const yearEnd = new Date(year, 11, 31);
-                 const diffTime = Math.abs(yearEnd - currentDate);
-                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                 daysInXun = diffDays + 1; // +1 to include today
+        try {
+            // 参数验证
+            if (!year || isNaN(year) || year < 2020 || year > 2100) {
+                throw new Error(`Invalid year: ${year}`);
             }
 
-            currentDate.setDate(currentDate.getDate() + daysInXun);
-            const endDate = new Date(currentDate);
-            endDate.setDate(endDate.getDate() - 1);
+            const periods = [];
+            let currentDate = new Date(year, 0, 1);
             
-            periods.push({ index: i, startDate, endDate, days: daysInXun });
+            // 验证起始日期有效性
+            if (isNaN(currentDate.getTime())) {
+                throw new Error(`Invalid start date for year: ${year}`);
+            }
+            
+            for (let i = 1; i <= CONFIG.XUN_COUNT; i++) {
+                const startDate = new Date(currentDate);
+                let daysInXun = CONFIG.XUN_DAYS;
+                
+                // Special handling for last period to cover rest of year
+                if (i === CONFIG.XUN_COUNT) {
+                     const yearEnd = new Date(year, 11, 31);
+                     const diffTime = Math.abs(yearEnd - currentDate);
+                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                     daysInXun = diffDays + 1; // +1 to include today
+                }
+
+                currentDate.setDate(currentDate.getDate() + daysInXun);
+                const endDate = new Date(currentDate);
+                endDate.setDate(endDate.getDate() - 1);
+                
+                // 验证生成的日期有效性
+                if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                    console.error(`Invalid date range for period ${i}:`, { startDate, endDate });
+                    continue; // 跳过无效周期，继续处理下一个
+                }
+                
+                periods.push({ index: i, startDate, endDate, days: daysInXun });
+            }
+            
+            if (periods.length === 0) {
+                throw new Error('No valid periods generated');
+            }
+            
+            return periods;
+        } catch (error) {
+            console.error('Calendar.getXunPeriods error:', error);
+            return this.getDefaultPeriods(year); // 降级方案
         }
-        return periods;
+    },
+
+    getDefaultPeriods(year) {
+        // 降级方案：生成标准的36旬周期
+        try {
+            const periods = [];
+            const daysPerXun = Math.floor(365 / CONFIG.XUN_COUNT);
+            let remainingDays = 365;
+            let currentDate = new Date(year, 0, 1);
+            
+            for (let i = 1; i <= CONFIG.XUN_COUNT; i++) {
+                const startDate = new Date(currentDate);
+                const daysInThisXun = i === CONFIG.XUN_COUNT ? remainingDays : daysPerXun;
+                
+                currentDate.setDate(currentDate.getDate() + daysInThisXun);
+                const endDate = new Date(currentDate);
+                endDate.setDate(endDate.getDate() - 1);
+                
+                periods.push({ 
+                    index: i, 
+                    startDate, 
+                    endDate, 
+                    days: daysInThisXun 
+                });
+                
+                remainingDays -= daysInThisXun;
+            }
+            
+            return periods;
+        } catch (error) {
+            console.error('Calendar.getDefaultPeriods error:', error);
+            // 最小降级：返回基本的旬结构
+            return Array.from({ length: CONFIG.XUN_COUNT }, (_, i) => ({
+                index: i + 1,
+                startDate: new Date(year, 0, (i * 10) + 1),
+                endDate: new Date(year, 0, Math.min((i + 1) * 10, 31)),
+                days: 10
+            }));
+        }
     },
 
     getCurrentXun(periods) {
-        const now = new Date();
-        if (now.getFullYear() !== CONFIG.YEAR) return null;
-        return periods.find(p => now >= p.startDate && now <= p.endDate) || null;
+        try {
+            if (!periods || !Array.isArray(periods)) {
+                console.warn('Calendar.getCurrentXun: invalid periods data');
+                return null;
+            }
+            
+            const now = new Date();
+            if (isNaN(now.getTime())) {
+                console.error('Calendar.getCurrentXun: invalid current time');
+                return null;
+            }
+            
+            if (now.getFullYear() !== CONFIG.YEAR) return null;
+            return periods.find(p => now >= p.startDate && now <= p.endDate) || null;
+        } catch (error) {
+            console.error('Calendar.getCurrentXun error:', error);
+            return null;
+        }
     },
     
     // Helper to get all dates in a range
     getDatesInRange(startDate, endDate) {
-        const dates = [];
-        let current = new Date(startDate);
-        while (current <= endDate) {
-            dates.push(new Date(current));
-            current.setDate(current.getDate() + 1);
+        try {
+            if (!startDate || !endDate) {
+                throw new Error('Invalid date range: missing start or end date');
+            }
+            
+            const dates = [];
+            let current = new Date(startDate);
+            
+            if (isNaN(current.getTime())) {
+                throw new Error(`Invalid start date: ${startDate}`);
+            }
+            
+            const end = new Date(endDate);
+            if (isNaN(end.getTime())) {
+                throw new Error(`Invalid end date: ${endDate}`);
+            }
+            
+            while (current <= end) {
+                dates.push(new Date(current));
+                current.setDate(current.getDate() + 1);
+            }
+            
+            return dates;
+        } catch (error) {
+            console.error('Calendar.getDatesInRange error:', error, { startDate, endDate });
+            return []; // 降级：返回空数组
         }
-        return dates;
     },
 
     getXunPeriodByDateStr(periods, dateStr) {
-        const d = new Date(dateStr);
-        return periods.find(p => d >= p.startDate && d <= p.endDate);
+        try {
+            if (!periods || !Array.isArray(periods)) {
+                console.warn('Calendar.getXunPeriodByDateStr: invalid periods data');
+                return null;
+            }
+            
+            if (!dateStr || typeof dateStr !== 'string') {
+                console.warn('Calendar.getXunPeriodByDateStr: invalid date string', dateStr);
+                return null;
+            }
+            
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) {
+                console.warn('Calendar.getXunPeriodByDateStr: invalid date', dateStr);
+                return null;
+            }
+            
+            return periods.find(p => d >= p.startDate && d <= p.endDate);
+        } catch (error) {
+            console.error('Calendar.getXunPeriodByDateStr error:', error, { dateStr });
+            return null;
+        }
     },
 
     // Date helpers
     addDays(dateStr, days) {
-        const d = new Date(dateStr);
-        d.setDate(d.getDate() + days);
-        return this.formatLocalDate(d);
+        try {
+            if (!dateStr || typeof dateStr !== 'string') {
+                throw new Error('Invalid date string');
+            }
+            
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) {
+                throw new Error(`Invalid date: ${dateStr}`);
+            }
+            
+            d.setDate(d.getDate() + days);
+            return this.formatLocalDate(d);
+        } catch (error) {
+            console.error('Calendar.addDays error:', error, { dateStr, days });
+            return dateStr; // 降级：返回原始日期
+        }
     },
 
     diffDays(dateStr1, dateStr2) {
-        const d1 = new Date(dateStr1);
-        const d2 = new Date(dateStr2);
-        return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+        try {
+            if (!dateStr1 || !dateStr2) {
+                throw new Error('Invalid date strings for diff');
+            }
+            
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+            
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+                throw new Error(`Invalid dates: ${dateStr1}, ${dateStr2}`);
+            }
+            
+            return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+        } catch (error) {
+            console.error('Calendar.diffDays error:', error, { dateStr1, dateStr2 });
+            return 0; // 降级：返回0天
+        }
     },
 
     isSameOrAfter(dateStr1, dateStr2) {
-        return new Date(dateStr1) >= new Date(dateStr2);
+        try {
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+            
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+                console.warn('Calendar.isSameOrAfter: invalid dates', { dateStr1, dateStr2 });
+                return false;
+            }
+            
+            return d1 >= d2;
+        } catch (error) {
+            console.error('Calendar.isSameOrAfter error:', error, { dateStr1, dateStr2 });
+            return false;
+        }
     },
     
     isSameOrBefore(dateStr1, dateStr2) {
-        return new Date(dateStr1) <= new Date(dateStr2);
+        try {
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+            
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+                console.warn('Calendar.isSameOrBefore: invalid dates', { dateStr1, dateStr2 });
+                return false;
+            }
+            
+            return d1 <= d2;
+        } catch (error) {
+            console.error('Calendar.isSameOrBefore error:', error, { dateStr1, dateStr2 });
+            return false;
+        }
     }
 };

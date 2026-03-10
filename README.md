@@ -19,7 +19,7 @@
 ### 🔭 宏观视角：三十六旬 (The 36 Xun)
 *   **时间的切片**：将漫长的 2026 年拆解为 36 段旅程。不再被宏大的年度计划压垮，而是专注于眼前的这 10 天。
 *   **旬目标**：为每个 10 天设定一个小而确定的期待。也可以是想要提醒自己保持觉察的状态，或者一些不同的主题探寻。
-*   **时间行者**：看着页面上的小人一步步走过这一年，感受时间的实体化流逝。
+*   **时间进度条**：![alt text](image.png)
 
 ### 🧘 微观感知：每日觉察 (Daily Mindfulness)
 我们关注的不仅仅是"完成了什么"，更是"感觉如何"。
@@ -67,36 +67,79 @@
 *   **测试覆盖**：使用 Jest 进行单元测试，核心模块覆盖率 >80%。
 *   **构建工具**：支持 CSS 实时编译和构建优化。
 
-## 🚀 开始使用
+## 🚀 使用指南
 
-### 在线体验
-（如果有部署可以直接填在这里，或者本地运行）
+### 🌐 在线体验 (推荐)
+**GitHub Pages 链接**: [https://magiccoai.github.io/36-xun-calendar/](https://magiccoai.github.io/36-xun-calendar/)
 
-### 本地运行
-1. 克隆仓库：
-   ```bash
-   git clone https://github.com/magiccoAI/36-xun-calendar.git
-   ```
-2. 直接在浏览器中打开 `index.html` 即可开始使用。
+#### 浏览器兼容性
+- **推荐浏览器**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
+- **移动端**: iOS Safari 13+, Android Chrome 80+
+- **不支持**: IE11 (仅基础功能)
 
-或者使用本地服务器（推荐）：
+#### 多设备使用说明
+- **数据存储**: 所有数据仅存储在当前浏览器的本地存储中
+- **跨设备同步**: 目前不支持自动同步
+- **解决方案**: 
+  1. 使用数据备份功能定期导出数据
+  2. 在新设备上导入备份文件
+  3. 建议主要在一个设备上使用，避免数据分散
+
+#### 手机 vs 桌面端差异
+- **手机端**: 底部导航，单手优化，触控友好
+- **桌面端**: 顶部导航，宽屏布局，键盘快捷键支持
+- **数据完全独立**: 手机和桌面打开同一链接是独立的数据空间
+
+### 💻 本地安装使用
+
+#### 方法一：直接打开 (简单快速)
 ```bash
-npx serve .
+# 1. 克隆项目
+git clone https://github.com/magiccoAI/36-xun-calendar.git
+
+# 2. 进入项目目录
+cd "36-xun-calendar"
+
+# 3. 直接双击打开 index.html 文件
+# 或者在浏览器地址栏输入完整路径
 ```
 
-### 开发指南
-如果您想修改样式或功能：
+#### 方法二：本地服务器 (推荐)
 ```bash
-# 安装依赖
+# 1. 克隆项目
+git clone https://github.com/magiccoAI/36-xun-calendar.git
+
+# 2. 进入项目目录
+cd "36-xun-calendar"
+
+# 3. 安装依赖 (可选，用于开发)
 npm install
 
-# 监听 CSS 修改
+# 4. 启动本地服务器
+npx serve .
+# 或者使用 Python 3
+python -m http.server 8000
+# 或者使用 Node.js http-server
+npx http-server .
+
+# 5. 在浏览器中访问 http://localhost:3000 或 http://localhost:8000
+```
+
+#### 完整开发环境设置
+```bash
+# 1. 克隆并安装依赖
+git clone https://github.com/magiccoAI/36-xun-calendar.git
+cd "36-xun-calendar"
+npm install
+
+# 2. 构建资源
+npm run build:css
+npm run build:images
+
+# 3. 启动开发模式 (监听 CSS 变化)
 npm run watch:css
 
-# 构建 CSS
-npm run build:css
-
-# 运行测试
+# 4. 运行测试
 npm test
 ```
 
@@ -104,15 +147,6 @@ npm test
 
 ### 🎨 睡眠记录升级
 - **双轴滑块**：直观的入睡和起床时间选择器
-- **跨昼夜计算**：智能处理从晚上到早上的睡眠时长
-- **质量反馈**：😴 睡得真香、😐 普普通通、😫 没睡好
-- **15分钟精度**：满足精确记录需求
-
-### 💝 三件好事增强
-- **智能分析**：自动提取高频关键词，发现生活主题
-- **时间线展示**：按日期回顾美好瞬间，满记录特殊标识
-- **温暖设计**：琥珀色渐变背景，卡片式布局
-- **个性化寄语**：根据完成度提供感恩鼓励
 
 ### 🛡️ 数据保护强化
 - **存储提醒文档**：详细的数据丢失风险说明和保护策略
@@ -127,15 +161,9 @@ npm test
 
 ## 📄 许可证
 
-本项目基于 [MIT License](LICENSE) 开源。
+本项目源码公开，仅供个人学习与研究使用。未经许可，严禁用于任何形式的商业用途。
 
-## 📚 相关文档
 
-- [数据存储与备份提醒](DATA_STORAGE_REMINDER.md) - 详细的存储指南和注意事项
-- [三件好事功能增强说明](GOOD_THINGS_ENHANCEMENT.md) - 新功能详细说明
-- [睡眠滑块增强说明](SLEEP_SLIDER_ENHANCEMENT.md) - 睡眠记录组件升级
-- [实施总结](IMPLEMENTATION_SUMMARY.md) - 项目改进总结
-- [测试报告](TEST_REPORT.md) - 技术测试结果
 
 ---
 

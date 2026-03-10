@@ -1,0 +1,99 @@
+{
+  "name": "36旬日历 - 重新丈量时间",
+  "short_name": "36旬日历",
+  "description": "重新丈量时间的刻度，在三十六个'十天'里，找回生活的质感",
+  "start_url": "https://magiccoai.github.io/36-xun-calendar/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "zh-CN",
+  "categories": ["productivity", "lifestyle", "utilities"],
+  "icons": [
+    {
+      "src": "src/images/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "src/images/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "src/images/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "src/images/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "src/images/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "src/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "src/images/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "src/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "src/images/screenshot-desktop.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "桌面端全景视图"
+    },
+    {
+      "src": "src/images/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "移动端记录界面"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日记录",
+      "short_name": "今日",
+      "description": "快速记录今天的生活状态",
+      "url": "/?view=today",
+      "icons": [
+        {
+          "src": "src/images/shortcut-today.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "36旬概览",
+      "short_name": "概览",
+      "description": "查看年度36旬进度",
+      "url": "/?view=macro",
+      "icons": [
+        {
+          "src": "src/images/shortcut-overview.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

@@ -31,6 +31,9 @@ class App {
         QuoteSystem.init();
         this.checkMenstrualPrediction();
         
+        // Initialize mobile current xun FAB
+        this.initMobileCurrentXunFAB();
+        
         // Subscribe to store
         store.subscribe(this.render.bind(this));
         
@@ -40,6 +43,21 @@ class App {
         // Force initial view to macro and scroll to current xun
         const currentXun = Calendar.getCurrentXun(this.xunPeriods);
         const initialXunIndex = currentXun ? currentXun.index : 1;
+        
+        // Debug logging
+        console.log('App initialization:');
+        console.log('- Today:', new Date().toISOString());
+        console.log('- Current Xun found:', currentXun);
+        console.log('- Initial Xun Index:', initialXunIndex);
+        console.log('- Today date:', new Date().toDateString());
+        console.log('- Today time:', new Date().toTimeString());
+        console.log('- Xun Periods:', this.xunPeriods.slice(0, 10).map(p => ({
+            index: p.index,
+            start: p.startDate.toISOString().split('T')[0],
+            end: p.endDate.toISOString().split('T')[0],
+            startFull: p.startDate.toString(),
+            endFull: p.endDate.toString()
+        })));
 
         store.setState({ 
             currentView: 'macro', 
@@ -48,7 +66,23 @@ class App {
 
         // Auto-scroll to current xun on initial load
         if (currentXun) {
+            console.log('Scrolling to Xun:', currentXun.index);
             this.scrollToXun(currentXun.index);
+        } else {
+            console.log('No current xun found, calculating manually...');
+            // 手动计算今天应该属于哪一旬
+            const now = new Date();
+            const startOfYear = new Date(CONFIG.YEAR, 0, 1);
+            const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+            const calculatedXunIndex = Math.ceil(dayOfYear / 10);
+            
+            console.log('Day of year:', dayOfYear);
+            console.log('Calculated Xun index:', calculatedXunIndex);
+            
+            // 确保索引在有效范围内
+            const targetXunIndex = Math.max(1, Math.min(calculatedXunIndex, CONFIG.XUN_COUNT));
+            console.log('Force scrolling to Xun', targetXunIndex);
+            this.scrollToXun(targetXunIndex);
         }
     }
 
@@ -180,6 +214,17 @@ class App {
     }
 
     initSettings() {
+        // 确保DOM完全加载后再初始化SettingsModal
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initSettingsModal();
+            });
+        } else {
+            this.initSettingsModal();
+        }
+    }
+
+    initSettingsModal() {
         this.settingsModal = new SettingsModal('settings-modal');
         const settingsBtn = document.getElementById('settings-btn');
         if (settingsBtn) {
@@ -506,8 +551,23 @@ class App {
         if (!menu) return;
 
         const rect = element.getBoundingClientRect();
-        menu.style.top = `${window.scrollY + rect.bottom + 5}px`;
-        menu.style.left = `${window.scrollX + rect.left}px`;
+        const menuWidth = 200; // Approximate menu width based on max-w-xs and content
+        
+        // Calculate initial position
+        let left = window.scrollX + rect.left;
+        let top = window.scrollY + rect.bottom + 5;
+        
+        // Adjust horizontal position if menu would go beyond right viewport
+        if (left + menuWidth > window.innerWidth + window.scrollX) {
+            left = window.scrollX + rect.right - menuWidth;
+            // Ensure menu doesn't go beyond left viewport either
+            if (left < window.scrollX) {
+                left = window.scrollX + 10;
+            }
+        }
+        
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
         menu.classList.remove('hidden');
 
         const newMenu = menu.cloneNode(true);
@@ -590,18 +650,158 @@ class App {
         setTimeout(() => {
             const element = document.getElementById(`xun-row-${xunIndex}`);
             if (element) {
+                // Check if mobile device
+                const isMobile = window.innerWidth <= 768;
+                
+                // Enhanced scroll with better positioning
                 element.scrollIntoView({
                     behavior: 'smooth',
-                    block: 'center'
+                    block: isMobile ? 'start' : 'center', // On mobile, scroll to top for better visibility
+                    inline: 'nearest'
                 });
-                // Highlight the row briefly
-                element.style.transition = 'background-color 0.5s ease-in-out';
-                element.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'; // blue-500 with 10% opacity
+                
+                // Enhanced highlight animation sequence
+                element.style.transition = 'all 0.5s ease-in-out';
+                
+                // Different effects for mobile vs desktop
+                if (isMobile) {
+                    // Mobile: more subtle but still noticeable effects
+                    element.style.transform = 'scale(1.015)';
+                    element.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.5), 0 4px 20px rgba(59, 130, 246, 0.2)';
+                    element.style.zIndex = '30';
+                } else {
+                    // Desktop: stronger effects
+                    element.style.transform = 'scale(1.03)';
+                    element.style.boxShadow = '0 0 0 4px rgba(59, 130, 246, 0.6), 0 8px 30px rgba(59, 130, 246, 0.3), 0 0 50px rgba(59, 130, 246, 0.2)';
+                    element.style.zIndex = '50';
+                }
+                
+                // Create a temporary flash effect
+                const flashOverlay = document.createElement('div');
+                const flashIntensity = isMobile ? 0.15 : 0.2;
+                flashOverlay.style.cssText = `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: linear-gradient(45deg, rgba(59, 130, 246, ${flashIntensity}), rgba(147, 197, 253, ${flashIntensity * 1.5}));
+                    border-radius: inherit;
+                    pointer-events: none;
+                    z-index: 51;
+                    animation: flashHighlight 1s ease-out;
+                `;
+                element.style.position = 'relative';
+                element.appendChild(flashOverlay);
+                
+                // Add flash animation keyframes if not already present
+                if (!document.getElementById('flash-highlight-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'flash-highlight-style';
+                    style.textContent = `
+                        @keyframes flashHighlight {
+                            0% { opacity: 0; }
+                            20% { opacity: 1; }
+                            100% { opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                // Mobile-specific: Add haptic feedback if available
+                if (isMobile && navigator.vibrate) {
+                    navigator.vibrate(50); // Short vibration for attention
+                }
+                
+                // Gradually reduce the highlight effects
                 setTimeout(() => {
-                    element.style.backgroundColor = '';
-                }, 2000);
+                    if (isMobile) {
+                        element.style.transform = 'scale(1.01)';
+                        element.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.4), 0 2px 15px rgba(59, 130, 246, 0.2)';
+                        element.style.zIndex = '10';
+                    } else {
+                        element.style.transform = 'scale(1.02)';
+                        element.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.3), 0 4px 20px rgba(59, 130, 246, 0.15), 0 0 30px rgba(59, 130, 246, 0.1)';
+                        element.style.zIndex = '10';
+                    }
+                    
+                    // Remove flash overlay
+                    if (flashOverlay.parentNode) {
+                        flashOverlay.parentNode.removeChild(flashOverlay);
+                    }
+                }, isMobile ? 800 : 1000);
+                
+                // Final gentle return to normal state (keeping the current-xun-highlight class effects)
+                setTimeout(() => {
+                    element.style.transform = '';
+                    element.style.boxShadow = '';
+                    element.style.zIndex = '';
+                }, isMobile ? 2000 : 2500);
             }
         }, 100); // A short delay
+    }
+
+    initMobileCurrentXunFAB() {
+        const fab = document.getElementById('mobile-current-xun-fab');
+        const xunNumber = document.getElementById('current-xun-number');
+        
+        if (!fab || !xunNumber) return;
+        
+        // Update FAB with current xun info
+        const updateFAB = () => {
+            const currentXun = Calendar.getCurrentXun(this.xunPeriods);
+            const state = store.getState();
+            const isMobile = window.innerWidth <= 768;
+            
+            if (currentXun && isMobile && state.currentView === 'macro') {
+                xunNumber.textContent = currentXun.index;
+                fab.classList.add('show');
+                fab.onclick = () => {
+                    this.scrollToXun(currentXun.index);
+                    // Haptic feedback on mobile
+                    if (navigator.vibrate) {
+                        navigator.vibrate(30);
+                    }
+                };
+            } else {
+                fab.classList.remove('show');
+            }
+        };
+        
+        // Initial update
+        updateFAB();
+        
+        // Update on view changes and window resize
+        store.subscribe(updateFAB);
+        window.addEventListener('resize', updateFAB);
+        
+        // Show/hide based on scroll position
+        let lastScrollY = window.scrollY;
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            const scrollThreshold = 200;
+            
+            // Only show/hide if in macro view and on mobile
+            const state = store.getState();
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile && state.currentView === 'macro') {
+                if (Math.abs(currentScrollY - lastScrollY) > scrollThreshold) {
+                    if (currentScrollY > lastScrollY) {
+                        // Scrolling down - hide FAB
+                        fab.style.transform = 'translateY(100px) scale(0.8)';
+                        fab.style.opacity = '0';
+                    } else {
+                        // Scrolling up - show FAB
+                        fab.style.transform = 'translateY(0) scale(1)';
+                        fab.style.opacity = '1';
+                    }
+                    lastScrollY = currentScrollY;
+                }
+            }
+        };
+        
+        window.addEventListener('scroll', handleScroll, { passive: true });
     }
 
     render(state, key, value) {

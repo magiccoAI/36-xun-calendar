@@ -145,12 +145,16 @@ class MenstrualView {
         this.currentDate = new Date();
         this.modal.classList.remove('hidden');
         this.modal.classList.add('flex');
+        // 添加发光效果
+        this.openBtn.classList.add('active');
         this.render();
     }
 
     close() {
         this.modal.classList.add('hidden');
         this.modal.classList.remove('flex');
+        // 移除发光效果
+        this.openBtn.classList.remove('active');
     }
 
     changeMonth(direction) {

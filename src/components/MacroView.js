@@ -120,6 +120,12 @@ export class MacroView {
             // Check if current xun
             if (currentXun && currentXun.index === period.index) {
                  row.classList.add('current-xun-highlight');
+                 // Add current xun indicator badge
+                 row.innerHTML += `
+                    <div class="current-xun-indicator">
+                        当前
+                    </div>
+                 `;
             }
 
             // Format Date

@@ -119,14 +119,43 @@ export const Calendar = {
                 return null;
             }
             
+            // 使用本地时间的日期部分，避免时区问题
             const now = new Date();
-            if (isNaN(now.getTime())) {
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0); // 设置为中午12点，避免时区边界问题
+            
+            console.log('=== getCurrentXun Debug ===');
+            console.log('Now (local):', now.toString());
+            console.log('Today (normalized):', today.toString());
+            console.log('Today ISO:', today.toISOString());
+            console.log('Year check:', today.getFullYear(), 'vs', CONFIG.YEAR);
+            
+            if (isNaN(today.getTime())) {
                 console.error('Calendar.getCurrentXun: invalid current time');
                 return null;
             }
             
-            if (now.getFullYear() !== CONFIG.YEAR) return null;
-            return periods.find(p => now >= p.startDate && now <= p.endDate) || null;
+            if (today.getFullYear() !== CONFIG.YEAR) {
+                console.log('Year mismatch, returning null');
+                return null;
+            }
+            
+            const currentXun = periods.find(p => {
+                // 创建旬的开始和结束日期，也设置为中午避免时区问题
+                const xunStart = new Date(p.startDate.getFullYear(), p.startDate.getMonth(), p.startDate.getDate(), 12, 0, 0, 0);
+                const xunEnd = new Date(p.endDate.getFullYear(), p.endDate.getMonth(), p.endDate.getDate(), 12, 0, 0, 0);
+                
+                const result = today >= xunStart && today <= xunEnd;
+                if (p.index >= 6 && p.index <= 10) {
+                    console.log(`Xun ${p.index}: ${p.startDate.toISOString().split('T')[0]} ~ ${p.endDate.toISOString().split('T')[0]} = ${result}`);
+                    console.log(`  Today >= start: ${today >= xunStart} (${today.toISOString()} >= ${xunStart.toISOString()})`);
+                    console.log(`  Today <= end: ${today <= xunEnd} (${today.toISOString()} <= ${xunEnd.toISOString()})`);
+                }
+                return result;
+            }) || null;
+            
+            console.log('Current Xun result:', currentXun ? `Xun ${currentXun.index}` : 'None');
+            console.log('=== End Debug ===');
+            return currentXun;
         } catch (error) {
             console.error('Calendar.getCurrentXun error:', error);
             return null;

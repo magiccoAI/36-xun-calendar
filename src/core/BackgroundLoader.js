@@ -21,11 +21,20 @@ export class BackgroundLoader {
 
   async loadTheme(themeName, isPreload = false) {
     if (this.cache.has(themeName)) {
-      return this.cache.get(themeName);
+      const cachedImageUrl = this.cache.get(themeName);
+      if (!isPreload) {
+        this.applyBackground(cachedImageUrl, themeName);
+      }
+      return cachedImageUrl;
     }
 
     if (this.loadingPromises.has(themeName)) {
-      return this.loadingPromises.get(themeName);
+      const loadingPromise = this.loadingPromises.get(themeName);
+      const imageUrl = await loadingPromise;
+      if (!isPreload && imageUrl) {
+        this.applyBackground(imageUrl, themeName);
+      }
+      return imageUrl;
     }
 
     const loadPromise = this.loadThemeImage(themeName, isPreload);
@@ -35,6 +44,9 @@ export class BackgroundLoader {
       const imageUrl = await loadPromise;
       this.cache.set(themeName, imageUrl);
       this.loadingPromises.delete(themeName);
+      if (!isPreload && imageUrl) {
+        this.applyBackground(imageUrl, themeName);
+      }
       return imageUrl;
     } catch (error) {
       console.error(`Failed to load theme ${themeName}:`, error);
@@ -55,9 +67,6 @@ export class BackgroundLoader {
           : `src/images/optimized/${themeName}-bg.jpg`;
 
       img.onload = () => {
-        if (!isPreload) {
-          this.applyBackground(imagePath, themeName);
-        }
         resolve(imagePath);
       };
 
@@ -69,9 +78,6 @@ export class BackgroundLoader {
         const fallbackImg = new Image();
         
         fallbackImg.onload = () => {
-          if (!isPreload) {
-            this.applyBackground(fallbackPath, themeName);
-          }
           resolve(fallbackPath);
         };
         

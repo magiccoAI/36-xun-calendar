@@ -3,6 +3,7 @@ import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
 import { CompleteSleepModule } from './CompleteSleepModule.js';
+import { BodyStateSelector } from './BodyStateSelector.js';
 
 export class Modal {
     constructor(modalId, onSave) {
@@ -11,6 +12,7 @@ export class Modal {
         this.onSave = onSave;
         this.currentDateStr = null;
         this.sleepSelector = null;
+        this.bodyStateSelector = null;
         
         this.initElements();
         this.initListeners();
@@ -35,7 +37,7 @@ export class Modal {
                 document.getElementById('day-indicator-check-3')
             ],
             weatherBtns: document.querySelectorAll('#weather-selector button'),
-            energyInput: document.getElementById('energy-level'),
+            bodyStateSelectorContainer: document.getElementById('body-state-selector'),
             nourishmentTags: document.getElementById('nourishment-tags-container'),
             sleepSelectorContainer: document.getElementById('sleep-selector-container'),
             metrics: {
@@ -106,10 +108,18 @@ export class Modal {
         this.elements.addActivityBtn.onclick = () => this.addCustomActivityInput();
     }
 
+    getDayOfWeek(dateStr) {
+        const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return days[date.getDay()];
+    }
+
     open(dateStr, xunIndex) {
         this.currentDateStr = dateStr;
         this.currentXunIndex = xunIndex;
-        this.elements.dateTitle.textContent = dateStr;
+        const dayOfWeek = this.getDayOfWeek(dateStr);
+        this.elements.dateTitle.innerHTML = `${dateStr} <span class="text-sm text-gray-500">${dayOfWeek}</span>`;
         
         const state = store.getState();
         const data = state.userData[dateStr] || {};
@@ -163,9 +173,6 @@ export class Modal {
             if (btn) btn.click();
         }
 
-        // Energy
-        this.elements.energyInput.value = data.energy_level || 50;
-
         // Nourishment
         this.renderNourishmentTags(data.nourishments || []);
         
@@ -179,6 +186,7 @@ export class Modal {
         }
         
         this.initSleepSelector(data.sleepData || {});
+        this.initBodyStateSelector(data.body_state || null);
 
         // Good Things
         if (data.three_good_things) {
@@ -224,7 +232,6 @@ export class Modal {
         this.currentWeather = null;
         this.elements.weatherBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
         this.elements.keywordsInput.value = '';
-        this.elements.energyInput.value = 50;
         this.elements.cycleStart.checked = false;
         this.elements.cycleEnd.checked = false;
         Object.values(this.elements.metrics).forEach(el => {
@@ -243,6 +250,11 @@ export class Modal {
         // Reset sleep selector
         if (this.sleepSelector) {
             this.sleepSelector.reset();
+        }
+        
+        // Reset body state selector
+        if (this.bodyStateSelector) {
+            this.bodyStateSelector.reset();
         }
     }
 
@@ -269,6 +281,20 @@ export class Modal {
                 // 可以在这里处理睡眠质量变化的逻辑
             }
         });
+    }
+
+    initBodyStateSelector(savedBodyState = null) {
+        if (!this.elements.bodyStateSelectorContainer) return;
+
+        this.bodyStateSelector = new BodyStateSelector(this.elements.bodyStateSelectorContainer, {
+            onChange: (bodyState) => {
+                // 可以在这里处理身体状态变化的逻辑
+            }
+        });
+
+        if (savedBodyState) {
+            this.bodyStateSelector.setValue(savedBodyState);
+        }
     }
 
     renderEmotionTags(selectedTags = []) {
@@ -540,7 +566,7 @@ export class Modal {
             emotions: Array.from(this.selectedEmotions),
             keywords: this.elements.keywordsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k),
             weather: this.currentWeather,
-            energy_level: this.elements.energyInput.value,
+            body_state: this.bodyStateSelector ? this.bodyStateSelector.getValue() : null,
             nourishments: Array.from(this.selectedNourishments),
             metrics: {
                 // sleep: this.elements.metrics.sleep.value || 0, // 已替换为睡眠滑块

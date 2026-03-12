@@ -467,6 +467,7 @@ class App {
             plot.setAttribute('aria-label', dateStr);
             plot.onclick = (e) => {
                 e.stopPropagation();
+                console.log(`Plot clicked: ${dateStr}`, plot);
                 this.showCropSelection(dateStr, plot);
             };
 
@@ -548,26 +549,49 @@ class App {
 
     showCropSelection(dateStr, element) {
         const menu = document.getElementById('crop-selection-menu');
-        if (!menu) return;
+        if (!menu) {
+            console.error('Crop selection menu not found');
+            return;
+        }
+
+        console.log(`Showing crop selection for: ${dateStr}`, element);
 
         const rect = element.getBoundingClientRect();
         const menuWidth = 200; // Approximate menu width based on max-w-xs and content
+        const menuHeight = 100; // Approximate menu height
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
         
         // Calculate initial position
-        let left = window.scrollX + rect.left;
-        let top = window.scrollY + rect.bottom + 5;
+        let left = scrollX + rect.left;
+        let top = scrollY + rect.bottom + 5;
+        
+        console.log(`Initial position: left=${left}, top=${top}, rect=${JSON.stringify(rect)}`);
         
         // Adjust horizontal position if menu would go beyond right viewport
-        if (left + menuWidth > window.innerWidth + window.scrollX) {
-            left = window.scrollX + rect.right - menuWidth;
+        if (left + menuWidth > window.innerWidth + scrollX) {
+            left = scrollX + rect.right - menuWidth;
             // Ensure menu doesn't go beyond left viewport either
-            if (left < window.scrollX) {
-                left = window.scrollX + 10;
+            if (left < scrollX) {
+                left = scrollX + 10;
             }
         }
         
-        menu.style.top = `${top}px`;
-        menu.style.left = `${left}px`;
+        // Adjust vertical position if menu would go beyond bottom viewport
+        if (top + menuHeight > window.innerHeight + scrollY) {
+            top = scrollY + rect.top - menuHeight - 5;
+            // Ensure menu doesn't go above top viewport
+            if (top < scrollY) {
+                top = scrollY + 10;
+            }
+        }
+        
+        console.log(`Final position: left=${left}, top=${top}`);
+        
+        menu.style.position = 'fixed';
+        menu.style.top = `${top - scrollY}px`;
+        menu.style.left = `${left - scrollX}px`;
+        menu.style.zIndex = '9999';
         menu.classList.remove('hidden');
 
         const newMenu = menu.cloneNode(true);

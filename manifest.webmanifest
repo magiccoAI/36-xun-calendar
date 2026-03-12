@@ -54,22 +54,6 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "src/images/screenshot-desktop.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "桌面端全景视图"
-    },
-    {
-      "src": "src/images/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "移动端记录界面"
-    }
-  ],
   "shortcuts": [
     {
       "name": "今日记录",

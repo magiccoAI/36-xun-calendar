@@ -107,8 +107,10 @@ export class BodyStateSelector {
     }
     
     setValue(stateId) {
-        if (stateId) {
-            this.selectState(stateId);
+        if (!stateId) return;
+        const normalizedId = typeof stateId === 'string' ? stateId : stateId.id;
+        if (normalizedId) {
+            this.selectState(normalizedId);
         }
     }
     

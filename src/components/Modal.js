@@ -13,6 +13,8 @@ export class Modal {
         this.currentDateStr = null;
         this.sleepSelector = null;
         this.bodyStateSelector = null;
+        this.currentTab = 'checkin';
+        this.currentBodyCondition = null;
         
         this.initElements();
         this.initListeners();
@@ -22,6 +24,8 @@ export class Modal {
         this.elements = {
             dateTitle: document.getElementById('modal-date'),
             closeBtn: document.getElementById('modal-close'),
+            tabButtons: document.querySelectorAll('.modal-tab-btn'),
+            tabPages: document.querySelectorAll('.modal-tab-page'),
             moodBtns: document.querySelectorAll('.mood-btn'),
             emotionTags: document.getElementById('emotion-tags'),
             keywordsInput: document.getElementById('keywords-input'),
@@ -39,6 +43,8 @@ export class Modal {
             weatherBtns: document.querySelectorAll('#weather-selector button'),
             bodyStateSelectorContainer: document.getElementById('body-state-selector'),
             nourishmentTags: document.getElementById('nourishment-tags-container'),
+            bodyConditionBtns: document.querySelectorAll('.body-condition-btn'),
+            bodyConditionNote: document.getElementById('body-condition-note'),
             sleepSelectorContainer: document.getElementById('sleep-selector-container'),
             metrics: {
                 // sleep: document.getElementById('metric-sleep'), // 已替换为睡眠滑块
@@ -54,8 +60,6 @@ export class Modal {
             ],
             customActivitiesContainer: document.getElementById('custom-activities-container'),
             addActivityBtn: document.getElementById('add-custom-activity'),
-            cycleStart: document.getElementById('cycle-start'),
-            cycleEnd: document.getElementById('cycle-end'),
             journalInput: document.getElementById('journal-input'),
             deleteBtn: document.getElementById('modal-delete'),
             saveBtn: document.getElementById('modal-save')
@@ -98,6 +102,14 @@ export class Modal {
             };
         });
 
+        this.elements.tabButtons.forEach(btn => {
+            btn.onclick = () => this.switchTab(btn.dataset.tab);
+        });
+
+        this.elements.bodyConditionBtns.forEach(btn => {
+            btn.onclick = () => this.selectBodyCondition(btn.dataset.condition);
+        });
+
         // Save Button
         this.elements.saveBtn.onclick = () => this.save();
 
@@ -127,16 +139,9 @@ export class Modal {
 
         console.log('Modal open:', dateStr, 'sleepData:', data.sleepData);
 
-        // Show/Hide Menstrual Tracker based on settings
-        const trackerContainer = document.getElementById('menstrual-tracker-container');
-        if (state.settings.showMenstrualCycle) {
-            trackerContainer.classList.remove('hidden');
-        } else {
-            trackerContainer.classList.add('hidden');
-        }
-
         // Reset UI
         this.resetUI();
+        this.switchTab('checkin');
 
         // Populate Data
         // Mood
@@ -187,6 +192,7 @@ export class Modal {
         
         this.initSleepSelector(data.sleepData || {});
         this.initBodyStateSelector(data.body_state || null);
+        this.setBodyCondition(data.body_condition || null);
 
         // Good Things
         if (data.three_good_things) {
@@ -232,8 +238,11 @@ export class Modal {
         this.currentWeather = null;
         this.elements.weatherBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
         this.elements.keywordsInput.value = '';
-        this.elements.cycleStart.checked = false;
-        this.elements.cycleEnd.checked = false;
+        this.elements.bodyConditionNote.value = '';
+        this.currentBodyCondition = null;
+        this.elements.bodyConditionBtns.forEach(btn => {
+            btn.classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-700');
+        });
         Object.values(this.elements.metrics).forEach(el => {
             if (el && el.id && el.id !== 'metric-sleep') { // 跳过已删除的睡眠输入
                 el.value = '';
@@ -286,15 +295,57 @@ export class Modal {
     initBodyStateSelector(savedBodyState = null) {
         if (!this.elements.bodyStateSelectorContainer) return;
 
-        this.bodyStateSelector = new BodyStateSelector(this.elements.bodyStateSelectorContainer, {
-            onChange: (bodyState) => {
-                // 可以在这里处理身体状态变化的逻辑
-            }
-        });
+        if (!this.bodyStateSelector) {
+            this.bodyStateSelector = new BodyStateSelector(this.elements.bodyStateSelectorContainer, {
+                onChange: (bodyState) => {
+                    // 可以在这里处理身体状态变化的逻辑
+                }
+            });
+        }
+
+        this.bodyStateSelector.reset();
 
         if (savedBodyState) {
             this.bodyStateSelector.setValue(savedBodyState);
         }
+    }
+
+    selectBodyCondition(condition) {
+        this.currentBodyCondition = condition;
+        this.elements.bodyConditionBtns.forEach(btn => {
+            const selected = btn.dataset.condition === condition;
+            btn.classList.toggle('bg-blue-100', selected);
+            btn.classList.toggle('border-blue-300', selected);
+            btn.classList.toggle('text-blue-700', selected);
+        });
+    }
+
+    setBodyCondition(bodyCondition) {
+        if (!bodyCondition) return;
+        if (bodyCondition.level) {
+            this.selectBodyCondition(bodyCondition.level);
+        }
+        this.elements.bodyConditionNote.value = bodyCondition.note || '';
+    }
+
+    switchTab(tabName) {
+        this.currentTab = tabName;
+
+        this.elements.tabButtons.forEach(btn => {
+            const selected = btn.dataset.tab === tabName;
+            btn.setAttribute('aria-selected', String(selected));
+            btn.classList.toggle('bg-white', selected);
+            btn.classList.toggle('text-blue-600', selected);
+            btn.classList.toggle('shadow-sm', selected);
+            btn.classList.toggle('text-gray-600', !selected);
+        });
+
+        this.elements.tabPages.forEach(page => {
+            const isActive = page.dataset.page === tabName;
+            page.classList.toggle('hidden', !isActive);
+            page.classList.toggle('opacity-0', !isActive);
+            page.classList.toggle('opacity-100', isActive);
+        });
     }
 
     renderEmotionTags(selectedTags = []) {
@@ -567,6 +618,10 @@ export class Modal {
             keywords: this.elements.keywordsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k),
             weather: this.currentWeather,
             body_state: this.bodyStateSelector ? this.bodyStateSelector.getValue() : null,
+            body_condition: {
+                level: this.currentBodyCondition,
+                note: this.elements.bodyConditionNote.value.trim()
+            },
             nourishments: Array.from(this.selectedNourishments),
             metrics: {
                 // sleep: this.elements.metrics.sleep.value || 0, // 已替换为睡眠滑块
@@ -592,19 +647,6 @@ export class Modal {
                 data.custom_activities.push({ name, value: val });
             }
         });
-        
-        // Cycle Data Logic
-        const isStart = this.elements.cycleStart.checked;
-        const isEnd = this.elements.cycleEnd.checked;
-        const currentCycles = store.getState().menstrualData.cycles;
-        const wasStart = currentCycles.some(c => c.start === this.currentDateStr);
-        const wasEnd = currentCycles.some(c => c.end === this.currentDateStr);
-
-        if (isStart && !wasStart) store.addPeriodStart(this.currentDateStr);
-        if (!isStart && wasStart) store.removePeriodStart(this.currentDateStr);
-        
-        if (isEnd && !wasEnd) store.addPeriodEnd(this.currentDateStr);
-        if (!isEnd && wasEnd) store.removePeriodEnd(this.currentDateStr);
         
         // Save Habits Definition as well (Update Macro Goals)
         const habits = this.elements.habitInputs.map(el => el.value.trim());

@@ -15,6 +15,9 @@ export class Modal {
         this.bodyStateSelector = null;
         this.currentTab = 'checkin';
         this.currentBodyCondition = null;
+        this.checkinGuideShown = false;
+        this.hasCheckinData = false;
+        this.isHydrating = false;
         
         this.initElements();
         this.initListeners();
@@ -26,6 +29,7 @@ export class Modal {
             closeBtn: document.getElementById('modal-close'),
             tabButtons: document.querySelectorAll('.modal-tab-btn'),
             tabPages: document.querySelectorAll('.modal-tab-page'),
+            guideTip: document.getElementById('checkin-guide-tip'),
             moodBtns: document.querySelectorAll('.mood-btn'),
             emotionTags: document.getElementById('emotion-tags'),
             keywordsInput: document.getElementById('keywords-input'),
@@ -67,9 +71,9 @@ export class Modal {
     }
 
     initListeners() {
-        this.elements.closeBtn.onclick = () => this.close();
+        this.elements.closeBtn.onclick = () => this.closeWithAutoSave();
         this.modal.onclick = (e) => {
-            if (e.target === this.modal) this.close();
+            if (e.target === this.modal) this.closeWithAutoSave();
         };
 
         // Mood Buttons
@@ -90,6 +94,7 @@ export class Modal {
                     emojiSpan.classList.add('grayscale-0');
                 }
                 this.currentMood = parseInt(btn.dataset.mood);
+                this.onCheckinInteraction('mood');
             };
         });
 
@@ -106,12 +111,16 @@ export class Modal {
             btn.onclick = () => this.switchTab(btn.dataset.tab);
         });
 
+        if (this.elements.guideTip) {
+            this.elements.guideTip.onclick = () => this.switchTab('record');
+        }
+
         this.elements.bodyConditionBtns.forEach(btn => {
             btn.onclick = () => this.selectBodyCondition(btn.dataset.condition);
         });
 
         // Save Button
-        this.elements.saveBtn.onclick = () => this.save();
+        this.elements.saveBtn.onclick = () => this.save({ closeAfterSave: true });
 
         // Delete Button
         this.elements.deleteBtn.onclick = () => this.delete();
@@ -141,7 +150,9 @@ export class Modal {
 
         // Reset UI
         this.resetUI();
+        this.checkinGuideShown = false;
         this.switchTab('checkin');
+        this.isHydrating = true;
 
         // Populate Data
         // Mood
@@ -214,6 +225,9 @@ export class Modal {
         // Journal
         this.elements.journalInput.value = data.journal || '';
 
+        this.isHydrating = false;
+        this.updateTabStatusIndicators();
+
         // Show Modal
         this.modal.classList.remove('hidden');
         this.modal.classList.add('flex');
@@ -232,6 +246,11 @@ export class Modal {
         }, 300);
     }
 
+
+    closeWithAutoSave() {
+        this.save({ closeAfterSave: true });
+    }
+
     resetUI() {
         this.elements.moodBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
         this.currentMood = null;
@@ -240,6 +259,9 @@ export class Modal {
         this.elements.keywordsInput.value = '';
         this.elements.bodyConditionNote.value = '';
         this.currentBodyCondition = null;
+        this.checkinGuideShown = false;
+        this.hasCheckinData = false;
+        this.isHydrating = false;
         this.elements.bodyConditionBtns.forEach(btn => {
             btn.classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-700');
         });
@@ -256,6 +278,11 @@ export class Modal {
         this.selectedEmotions = new Set();
         this.selectedNourishments = new Set();
         
+        if (this.elements.guideTip) {
+            this.elements.guideTip.classList.add('hidden');
+        }
+        this.updateTabStatusIndicators();
+
         // Reset sleep selector
         if (this.sleepSelector) {
             this.sleepSelector.reset();
@@ -297,8 +324,8 @@ export class Modal {
 
         if (!this.bodyStateSelector) {
             this.bodyStateSelector = new BodyStateSelector(this.elements.bodyStateSelectorContainer, {
-                onChange: (bodyState) => {
-                    // 可以在这里处理身体状态变化的逻辑
+                onChange: () => {
+                    this.onCheckinInteraction('vitality');
                 }
             });
         }
@@ -312,6 +339,7 @@ export class Modal {
 
     selectBodyCondition(condition) {
         this.currentBodyCondition = condition;
+        this.onCheckinInteraction('vitality');
         this.elements.bodyConditionBtns.forEach(btn => {
             const selected = btn.dataset.condition === condition;
             btn.classList.toggle('bg-blue-100', selected);
@@ -346,6 +374,8 @@ export class Modal {
             page.classList.toggle('opacity-0', !isActive);
             page.classList.toggle('opacity-100', isActive);
         });
+
+        this.updateTabStatusIndicators();
     }
 
     renderEmotionTags(selectedTags = []) {
@@ -368,9 +398,11 @@ export class Modal {
                 if (this.selectedEmotions.has(emo.value)) {
                     this.selectedEmotions.delete(emo.value);
                     tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors';
+                    this.updateTabStatusIndicators();
                 } else {
                     this.selectedEmotions.add(emo.value);
                     tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-blue-100 border-blue-300 text-blue-700 transition-colors';
+                    this.onCheckinInteraction('feelings');
                 }
             };
             
@@ -590,6 +622,39 @@ export class Modal {
         container.appendChild(addBtn);
     }
 
+    hasMeaningfulCheckinData() {
+        const hasMood = Number.isInteger(this.currentMood);
+        const hasBodyState = this.bodyStateSelector && !!this.bodyStateSelector.getValue();
+        const hasFeelings = this.selectedEmotions && this.selectedEmotions.size > 0;
+        return hasMood || hasBodyState || hasFeelings;
+    }
+
+    updateTabStatusIndicators() {
+        this.hasCheckinData = this.hasMeaningfulCheckinData();
+        this.elements.tabButtons.forEach(btn => {
+            const statusEl = btn.querySelector('[data-tab-status]');
+            if (!statusEl) return;
+            if (!this.hasCheckinData) {
+                statusEl.textContent = '';
+                return;
+            }
+            statusEl.textContent = btn.dataset.tab === 'checkin' ? '✓' : '●';
+        });
+    }
+
+    showCheckinGuideTip() {
+        if (!this.elements.guideTip || this.checkinGuideShown || !this.hasMeaningfulCheckinData()) return;
+        this.checkinGuideShown = true;
+        this.elements.guideTip.classList.remove('hidden');
+    }
+
+    onCheckinInteraction(type) {
+        if (!['mood', 'vitality', 'feelings'].includes(type)) return;
+        this.updateTabStatusIndicators();
+        if (this.isHydrating) return;
+        this.showCheckinGuideTip();
+    }
+
     addCustomActivityInput(name = '', value = '') {
         const div = document.createElement('div');
         div.className = "flex gap-2 mb-2 activity-row";
@@ -609,7 +674,7 @@ export class Modal {
         this.elements.addActivityBtn.insertAdjacentElement('beforebegin', div);
     }
 
-    save() {
+    save(options = {}) {
         if (!this.currentDateStr) return;
 
         const data = {
@@ -665,7 +730,9 @@ export class Modal {
         // Save everything
         store.setState({ userData, macroGoals });
         
-        this.close();
+        if (options.closeAfterSave) {
+            this.close();
+        }
         if (this.onSave) this.onSave();
     }
 

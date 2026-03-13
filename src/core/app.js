@@ -17,6 +17,7 @@ import MenstrualView from '../components/MenstrualView.js';
 class App {
     constructor() {
         this.xunPeriods = Calendar.getXunPeriods(CONFIG.YEAR);
+        this.pendingDayCellPatch = null;
         this.initViews();
         this.initModal();
         this.initBackup();
@@ -126,8 +127,9 @@ class App {
     }
 
     initModal() {
-        this.modal = new Modal('modal', () => {
-            // On save/delete, store updates, which triggers render
+        this.modal = new Modal('modal', (payload) => {
+            // 记录一次单日 patch，避免保存后整个月历重绘
+            this.pendingDayCellPatch = payload || null;
         });
 
         // The logic for the modal's internal elements is being initialized here.
@@ -833,6 +835,15 @@ class App {
         localStorage.setItem('xun_last_viewed_view', state.currentView);
         if (state.viewedXunIndex) {
             localStorage.setItem(CONFIG.STORAGE_KEYS.LAST_VIEWED_XUN, state.viewedXunIndex);
+        }
+
+        if (key === 'userData' && this.pendingDayCellPatch && (state.currentView === 'detail' || state.currentView === 'overview')) {
+            const patched = this.detailView.updateDayCell(this.pendingDayCellPatch.dateStr);
+            this.pendingDayCellPatch = null;
+            if (patched) {
+                this.checkMenstrualPrediction();
+                return;
+            }
         }
 
         if (this.menstrualBtn) {

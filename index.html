@@ -672,6 +672,20 @@
                 opacity: 0.9;
             }
         }
+
+        /* Detail day-cell energy signal */
+        .energy-ring {
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+        }
+        .energy-ring.level-1 { background: #8FA3B0; }
+        .energy-ring.level-2 { background: #6CCB9F; }
+        .energy-ring.level-3 { background: #3ED37A; }
+        .energy-ring.level-4 { background: #F4C542; }
+
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased overflow-x-hidden">

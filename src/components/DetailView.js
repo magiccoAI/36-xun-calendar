@@ -37,6 +37,106 @@ export class DetailView {
         });
     }
 
+
+    getEnergyLevel(dayData = {}) {
+        const vitality = Number(dayData.vitality);
+        if (Number.isInteger(vitality) && vitality >= 1 && vitality <= 4) return vitality;
+
+        const bodyState = dayData.body_state;
+        if (bodyState && typeof bodyState === 'object') {
+            const levelById = { recover: 1, normal: 2, good: 3, high: 4 };
+            if (bodyState.id && levelById[bodyState.id]) return levelById[bodyState.id];
+
+            const score = Number(bodyState.score);
+            if (!Number.isNaN(score)) {
+                if (score <= 35) return 1;
+                if (score <= 65) return 2;
+                if (score <= 85) return 3;
+                return 4;
+            }
+        }
+
+        return null;
+    }
+
+    getEnergyRingMarkup(dayData = {}) {
+        const level = this.getEnergyLevel(dayData);
+        if (!level) return '';
+        return `<span class="energy-ring level-${level}" title="Energy ${level}"></span>`;
+    }
+
+    getWeatherIcon(weather) {
+        const map = { 'Sunny': '☀️', 'Cloudy': '☁️', 'Overcast': '🌥️', 'Rainy': '🌧️', 'Snowy': '❄️', 'Windy': '🌬️', 'Foggy': '🌫️', 'Thunder': '⚡' };
+        return map[weather] || '';
+    }
+
+    buildIndicators(dayData = {}, isWithinXun = false, periodIndex = 1, macroGoals = {}) {
+        const indicators = [];
+
+        if (dayData.goal_checkin) indicators.push('<span title="核心目标">🎯</span>');
+        if (isWithinXun) {
+            const xunIndicators = Array.isArray(macroGoals[periodIndex]?.indicators) ? macroGoals[periodIndex].indicators : [];
+            const checkins = Array.isArray(dayData.indicator_checkins) ? dayData.indicator_checkins : [];
+            const marks = ['①', '②', '③'];
+            for (let i = 0; i < 3; i++) {
+                if (checkins[i] === true) {
+                    const title = xunIndicators[i] ? `指标：${xunIndicators[i]}` : `指标${i + 1}`;
+                    indicators.push(`<span title="${title}">${marks[i]}</span>`);
+                }
+            }
+        }
+        if (dayData.goal_actions && dayData.goal_actions.length > 0) indicators.push('<span title="最小行动">✅</span>');
+        if (dayData.goal_blockers) indicators.push('<span title="阻碍">🚧</span>');
+        if (dayData.metrics) {
+            if (dayData.metrics.exercise > 0) indicators.push('<span title="运动">🏃</span>');
+            if (dayData.metrics.reading > 0) indicators.push('<span title="阅读">📚</span>');
+        }
+        if (dayData.journal || (dayData.emotions && dayData.emotions.length > 0)) {
+            indicators.push('<span title="日记/情绪">📝</span>');
+        }
+        if (dayData.weather) {
+            indicators.push(`<span title="${dayData.weather}">${this.getWeatherIcon(dayData.weather)}</span>`);
+        }
+
+        return indicators;
+    }
+
+    buildDayCellBodyMarkup(dayData = {}, isWithinXun = false, periodIndex = 1, macroGoals = {}) {
+        const indicators = this.buildIndicators(dayData, isWithinXun, periodIndex, macroGoals);
+        const energyRing = this.getEnergyRingMarkup(dayData);
+
+        return `
+            ${dayData.keywords && dayData.keywords.length > 0 ? `
+            <div data-role="keywords" class="flex flex-wrap justify-center gap-0.5 mb-1 w-full px-0.5">
+                ${dayData.keywords.slice(0, 3).map(k => `<span class="text-[8px] leading-tight text-gray-500 bg-white/50 px-1 rounded-sm border border-gray-100/50 break-words whitespace-normal max-w-full text-center">${k}</span>`).join('')}
+            </div>
+            ` : '<div class="flex-1"></div>'}
+
+            <div data-role="bottom" class="flex items-center justify-between gap-1 text-[8px] md:text-[10px] opacity-80 mt-auto">
+                <div data-role="icons" class="flex gap-0.5 md:gap-1 flex-wrap">
+                    ${indicators.join('')}
+                </div>
+                ${energyRing}
+            </div>
+        `;
+    }
+
+    updateDayCell(dateStr) {
+        const dayEl = this.container.querySelector(`.day-cell[data-date="${dateStr}"]`);
+        if (!dayEl) return false;
+
+        const state = store.getState();
+        const xunPeriods = Calendar.getXunPeriods(CONFIG.YEAR);
+        const targetPeriod = Calendar.getXunPeriodByDateStr(xunPeriods, dateStr);
+        const periodIndex = targetPeriod ? targetPeriod.index : (state.viewedXunIndex || 1);
+        const dayData = state.userData[dateStr] || {};
+
+        const body = dayEl.querySelector('[data-role="day-body"]');
+        if (!body) return false;
+        body.innerHTML = this.buildDayCellBodyMarkup(dayData, true, periodIndex, state.macroGoals);
+        return true;
+    }
+
     render(period) {
         // Elements within the container (or passed in constructor?)
         // The original code targeted specific IDs: detail-title, detail-calendars-container, detail-content
@@ -234,11 +334,12 @@ export class DetailView {
                 }
 
                 const dayEl = document.createElement('div');
-                const baseClass = `p-1 md:p-3 border-t border-r border-gray-50 min-h-[5rem] md:min-h-[7rem] max-h-[20rem] overflow-y-auto h-auto flex flex-col relative transition-all duration-200 group`;
+                const baseClass = `day-cell p-1 md:p-3 border-t border-r border-gray-50 min-h-[5rem] md:min-h-[7rem] max-h-[20rem] overflow-y-auto h-auto flex flex-col relative transition-all duration-200 group`;
                 const activeClass = `cursor-pointer`;
                 const inactiveClass = `bg-gray-50/40 text-gray-300 grayscale opacity-50`;
 
                 dayEl.className = `${baseClass} ${isWithinXun ? activeClass : inactiveClass}`;
+                dayEl.dataset.date = dateStr;
                 
                 if (isPeriod && state.settings.showMenstrualCycle) {
                     dayEl.style.background = 'rgba(252, 211, 241, 0.3)'; // A light pink background
@@ -249,66 +350,19 @@ export class DetailView {
                     dayEl.style.background = 'white';
                 }
 
-                if (dayData.mood) {
-                    dayEl.classList.add(`mood-${dayData.mood}`); 
-                }
-                
-                const dateColor = isWithinXun ? (dayData.mood ? 'text-gray-800' : 'text-gray-700') : 'text-gray-300';
+                const dateColor = isWithinXun ? 'text-gray-700' : 'text-gray-300';
                 const subText = holidayName 
                     ? `<span class="${isHoliday ? 'text-red-500 font-bold' : 'text-gray-500'}">${holidayName}</span>` 
                     : (jieQi ? `<span class="text-blue-500 font-medium">${jieQi}</span>` : lunarDay);
 
-                const moodEmojis = {1: '😫', 2: '😞', 3: '😐', 4: '🙂', 5: '🤩'};
-                const displayEmoji = dayData.mood ? moodEmojis[dayData.mood] : (dayData.emoji || '');
-
-                let indicators = [];
-        
-                if (dayData.goal_checkin) indicators.push('<span title="核心目标">🎯</span>');
-                if (isWithinXun) {
-                    const xunIndicators = Array.isArray(macroGoals[period.index]?.indicators) ? macroGoals[period.index].indicators : [];
-                    const checkins = Array.isArray(dayData.indicator_checkins) ? dayData.indicator_checkins : [];
-                    const marks = ['①', '②', '③'];
-                    for (let i = 0; i < 3; i++) {
-                        if (checkins[i] === true) {
-                            const title = xunIndicators[i] ? `指标：${xunIndicators[i]}` : `指标${i + 1}`;
-                            indicators.push(`<span title="${title}">${marks[i]}</span>`);
-                        }
-                    }
-                }
-                if (dayData.goal_actions && dayData.goal_actions.length > 0) indicators.push('<span title="最小行动">✅</span>');
-                if (dayData.goal_blockers) indicators.push('<span title="阻碍">🚧</span>');
-                if (dayData.metrics) {
-                    if (dayData.metrics.exercise > 0) indicators.push('<span title="运动">🏃</span>');
-                    if (dayData.metrics.reading > 0) indicators.push('<span title="阅读">📚</span>');
-                }
-                if (dayData.journal || (dayData.emotions && dayData.emotions.length > 0)) {
-                    indicators.push('<span title="日记/情绪">📝</span>');
-                }
-
-                const getWeatherIcon = (w) => {
-                    const map = { 'Sunny': '☀️', 'Cloudy': '☁️', 'Overcast': '🌥️', 'Rainy': '🌧️', 'Snowy': '❄️', 'Windy': '🌬️', 'Foggy': '🌫️', 'Thunder': '⚡' };
-                    return map[w] || '';
-                };
+                const dayBodyMarkup = this.buildDayCellBodyMarkup(dayData, isWithinXun, period.index, macroGoals);
 
                 dayEl.innerHTML = `
                     <div class="flex justify-between items-start mb-1">
                         <span class="text-xs md:text-sm font-medium ${dateColor} group-hover:text-blue-600 transition-colors">${currentDate.getDate()}</span>
                         <span class="text-[8px] md:text-[10px] ${holidayName ? '' : 'text-gray-400'} scale-90 origin-right transform">${subText}</span>
                     </div>
-                    <div class="flex-1 flex flex-col items-center justify-center w-full">
-                            ${displayEmoji ? `<div class="text-xl md:text-2xl filter drop-shadow-sm transform group-hover:scale-110 transition-transform mb-1">${displayEmoji}</div>` : ''}
-                            
-                            ${dayData.keywords && dayData.keywords.length > 0 ? `
-                            <div class="flex flex-wrap justify-center gap-0.5 mb-1 w-full px-0.5">
-                                ${dayData.keywords.slice(0, 3).map(k => `<span class="text-[8px] leading-tight text-gray-500 bg-white/50 px-1 rounded-sm border border-gray-100/50 break-words whitespace-normal max-w-full text-center">${k}</span>`).join('')}
-                            </div>
-                            ` : ''}
-
-                            <div class="flex gap-0.5 md:gap-1 text-[8px] md:text-[10px] opacity-70 flex-wrap justify-center mt-auto">
-                            ${indicators.join('')}
-                            ${dayData.weather ? `<span title="${dayData.weather}">${getWeatherIcon(dayData.weather)}</span>` : ''}
-                            </div>
-                    </div>
+                    <div data-role="day-body" class="flex-1 flex flex-col w-full">${dayBodyMarkup}</div>
                 `;
 
                 if (isWithinXun) {

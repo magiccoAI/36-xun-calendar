@@ -655,6 +655,19 @@ export class Modal {
         this.showCheckinGuideTip();
     }
 
+    getVitalityLevel(bodyState) {
+        const levelById = { recover: 1, normal: 2, good: 3, high: 4 };
+        if (!bodyState) return null;
+        if (bodyState.id && levelById[bodyState.id]) return levelById[bodyState.id];
+
+        const score = Number(bodyState.score);
+        if (Number.isNaN(score)) return null;
+        if (score <= 35) return 1;
+        if (score <= 65) return 2;
+        if (score <= 85) return 3;
+        return 4;
+    }
+
     addCustomActivityInput(name = '', value = '') {
         const div = document.createElement('div');
         div.className = "flex gap-2 mb-2 activity-row";
@@ -683,6 +696,7 @@ export class Modal {
             keywords: this.elements.keywordsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k),
             weather: this.currentWeather,
             body_state: this.bodyStateSelector ? this.bodyStateSelector.getValue() : null,
+            vitality: this.getVitalityLevel(this.bodyStateSelector ? this.bodyStateSelector.getValue() : null),
             body_condition: {
                 level: this.currentBodyCondition,
                 note: this.elements.bodyConditionNote.value.trim()
@@ -733,7 +747,7 @@ export class Modal {
         if (options.closeAfterSave) {
             this.close();
         }
-        if (this.onSave) this.onSave();
+        if (this.onSave) this.onSave({ action: 'save', dateStr: this.currentDateStr, dayData: data });
     }
 
     delete() {
@@ -743,6 +757,6 @@ export class Modal {
         delete userData[this.currentDateStr];
         store.setState({ userData });
         this.close();
-        if (this.onSave) this.onSave();
+        if (this.onSave) this.onSave({ action: 'delete', dateStr: this.currentDateStr, dayData: null });
     }
 }

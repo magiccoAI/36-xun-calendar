@@ -162,6 +162,44 @@ export const Calendar = {
         }
     },
     
+
+    getXunRange(dateInput = new Date()) {
+        try {
+            const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+            if (isNaN(date.getTime())) {
+                throw new Error(`Invalid date: ${dateInput}`);
+            }
+
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const day = date.getDate();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+
+            let startDay = 1;
+            let endDay = 10;
+
+            if (day >= 11 && day <= 20) {
+                startDay = 11;
+                endDay = 20;
+            } else if (day >= 21) {
+                startDay = 21;
+                endDay = lastDay;
+            }
+
+            return {
+                startDate: new Date(year, month, startDay),
+                endDate: new Date(year, month, endDay)
+            };
+        } catch (error) {
+            console.error('Calendar.getXunRange error:', error, { dateInput });
+            const fallback = new Date();
+            return {
+                startDate: new Date(fallback.getFullYear(), fallback.getMonth(), 1),
+                endDate: new Date(fallback.getFullYear(), fallback.getMonth(), 10)
+            };
+        }
+    },
+
     // Helper to get all dates in a range
     getDatesInRange(startDate, endDate) {
         try {

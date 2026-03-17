@@ -15,11 +15,9 @@ export class Modal {
         this.bodyStateSelector = null;
         this.currentTab = 'checkin';
         this.currentBodyCondition = null;
-        this.checkinGuideShown = false;
         this.hasCheckinData = false;
         this.isHydrating = false;
-        this.autoProgressTimer = null;
-        this.autoProgressCancelled = false;
+        this.softPromptVisible = false;
         
         this.initElements();
         this.initListeners();
@@ -31,7 +29,8 @@ export class Modal {
             closeBtn: document.getElementById('modal-close'),
             tabButtons: document.querySelectorAll('.modal-tab-btn'),
             tabPages: document.querySelectorAll('.modal-tab-page'),
-            guideTip: document.getElementById('checkin-guide-tip'),
+            softTransitionPrompt: document.getElementById('soft-transition-prompt'),
+            softTransitionCta: document.getElementById('soft-transition-cta'),
             moodBtns: document.querySelectorAll('.mood-btn'),
             emotionTags: document.getElementById('emotion-tags'),
             keywordsInput: document.getElementById('keywords-input'),
@@ -115,13 +114,14 @@ export class Modal {
             btn.onclick = () => this.switchTab(btn.dataset.tab);
         });
 
-        if (this.elements.guideTip) {
-            this.elements.guideTip.onclick = () => this.switchTab('record');
-        }
 
         this.elements.bodyConditionBtns.forEach(btn => {
             btn.onclick = () => this.selectBodyCondition(btn.dataset.condition);
         });
+
+        if (this.elements.bodyConditionNote) {
+            this.elements.bodyConditionNote.oninput = () => this.onCheckinInteraction('vitality');
+        }
 
         // Save Button
         this.elements.saveBtn.onclick = () => this.save({ closeAfterSave: true });
@@ -132,8 +132,8 @@ export class Modal {
         // Add Activity
         this.elements.addActivityBtn.onclick = () => this.addCustomActivityInput();
 
-        if (this.elements.autoProgressCancelBtn) {
-            this.elements.autoProgressCancelBtn.onclick = () => this.cancelAutoProgression();
+        if (this.elements.softTransitionCta) {
+            this.elements.softTransitionCta.onclick = () => this.switchTab('record');
         }
     }
 
@@ -158,12 +158,9 @@ export class Modal {
 
         // Reset UI
         this.resetUI();
-        this.checkinGuideShown = false;
         this.switchTab('checkin');
         this.isHydrating = true;
-        this.autoProgressCancelled = false;
-        this.clearAutoProgressionTimer();
-        this.hideAutoProgressToast();
+        this.hideSoftTransitionPrompt();
 
         // Populate Data
         // Mood
@@ -245,10 +242,10 @@ export class Modal {
         // Show Modal
         this.modal.classList.remove('hidden');
         this.modal.classList.add('flex');
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             this.panel.classList.remove('scale-95');
             this.panel.classList.add('scale-100');
-        }, 10);
+        });
     }
 
     close() {
@@ -256,10 +253,15 @@ export class Modal {
         this.hideAutoProgressToast();
         this.panel.classList.remove('scale-100');
         this.panel.classList.add('scale-95');
-        setTimeout(() => {
+
+        const handleTransitionEnd = (event) => {
+            if (event && event.target !== this.panel) return;
             this.modal.classList.add('hidden');
             this.modal.classList.remove('flex');
-        }, 300);
+            this.panel.removeEventListener('transitionend', handleTransitionEnd);
+        };
+
+        this.panel.addEventListener('transitionend', handleTransitionEnd);
     }
 
 
@@ -275,11 +277,9 @@ export class Modal {
         this.elements.keywordsInput.value = '';
         this.elements.bodyConditionNote.value = '';
         this.currentBodyCondition = null;
-        this.checkinGuideShown = false;
         this.hasCheckinData = false;
         this.isHydrating = false;
-        this.autoProgressTimer = null;
-        this.autoProgressCancelled = false;
+        this.softPromptVisible = false;
         this.elements.bodyConditionBtns.forEach(btn => {
             btn.classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-700');
         });
@@ -296,9 +296,7 @@ export class Modal {
         this.selectedEmotions = new Set();
         this.selectedNourishments = new Set();
         
-        if (this.elements.guideTip) {
-            this.elements.guideTip.classList.add('hidden');
-        }
+        this.hideSoftTransitionPrompt();
         this.updateTabStatusIndicators();
 
         // Reset sleep selector
@@ -380,10 +378,10 @@ export class Modal {
         this.elements.tabButtons.forEach(btn => {
             const selected = btn.dataset.tab === tabName;
             btn.setAttribute('aria-selected', String(selected));
-            btn.classList.toggle('bg-white/90', selected);
-            btn.classList.toggle('text-blue-700', selected);
-            btn.classList.toggle('shadow-sm', selected);
-            btn.classList.toggle('text-gray-600', !selected);
+            btn.classList.toggle('text-black', selected);
+            btn.classList.toggle('font-medium', selected);
+            btn.classList.toggle('border-blue-400', selected);
+            btn.classList.toggle('text-gray-400', !selected);
         });
 
         if (tabName !== 'checkin') {
@@ -394,8 +392,19 @@ export class Modal {
         this.elements.tabPages.forEach(page => {
             const isActive = page.dataset.page === tabName;
             page.classList.toggle('hidden', !isActive);
-            page.classList.toggle('opacity-0', !isActive);
-            page.classList.toggle('opacity-100', isActive);
+            if (isActive) {
+                if (tabName === 'record') {
+                    page.classList.remove('opacity-100', 'translate-y-0');
+                    page.classList.add('opacity-0', 'translate-y-2');
+                    requestAnimationFrame(() => {
+                        page.classList.remove('opacity-0', 'translate-y-2');
+                        page.classList.add('opacity-100', 'translate-y-0');
+                    });
+                } else {
+                    page.classList.remove('opacity-0', 'translate-y-2');
+                    page.classList.add('opacity-100', 'translate-y-0');
+                }
+            }
         });
 
         this.updateTabStatusIndicators();
@@ -659,74 +668,61 @@ export class Modal {
             if (!statusEl) return;
             if (!this.hasCheckinData) {
                 statusEl.textContent = '';
+                statusEl.classList.remove('opacity-60');
                 return;
             }
-            statusEl.textContent = btn.dataset.tab === 'checkin' ? '✓' : '●';
+            statusEl.textContent = btn.dataset.tab === 'checkin' ? '✓' : '';
+            statusEl.classList.toggle('opacity-60', btn.dataset.tab === 'checkin' && !!statusEl.textContent);
         });
+        this.updateSoftTransitionPrompt();
     }
 
-    showCheckinGuideTip() {
-        if (!this.elements.guideTip || this.checkinGuideShown || !this.hasMeaningfulCheckinData()) return;
-        this.checkinGuideShown = true;
-        this.elements.guideTip.classList.remove('hidden');
+    hasSoftTransitionData() {
+        const hasVitality = this.bodyStateSelector && !!this.bodyStateSelector.getValue();
+        const hasMood = Number.isInteger(this.currentMood);
+        const hasFeelings = this.selectedEmotions && this.selectedEmotions.size > 0;
+        const hasBodyCondition = !!this.currentBodyCondition || !!(this.elements.bodyConditionNote && this.elements.bodyConditionNote.value.trim());
+        return hasVitality || hasMood || hasFeelings || hasBodyCondition;
+    }
+
+    showSoftTransitionPrompt() {
+        if (!this.elements.softTransitionPrompt) return;
+        const prompt = this.elements.softTransitionPrompt;
+        prompt.classList.remove('hidden');
+        prompt.classList.add('flex');
+
+        if (!this.softPromptVisible) {
+            prompt.classList.add('opacity-0', 'translate-y-2');
+            requestAnimationFrame(() => {
+                prompt.classList.remove('opacity-0', 'translate-y-2');
+                prompt.classList.add('opacity-100', 'translate-y-0');
+            });
+            this.softPromptVisible = true;
+        } else {
+            prompt.classList.remove('opacity-0', 'translate-y-2');
+            prompt.classList.add('opacity-100', 'translate-y-0');
+        }
+    }
+
+    hideSoftTransitionPrompt() {
+        if (!this.elements.softTransitionPrompt) return;
+        const prompt = this.elements.softTransitionPrompt;
+        prompt.classList.remove('flex', 'opacity-100', 'translate-y-0');
+        prompt.classList.add('hidden', 'opacity-0', 'translate-y-2');
+        this.softPromptVisible = false;
+    }
+
+    updateSoftTransitionPrompt() {
+        if (this.currentTab !== 'checkin' || this.isHydrating || !this.hasSoftTransitionData()) {
+            this.hideSoftTransitionPrompt();
+            return;
+        }
+        this.showSoftTransitionPrompt();
     }
 
     onCheckinInteraction(type) {
         if (!['mood', 'vitality', 'feelings'].includes(type)) return;
         this.updateTabStatusIndicators();
-        if (this.isHydrating) return;
-        this.showCheckinGuideTip();
-        this.scheduleAutoProgression();
-    }
-
-    hasAutoProgressionRequirements() {
-        const hasVitality = this.bodyStateSelector && !!this.bodyStateSelector.getValue();
-        const hasMood = Number.isInteger(this.currentMood);
-        const hasFeelings = this.selectedEmotions && this.selectedEmotions.size > 0;
-        return hasVitality && (hasMood || hasFeelings);
-    }
-
-    clearAutoProgressionTimer() {
-        if (!this.autoProgressTimer) return;
-        clearTimeout(this.autoProgressTimer);
-        this.autoProgressTimer = null;
-    }
-
-    hideAutoProgressToast() {
-        if (!this.elements.autoProgressToast) return;
-        this.elements.autoProgressToast.classList.add('hidden');
-    }
-
-    showAutoProgressToast() {
-        if (!this.elements.autoProgressToast) return;
-        this.elements.autoProgressToast.classList.remove('hidden');
-    }
-
-    cancelAutoProgression() {
-        this.autoProgressCancelled = true;
-        this.clearAutoProgressionTimer();
-        this.hideAutoProgressToast();
-    }
-
-    scheduleAutoProgression() {
-        if (this.currentTab !== 'checkin') return;
-        if (this.autoProgressCancelled) return;
-
-        if (!this.hasAutoProgressionRequirements()) {
-            this.clearAutoProgressionTimer();
-            this.hideAutoProgressToast();
-            return;
-        }
-
-        this.showAutoProgressToast();
-        this.clearAutoProgressionTimer();
-        this.autoProgressTimer = setTimeout(() => {
-            this.hideAutoProgressToast();
-            this.autoProgressTimer = null;
-            if (this.currentTab === 'checkin' && !this.autoProgressCancelled) {
-                this.switchTab('record');
-            }
-        }, 1200);
     }
 
     getVitalityLevel(bodyState) {

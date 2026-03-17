@@ -18,6 +18,7 @@ export class Modal {
         this.hasCheckinData = false;
         this.isHydrating = false;
         this.softPromptVisible = false;
+        this.autoProgressionTimer = null;
         
         this.initElements();
         this.initListeners();
@@ -135,6 +136,26 @@ export class Modal {
         if (this.elements.softTransitionCta) {
             this.elements.softTransitionCta.onclick = () => this.switchTab('record');
         }
+
+        if (this.elements.autoProgressCancelBtn) {
+            this.elements.autoProgressCancelBtn.onclick = () => {
+                this.autoProgressCancelled = true;
+                this.clearAutoProgressionTimer();
+                this.hideAutoProgressToast();
+            };
+        }
+    }
+
+    clearAutoProgressionTimer() {
+        if (!this.autoProgressionTimer) return;
+        clearTimeout(this.autoProgressionTimer);
+        this.autoProgressionTimer = null;
+    }
+
+    hideAutoProgressToast() {
+        if (!this.elements.autoProgressToast) return;
+        this.elements.autoProgressToast.classList.add('hidden');
+        this.elements.autoProgressToast.classList.remove('flex');
     }
 
     getDayOfWeek(dateStr) {

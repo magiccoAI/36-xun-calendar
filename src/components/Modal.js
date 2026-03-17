@@ -18,6 +18,8 @@ export class Modal {
         this.checkinGuideShown = false;
         this.hasCheckinData = false;
         this.isHydrating = false;
+        this.autoProgressTimer = null;
+        this.autoProgressCancelled = false;
         
         this.initElements();
         this.initListeners();
@@ -66,7 +68,9 @@ export class Modal {
             addActivityBtn: document.getElementById('add-custom-activity'),
             journalInput: document.getElementById('journal-input'),
             deleteBtn: document.getElementById('modal-delete'),
-            saveBtn: document.getElementById('modal-save')
+            saveBtn: document.getElementById('modal-save'),
+            autoProgressToast: document.getElementById('auto-progress-toast'),
+            autoProgressCancelBtn: document.getElementById('auto-progress-cancel')
         };
     }
 
@@ -80,14 +84,14 @@ export class Modal {
         this.elements.moodBtns.forEach(btn => {
             btn.onclick = () => {
                 this.elements.moodBtns.forEach(b => {
-                    b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300');
+                    b.classList.remove('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg');
                     const emojiSpan = b.querySelector('span');
                     if (emojiSpan) {
                         emojiSpan.classList.add('grayscale');
                         emojiSpan.classList.remove('grayscale-0');
                     }
                 });
-                btn.classList.add('bg-blue-100', 'ring-2', 'ring-blue-300');
+                btn.classList.add('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg');
                 const emojiSpan = btn.querySelector('span');
                 if (emojiSpan) {
                     emojiSpan.classList.remove('grayscale');
@@ -101,8 +105,8 @@ export class Modal {
         // Weather Buttons
         this.elements.weatherBtns.forEach(btn => {
             btn.onclick = () => {
-                this.elements.weatherBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
-                btn.classList.add('bg-blue-100', 'ring-2', 'ring-blue-300');
+                this.elements.weatherBtns.forEach(b => b.classList.remove('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg'));
+                btn.classList.add('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg');
                 this.currentWeather = btn.dataset.weather;
             };
         });
@@ -127,6 +131,10 @@ export class Modal {
         
         // Add Activity
         this.elements.addActivityBtn.onclick = () => this.addCustomActivityInput();
+
+        if (this.elements.autoProgressCancelBtn) {
+            this.elements.autoProgressCancelBtn.onclick = () => this.cancelAutoProgression();
+        }
     }
 
     getDayOfWeek(dateStr) {
@@ -153,6 +161,9 @@ export class Modal {
         this.checkinGuideShown = false;
         this.switchTab('checkin');
         this.isHydrating = true;
+        this.autoProgressCancelled = false;
+        this.clearAutoProgressionTimer();
+        this.hideAutoProgressToast();
 
         // Populate Data
         // Mood
@@ -226,6 +237,9 @@ export class Modal {
         this.elements.journalInput.value = data.journal || '';
 
         this.isHydrating = false;
+        this.autoProgressCancelled = false;
+        this.clearAutoProgressionTimer();
+        this.hideAutoProgressToast();
         this.updateTabStatusIndicators();
 
         // Show Modal
@@ -238,6 +252,8 @@ export class Modal {
     }
 
     close() {
+        this.clearAutoProgressionTimer();
+        this.hideAutoProgressToast();
         this.panel.classList.remove('scale-100');
         this.panel.classList.add('scale-95');
         setTimeout(() => {
@@ -252,16 +268,18 @@ export class Modal {
     }
 
     resetUI() {
-        this.elements.moodBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
+        this.elements.moodBtns.forEach(b => b.classList.remove('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg'));
         this.currentMood = null;
         this.currentWeather = null;
-        this.elements.weatherBtns.forEach(b => b.classList.remove('bg-blue-100', 'ring-2', 'ring-blue-300'));
+        this.elements.weatherBtns.forEach(b => b.classList.remove('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg'));
         this.elements.keywordsInput.value = '';
         this.elements.bodyConditionNote.value = '';
         this.currentBodyCondition = null;
         this.checkinGuideShown = false;
         this.hasCheckinData = false;
         this.isHydrating = false;
+        this.autoProgressTimer = null;
+        this.autoProgressCancelled = false;
         this.elements.bodyConditionBtns.forEach(btn => {
             btn.classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-700');
         });
@@ -362,11 +380,16 @@ export class Modal {
         this.elements.tabButtons.forEach(btn => {
             const selected = btn.dataset.tab === tabName;
             btn.setAttribute('aria-selected', String(selected));
-            btn.classList.toggle('bg-white', selected);
-            btn.classList.toggle('text-blue-600', selected);
+            btn.classList.toggle('bg-white/90', selected);
+            btn.classList.toggle('text-blue-700', selected);
             btn.classList.toggle('shadow-sm', selected);
             btn.classList.toggle('text-gray-600', !selected);
         });
+
+        if (tabName !== 'checkin') {
+            this.clearAutoProgressionTimer();
+            this.hideAutoProgressToast();
+        }
 
         this.elements.tabPages.forEach(page => {
             const isActive = page.dataset.page === tabName;
@@ -653,6 +676,57 @@ export class Modal {
         this.updateTabStatusIndicators();
         if (this.isHydrating) return;
         this.showCheckinGuideTip();
+        this.scheduleAutoProgression();
+    }
+
+    hasAutoProgressionRequirements() {
+        const hasVitality = this.bodyStateSelector && !!this.bodyStateSelector.getValue();
+        const hasMood = Number.isInteger(this.currentMood);
+        const hasFeelings = this.selectedEmotions && this.selectedEmotions.size > 0;
+        return hasVitality && (hasMood || hasFeelings);
+    }
+
+    clearAutoProgressionTimer() {
+        if (!this.autoProgressTimer) return;
+        clearTimeout(this.autoProgressTimer);
+        this.autoProgressTimer = null;
+    }
+
+    hideAutoProgressToast() {
+        if (!this.elements.autoProgressToast) return;
+        this.elements.autoProgressToast.classList.add('hidden');
+    }
+
+    showAutoProgressToast() {
+        if (!this.elements.autoProgressToast) return;
+        this.elements.autoProgressToast.classList.remove('hidden');
+    }
+
+    cancelAutoProgression() {
+        this.autoProgressCancelled = true;
+        this.clearAutoProgressionTimer();
+        this.hideAutoProgressToast();
+    }
+
+    scheduleAutoProgression() {
+        if (this.currentTab !== 'checkin') return;
+        if (this.autoProgressCancelled) return;
+
+        if (!this.hasAutoProgressionRequirements()) {
+            this.clearAutoProgressionTimer();
+            this.hideAutoProgressToast();
+            return;
+        }
+
+        this.showAutoProgressToast();
+        this.clearAutoProgressionTimer();
+        this.autoProgressTimer = setTimeout(() => {
+            this.hideAutoProgressToast();
+            this.autoProgressTimer = null;
+            if (this.currentTab === 'checkin' && !this.autoProgressCancelled) {
+                this.switchTab('record');
+            }
+        }, 1200);
     }
 
     getVitalityLevel(bodyState) {

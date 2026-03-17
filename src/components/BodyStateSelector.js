@@ -46,7 +46,7 @@ export class BodyStateSelector {
     render() {
         this.container.innerHTML = `
             <div class="body-state-selector">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 gap-4">
                     ${this.bodyStates.map(state => this.renderStateCard(state)).join('')}
                 </div>
             </div>
@@ -57,7 +57,7 @@ export class BodyStateSelector {
         const isSelected = this.selectedState?.id === state.id;
         return `
             <div class="body-state-card ${isSelected ? 'selected' : ''}" data-state-id="${state.id}">
-                <div class="p-3 rounded-lg border-2 border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50 transition-all cursor-pointer ${isSelected ? 'border-blue-500 bg-blue-50' : ''}">
+                <div class="p-4 rounded-xl border border-white/60 bg-white/50 backdrop-blur-md hover:bg-white/70 hover:scale-95 transition duration-300 ease-out cursor-pointer shadow-md hover:shadow-lg ${isSelected ? 'ring-2 ring-blue-300/60 bg-white/80 shadow-lg' : ''}">
                     <div class="text-center">
                         <div class="text-2xl mb-2">${state.icon}</div>
                         <div class="font-medium text-sm text-gray-800 mb-1">${state.title}</div>
@@ -97,11 +97,11 @@ export class BodyStateSelector {
             const innerDiv = card.querySelector('div');
             
             if (isSelected) {
-                innerDiv.classList.add('border-blue-500', 'bg-blue-50');
-                innerDiv.classList.remove('border-gray-200', 'bg-white');
+                innerDiv.classList.add('ring-2', 'ring-blue-300/60', 'bg-white/80', 'shadow-lg');
+                innerDiv.classList.remove('bg-white/50');
             } else {
-                innerDiv.classList.remove('border-blue-500', 'bg-blue-50');
-                innerDiv.classList.add('border-gray-200', 'bg-white');
+                innerDiv.classList.remove('ring-2', 'ring-blue-300/60', 'bg-white/80', 'shadow-lg');
+                innerDiv.classList.add('bg-white/50');
             }
         });
     }

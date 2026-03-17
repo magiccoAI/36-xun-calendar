@@ -67,7 +67,9 @@ export class Modal {
             addActivityBtn: document.getElementById('add-custom-activity'),
             journalInput: document.getElementById('journal-input'),
             deleteBtn: document.getElementById('modal-delete'),
-            saveBtn: document.getElementById('modal-save')
+            saveBtn: document.getElementById('modal-save'),
+            autoProgressToast: document.getElementById('auto-progress-toast'),
+            autoProgressCancelBtn: document.getElementById('auto-progress-cancel')
         };
     }
 
@@ -232,6 +234,9 @@ export class Modal {
         this.elements.journalInput.value = data.journal || '';
 
         this.isHydrating = false;
+        this.autoProgressCancelled = false;
+        this.clearAutoProgressionTimer();
+        this.hideAutoProgressToast();
         this.updateTabStatusIndicators();
 
         // Show Modal
@@ -244,6 +249,8 @@ export class Modal {
     }
 
     close() {
+        this.clearAutoProgressionTimer();
+        this.hideAutoProgressToast();
         this.panel.classList.remove('scale-100');
         this.panel.classList.add('scale-95');
 
@@ -376,6 +383,11 @@ export class Modal {
             btn.classList.toggle('border-blue-400', selected);
             btn.classList.toggle('text-gray-400', !selected);
         });
+
+        if (tabName !== 'checkin') {
+            this.clearAutoProgressionTimer();
+            this.hideAutoProgressToast();
+        }
 
         this.elements.tabPages.forEach(page => {
             const isActive = page.dataset.page === tabName;

@@ -30,28 +30,32 @@ export const Calendar = {
             }
 
             const periods = [];
-            let currentDate = new Date(year, 0, 1);
+            const yearStart = new Date(year, 0, 1);
             
             // 验证起始日期有效性
-            if (isNaN(currentDate.getTime())) {
+            if (isNaN(yearStart.getTime())) {
                 throw new Error(`Invalid start date for year: ${year}`);
             }
             
             for (let i = 1; i <= CONFIG.XUN_COUNT; i++) {
-                const startDate = new Date(currentDate);
+                // 计算每个旬的起始日期（基于固定的年初开始日期）
+                const daysFromStart = (i - 1) * CONFIG.XUN_DAYS;
+                const startDate = new Date(yearStart);
+                startDate.setDate(yearStart.getDate() + daysFromStart);
+                
                 let daysInXun = CONFIG.XUN_DAYS;
                 
                 // Special handling for last period to cover rest of year
                 if (i === CONFIG.XUN_COUNT) {
                      const yearEnd = new Date(year, 11, 31);
-                     const diffTime = Math.abs(yearEnd - currentDate);
+                     const diffTime = Math.abs(yearEnd - startDate);
                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                      daysInXun = diffDays + 1; // +1 to include today
                 }
 
-                currentDate.setDate(currentDate.getDate() + daysInXun);
-                const endDate = new Date(currentDate);
-                endDate.setDate(endDate.getDate() - 1);
+                // 计算结束日期
+                const endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + daysInXun - 1);
                 
                 // 验证生成的日期有效性
                 if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {

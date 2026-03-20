@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试本旬小结</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .section { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; }
+        .error { color: red; }
+        .success { color: green; }
+        .debug { color: #666; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 本旬小结调试工具</h1>
+    
+    <div class="section">
+        <h2>1. 当前数据存储状态</h2>
+        <div id="storage-status">检查中...</div>
+    </div>
+    
+    <div class="section">
+        <h2>2. 旬范围计算</h2>
+        <div id="xun-range">计算中...</div>
+    </div>
+    
+    <div class="section">
+        <h2>3. 数据标准化结果</h2>
+        <div id="normalized-data">处理中...</div>
+    </div>
+    
+    <div class="section">
+        <h2>4. 最终统计结果</h2>
+        <div id="final-summary">生成中...</div>
+    </div>
+    
+    <div class="section">
+        <h2>5. UI显示检查</h2>
+        <div id="ui-check">验证中...</div>
+    </div>
+
+    <script type="module">
+        // 模拟导入核心模块
+        console.log('🚀 开始调试本旬小结...');
+        
+        // 检查localStorage数据
+        function checkStorage() {
+            const userData = JSON.parse(localStorage.getItem('xun_calendar_user_data') || '{}');
+            const keys = Object.keys(userData);
+            
+            const storageDiv = document.getElementById('storage-status');
+            if (keys.length === 0) {
+                storageDiv.innerHTML = '<p class="error">❌ 没有找到任何用户数据</p>';
+                storageDiv.innerHTML += '<button onclick="addTestData()">添加测试数据</button>';
+            } else {
+                storageDiv.innerHTML = `
+                    <p class="success">✅ 找到 ${keys.length} 天的数据</p>
+                    <p>数据日期范围: ${Math.min(...keys.map(d => new Date(d)))} ~ ${Math.max(...keys.map(d => new Date(d)))}</p>
+                    <pre>${JSON.stringify(userData, null, 2)}</pre>
+                `;
+            }
+            return userData;
+        }
+        
+        // 添加测试数据
+        window.addTestData = function() {
+            const testData = {
+                '2026-03-11': {
+                    sleepData: { duration: 6, quality: 7 },
+                    metrics: { wealth: 6, exercise: 0, reading: 10 },
+                    emotions: ['tired'],
+                    body_state: { title: '需要恢复', id: 'recover' }
+                },
+                '2026-03-12': {
+                    sleepData: { duration: 8, quality: 8 },
+                    metrics: { wealth: 8, exercise: 30, reading: 20 },
+                    emotions: ['focused'],
+                    body_state: { title: '正常运转', id: 'normal' }
+                },
+                '2026-03-13': {
+                    sleepData: { duration: 7, quality: 7 },
+                    metrics: { wealth: 9, exercise: 20, reading: 0 },
+                    emotions: ['focused', 'calm'],
+                    body_state: { title: '状态很好', id: 'good' }
+                },
+                '2026-03-14': {
+                    sleepData: { duration: 7.5, quality: 9 },
+                    metrics: { wealth: 7, exercise: 45, reading: 15 },
+                    emotions: ['happy', 'energetic'],
+                    body_state: { title: '高能日', id: 'high' }
+                },
+                '2026-03-15': {
+                    sleepData: { duration: 5.5, quality: 6 },
+                    metrics: { wealth: 5, exercise: 15, reading: 25 },
+                    emotions: ['productive'],
+                    body_state: { title: '需要恢复', id: 'recover' }
+                }
+            };
+            
+            localStorage.setItem('xun_calendar_user_data', JSON.stringify(testData));
+            location.reload();
+        };
+        
+        // 计算旬范围
+        function calculateXunRange() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const date = now.getDate();
+            
+            // 计算当前是第几旬
+            const xunIndex = Math.floor((date - 1) / 10) + 1;
+            const startDate = new Date(year, month, (xunIndex - 1) * 10 + 1);
+            let endDate = new Date(year, month, xunIndex * 10);
+            
+            // 处理月末最后一天可能不足10天的情况
+            const nextMonth = new Date(year, month + 1, 1);
+            if (endDate > nextMonth) {
+                endDate = new Date(nextMonth);
+                endDate.setDate(0); // 上个月的最后一天
+            }
+            
+            const rangeDiv = document.getElementById('xun-range');
+            rangeDiv.innerHTML = `
+                <p class="debug">当前日期: ${now.toISOString().split('T')[0]}</p>
+                <p class="debug">当前是第${xunIndex}旬</p>
+                <p class="success">旬范围: ${startDate.toISOString().split('T')[0]} ~ ${endDate.toISOString().split('T')[0]}</p>
+            `;
+            
+            return { startDate, endDate };
+        }
+        
+        // 模拟数据标准化
+        function normalizeData(userData, xunRange) {
+            const vitalityToEnergy = {
+                "需要恢复": 3,
+                "正常运转": 5,
+                "状态很好": 7,
+                "高能日": 9
+            };
+            
+            const normalized = [];
+            
+            Object.entries(userData).forEach(([dateStr, record]) => {
+                const date = new Date(dateStr);
+                if (date >= xunRange.startDate && date <= xunRange.endDate) {
+                    let energy = null;
+                    if (record.body_state && record.body_state.title) {
+                        energy = vitalityToEnergy[record.body_state.title] || null;
+                    }
+                    
+                    normalized.push({
+                        date: dateStr,
+                        sleepDuration: Number(record.sleepData?.duration) || 0,
+                        energy: energy,
+                        exerciseMinutes: Number(record.metrics?.exercise) || 0,
+                        readingMinutes: Number(record.metrics?.reading) || 0,
+                        emotions: record.emotions || [],
+                        vitality: record.body_state?.title || null
+                    });
+                }
+            });
+            
+            const normalizedDiv = document.getElementById('normalized-data');
+            if (normalized.length === 0) {
+                normalizedDiv.innerHTML = '<p class="error">❌ 当前旬范围内没有找到数据</p>';
+            } else {
+                normalizedDiv.innerHTML = `
+                    <p class="success">✅ 标准化了 ${normalized.length} 条记录</p>
+                    <pre>${JSON.stringify(normalized, null, 2)}</pre>
+                `;
+            }
+            
+            return normalized;
+        }
+        
+        // 计算最终统计
+        function calculateSummary(normalizedData) {
+            if (normalizedData.length === 0) {
+                return { avgEnergy: 0, recordCount: 0 };
+            }
+            
+            let sleepSum = 0;
+            let energySum = 0;
+            let exerciseSum = 0;
+            let readingSum = 0;
+            let highEnergyCount = 0;
+            const energyValues = [];
+            
+            normalizedData.forEach(record => {
+                sleepSum += record.sleepDuration;
+                exerciseSum += record.exerciseMinutes;
+                readingSum += record.readingMinutes;
+                
+                if (record.energy !== null) {
+                    energySum += record.energy;
+                    energyValues.push(record.energy);
+                    if (record.energy >= 7) {
+                        highEnergyCount++;
+                    }
+                }
+            });
+            
+            const summary = {
+                recordCount: normalizedData.length,
+                avgSleep: (sleepSum / normalizedData.length).toFixed(1),
+                avgEnergy: energyValues.length > 0 ? (energySum / energyValues.length).toFixed(1) : '--',
+                totalExercise: exerciseSum,
+                totalReading: readingSum,
+                highEnergyDaysCount: highEnergyCount,
+                minEnergy: energyValues.length > 0 ? Math.min(...energyValues) : '--',
+                maxEnergy: energyValues.length > 0 ? Math.max(...energyValues) : '--',
+                energyVolatility: energyValues.length > 0 ? Math.max(...energyValues) - Math.min(...energyValues) : 0
+            };
+            
+            const summaryDiv = document.getElementById('final-summary');
+            summaryDiv.innerHTML = `
+                <p class="success">✅ 统计计算完成</p>
+                <pre>${JSON.stringify(summary, null, 2)}</pre>
+            `;
+            
+            return summary;
+        }
+        
+        // 检查UI显示逻辑
+        function checkUIDisplay(summary) {
+            const uiDiv = document.getElementById('ui-check');
+            
+            // 模拟UI显示逻辑
+            const displayAvgEnergy = summary.avgEnergy !== '--' ? Number(summary.avgEnergy).toFixed(1) : '--';
+            
+            uiDiv.innerHTML = `
+                <p class="debug">UI显示检查:</p>
+                <p>平均精力显示值: ${displayAvgEnergy}</p>
+                <p>记录天数: ${summary.recordCount}</p>
+                <p>高精力天数: ${summary.highEnergyDaysCount}</p>
+                <p class="${summary.avgEnergy === '--' ? 'error' : 'success'}">
+                    ${summary.avgEnergy === '--' ? '❌ UI将显示"--"' : '✅ UI将显示正确数值'}
+                </p>
+            `;
+        }
+        
+        // 执行调试流程
+        function runDebug() {
+            try {
+                const userData = checkStorage();
+                const xunRange = calculateXunRange();
+                const normalizedData = normalizeData(userData, xunRange);
+                const summary = calculateSummary(normalizedData);
+                checkUIDisplay(summary);
+                
+                console.log('🎉 调试完成!', { userData, xunRange, normalizedData, summary });
+            } catch (error) {
+                console.error('❌ 调试过程中出错:', error);
+                document.body.innerHTML += `<div class="error"><h2>❌ 调试错误</h2><pre>${error.stack}</pre></div>`;
+            }
+        }
+        
+        // 页面加载完成后执行调试
+        runDebug();
+    </script>
+</body>
+</html>

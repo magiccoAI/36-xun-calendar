@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第8旬日期范围调试</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .section { margin: 20px 0; padding: 15px; background: white; border-radius: 8px; }
+        .error { color: red; }
+        .success { color: green; }
+        .debug { color: #666; }
+        pre { background: #f8f8f8; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 第8旬日期范围调试</h1>
+    
+    <div class="section">
+        <h2>1. 年历系统中的第8旬</h2>
+        <div id="year-based-xun8">计算中...</div>
+    </div>
+    
+    <div class="section">
+        <h2>2. 月历系统中的3月中旬</h2>
+        <div id="month-based-march">计算中...</div>
+    </div>
+    
+    <div class="section">
+        <h2>3. 3月12-21日对应的旬</h2>
+        <div id="march-12-21">计算中...</div>
+    </div>
+    
+    <div class="section">
+        <h2>4. 2026年3月所有旬</h2>
+        <div id="march-all-xun">计算中...</div>
+    </div>
+
+    <script type="module">
+        // 模拟Calendar类
+        const Calendar = {
+            pad2(n) {
+                return String(n).padStart(2, '0');
+            },
+            
+            formatLocalDate(d) {
+                return `${d.getFullYear()}-${this.pad2(d.getMonth() + 1)}-${this.pad2(d.getDate())}`;
+            },
+            
+            getXunPeriods(year) {
+                const periods = [];
+                const yearStart = new Date(year, 0, 1);
+                const XUN_COUNT = 36;
+                const XUN_DAYS = 10;
+                
+                for (let i = 1; i <= XUN_COUNT; i++) {
+                    const daysFromStart = (i - 1) * XUN_DAYS;
+                    const startDate = new Date(yearStart);
+                    startDate.setDate(yearStart.getDate() + daysFromStart);
+                    
+                    let daysInXun = XUN_DAYS;
+                    
+                    // Special handling for last period
+                    if (i === XUN_COUNT) {
+                         const yearEnd = new Date(year, 11, 31);
+                         const diffTime = Math.abs(yearEnd - startDate);
+                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                         daysInXun = diffDays + 1;
+                    }
+
+                    const endDate = new Date(startDate);
+                    endDate.setDate(startDate.getDate() + daysInXun - 1);
+                    
+                    periods.push({ index: i, startDate, endDate, days: daysInXun });
+                }
+                
+                return periods;
+            },
+            
+            getXunRange(dateInput = new Date()) {
+                const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const day = date.getDate();
+                const lastDay = new Date(year, month + 1, 0).getDate();
+
+                let startDay = 1;
+                let endDay = 10;
+
+                if (day >= 11 && day <= 20) {
+                    startDay = 11;
+                    endDay = 20;
+                } else if (day >= 21) {
+                    startDay = 21;
+                    endDay = lastDay;
+                }
+
+                return {
+                    startDate: new Date(year, month, startDay),
+                    endDate: new Date(year, month, endDay)
+                };
+            }
+        };
+        
+        // 调试函数
+        function debugXunCalculations() {
+            const year = 2026;
+            const periods = Calendar.getXunPeriods(year);
+            
+            // 1. 年历系统中的第8旬
+            const xun8 = periods.find(p => p.index === 8);
+            const yearBasedDiv = document.getElementById('year-based-xun8');
+            if (xun8) {
+                yearBasedDiv.innerHTML = `
+                    <p class="success">第8旬 (从年初计算):</p>
+                    <p>开始日期: ${Calendar.formatLocalDate(xun8.startDate)}</p>
+                    <p>结束日期: ${Calendar.formatLocalDate(xun8.endDate)}</p>
+                    <p>天数: ${xun8.days}</p>
+                `;
+            } else {
+                yearBasedDiv.innerHTML = '<p class="error">未找到第8旬</p>';
+            }
+            
+            // 2. 月历系统中的3月中旬
+            const marchDate = new Date(2026, 2, 15); // March 15, 2026
+            const monthRange = Calendar.getXunRange(marchDate);
+            const monthBasedDiv = document.getElementById('month-based-march');
+            monthBasedDiv.innerHTML = `
+                <p class="debug">3月15日所在旬 (月历系统):</p>
+                <p>开始日期: ${Calendar.formatLocalDate(monthRange.startDate)}</p>
+                <p>结束日期: ${Calendar.formatLocalDate(monthRange.endDate)}</p>
+            `;
+            
+            // 3. 3月12-21日对应的旬
+            const march12 = new Date(2026, 2, 12);
+            const march21 = new Date(2026, 2, 21);
+            const range12 = Calendar.getXunRange(march12);
+            const range21 = Calendar.getXunRange(march21);
+            const marchDiv = document.getElementById('march-12-21');
+            marchDiv.innerHTML = `
+                <p class="debug">3月12日所在旬: ${Calendar.formatLocalDate(range12.startDate)} ~ ${Calendar.formatLocalDate(range12.endDate)}</p>
+                <p class="debug">3月21日所在旬: ${Calendar.formatLocalDate(range21.startDate)} ~ ${Calendar.formatLocalDate(range21.endDate)}</p>
+            `;
+            
+            // 检查在年历系统中对应的旬号
+            const xunForMarch12 = periods.find(p => march12 >= p.startDate && march12 <= p.endDate);
+            const xunForMarch21 = periods.find(p => march21 >= p.startDate && march21 <= p.endDate);
+            
+            if (xunForMarch12) {
+                marchDiv.innerHTML += `<p class="success">3月12日对应年历第${xunForMarch12.index}旬</p>`;
+                marchDiv.innerHTML += `<p>范围: ${Calendar.formatLocalDate(xunForMarch12.startDate)} ~ ${Calendar.formatLocalDate(xunForMarch12.endDate)}</p>`;
+            }
+            
+            if (xunForMarch21) {
+                marchDiv.innerHTML += `<p class="success">3月21日对应年历第${xunForMarch21.index}旬</p>`;
+                marchDiv.innerHTML += `<p>范围: ${Calendar.formatLocalDate(xunForMarch21.startDate)} ~ ${Calendar.formatLocalDate(xunForMarch21.endDate)}</p>`;
+            }
+            
+            // 4. 2026年3月所有旬
+            const marchPeriods = periods.filter(p => {
+                return (p.startDate.getMonth() === 2 && p.startDate.getFullYear() === 2026) ||
+                       (p.endDate.getMonth() === 2 && p.endDate.getFullYear() === 2026);
+            });
+            
+            const marchAllDiv = document.getElementById('march-all-xun');
+            let html = '';
+            marchPeriods.forEach(period => {
+                html += `<p>第${period.index}旬: ${Calendar.formatLocalDate(period.startDate)} ~ ${Calendar.formatLocalDate(period.endDate)}</p>`;
+            });
+            marchAllDiv.innerHTML = html;
+            
+            // 关键发现总结
+            console.log('=== 关键发现 ===');
+            console.log('用户报告的第8旬范围: 3月12日 ~ 3月21日');
+            console.log('年历系统第8旬范围:', xun8 ? `${Calendar.formatLocalDate(xun8.startDate)} ~ ${Calendar.formatLocalDate(xun8.endDate)}` : '未找到');
+            console.log('月历系统3月中旬范围:', `${Calendar.formatLocalDate(range12.startDate)} ~ ${Calendar.formatLocalDate(range12.endDate)}`);
+            
+            if (xunForMarch12 && xunForMarch21) {
+                console.log('问题发现: 3月12-21日跨越了两个不同的年历旬!');
+                console.log('3月12日在年历第' + xunForMarch12.index + '旬');
+                console.log('3月21日在年历第' + xunForMarch21.index + '旬');
+            }
+        }
+        
+        // 执行调试
+        debugXunCalculations();
+    </script>
+</body>
+</html>

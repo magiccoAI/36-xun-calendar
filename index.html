@@ -570,35 +570,107 @@
             -webkit-appearance: none;
             appearance: none;
             width: 100%;
-            height: 8px;
-            background: #e5e7eb; /* gray-200 */
-            border-radius: 9999px;
+            height: 6px;
+            background: transparent;
+            border-radius: 3px;
             outline: none;
-            transition: background 0.3s;
+            position: relative;
+        }
+
+        #energy-level::-webkit-slider-track {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, 
+                #f3f4f6 0%, 
+                #e5e7eb 20%, 
+                #d1d5db 40%, 
+                #9ca3af 60%, 
+                #3b82f6 80%, 
+                #1d4ed8 100%);
+            border-radius: 3px;
+            border: none;
+        }
+
+        #energy-level::-moz-range-track {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, 
+                #f3f4f6 0%, 
+                #e5e7eb 20%, 
+                #d1d5db 40%, 
+                #9ca3af 60%, 
+                #3b82f6 80%, 
+                #1d4ed8 100%);
+            border-radius: 3px;
+            border: none;
         }
 
         #energy-level::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             background: #ffffff;
-            border: 2px solid #3b82f6; /* blue-500 */
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             cursor: pointer;
-            box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(1px);
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+        }
+
+        #energy-level::-webkit-slider-thumb:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.2),
+                0 6px 16px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        #energy-level::-webkit-slider-thumb:active {
+            transform: scale(0.95);
+            box-shadow: 
+                0 1px 4px rgba(0, 0, 0, 0.15),
+                0 2px 6px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
 
         #energy-level::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             background: #ffffff;
-            border: 2px solid #3b82f6;
+            border: 1px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
             cursor: pointer;
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.15),
+                0 4px 12px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(1px);
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            position: relative;
+            border: none;
         }
 
-        /* Winter header image styles */
+        #energy-level::-moz-range-thumb:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.2),
+                0 6px 16px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7);
+        }
+
+        #energy-level::-moz-range-thumb:active {
+            transform: scale(0.95);
+            box-shadow: 
+                0 1px 4px rgba(0, 0, 0, 0.15),
+                0 2px 6px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
         body.theme-winter #winter-header-image {
             display: block;
             background-image: url('src/images/winter-header.png');
@@ -1011,9 +1083,9 @@
                     <summary class="cursor-pointer text-sm font-medium text-gray-700">身体状态 (Body State)</summary>
                     <div class="mt-4 space-y-4">
                         <div id="body-condition-group" class="grid grid-cols-3 gap-3 text-xs">
-                            <button type="button" data-condition="良好" class="body-condition-btn p-2 rounded-xl border border-white/70 bg-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out">良好</button>
-                            <button type="button" data-condition="轻微不适" class="body-condition-btn p-2 rounded-xl border border-white/70 bg-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out">轻微不适</button>
-                            <button type="button" data-condition="明显不适" class="body-condition-btn p-2 rounded-xl border border-white/70 bg-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out">明显不适</button>
+                            <button type="button" data-condition="良好" class="body-condition-btn p-2 rounded-xl border border-green-300 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-400 hover:scale-95 active:scale-90 transition duration-300 ease-out">良好</button>
+                            <button type="button" data-condition="轻微不适" class="body-condition-btn p-2 rounded-xl border border-yellow-300 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 hover:border-yellow-400 hover:scale-95 active:scale-90 transition duration-300 ease-out">轻微不适</button>
+                            <button type="button" data-condition="明显不适" class="body-condition-btn p-2 rounded-xl border border-red-300 bg-red-50 text-red-700 hover:bg-red-100 hover:border-red-400 hover:scale-95 active:scale-90 transition duration-300 ease-out">明显不适</button>
                         </div>
                         <input id="body-condition-note" type="text" class="w-full p-3 border border-white/60 bg-white/65 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="补充说明（可选）：例如鼻炎/感冒/头痛" />
                     </div>
@@ -1125,9 +1197,10 @@
 
                 <div id="daily-quote-container" class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/70 text-center relative overflow-hidden group">
                     <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                    <div class="absolute top-2 left-2 text-xs text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity">点击右上角可手动刷新</div>
                     <p id="daily-quote-text" class="text-sm text-gray-600 font-serif italic mb-1 min-h-[1.5em]">正在加载今日金句...</p>
                     <p id="daily-quote-author" class="text-xs text-gray-400 text-right">—— 佚名</p>
-                    <button id="refresh-quote" class="absolute top-2 right-2 text-gray-300 hover:text-blue-500 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100" title="刷新"><svg class="h-4 w-4"><use href="#icon-refresh"></use></svg></button>
+                    <button id="refresh-quote" class="absolute top-2 right-2 bg-white/80 hover:bg-blue-50 text-blue-500 hover:text-blue-600 border border-blue-200 hover:border-blue-300 rounded-full p-1.5 shadow-sm hover:shadow-md transition-all duration-200 group" title="手动刷新名言"><svg class="h-4 w-4 group-hover:rotate-180 transition-transform duration-300"><use href="#icon-refresh"></use></svg></button>
                 </div>
 
                 <div>

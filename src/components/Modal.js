@@ -134,7 +134,10 @@ export class Modal {
         this.elements.addActivityBtn.onclick = () => this.addCustomActivityInput();
 
         if (this.elements.softTransitionCta) {
-            this.elements.softTransitionCta.onclick = () => this.switchTab('record');
+            this.elements.softTransitionCta.onclick = () => {
+                this.switchTab('record');
+                this.scrollToTopOfRecordTab();
+            };
         }
 
         if (this.elements.autoProgressCancelBtn) {
@@ -302,7 +305,9 @@ export class Modal {
         this.isHydrating = false;
         this.softPromptVisible = false;
         this.elements.bodyConditionBtns.forEach(btn => {
-            btn.classList.remove('bg-blue-100', 'border-blue-300', 'text-blue-700');
+            btn.classList.remove('bg-green-100', 'border-green-400', 'text-green-700',
+                              'bg-yellow-100', 'border-yellow-400', 'text-yellow-700',
+                              'bg-red-100', 'border-red-400', 'text-red-700');
         });
         Object.values(this.elements.metrics).forEach(el => {
             if (el && el.id && el.id !== 'metric-sleep') { // 跳过已删除的睡眠输入
@@ -379,9 +384,22 @@ export class Modal {
         this.onCheckinInteraction('vitality');
         this.elements.bodyConditionBtns.forEach(btn => {
             const selected = btn.dataset.condition === condition;
-            btn.classList.toggle('bg-blue-100', selected);
-            btn.classList.toggle('border-blue-300', selected);
-            btn.classList.toggle('text-blue-700', selected);
+            
+            // 移除所有状态样式
+            btn.classList.remove('bg-green-100', 'border-green-400', 'text-green-700',
+                              'bg-yellow-100', 'border-yellow-400', 'text-yellow-700',
+                              'bg-red-100', 'border-red-400', 'text-red-700');
+            
+            // 根据条件添加对应的样式
+            if (selected) {
+                if (condition === '良好') {
+                    btn.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
+                } else if (condition === '轻微不适') {
+                    btn.classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
+                } else if (condition === '明显不适') {
+                    btn.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
+                }
+            }
         });
     }
 
@@ -739,6 +757,13 @@ export class Modal {
             return;
         }
         this.showSoftTransitionPrompt();
+    }
+
+    scrollToTopOfRecordTab() {
+        // 需要滚动的是模态框面板，因为它是具有 overflow-y-auto 的容器
+        if (this.panel) {
+            this.panel.scrollTop = 0;
+        }
     }
 
     onCheckinInteraction(type) {

@@ -61,6 +61,94 @@ const energyBarsGrid = (summary) => {
     `;
 };
 
+// 三件好事汇总模块生成函数
+const generateGoodThingsSection = (summary) => {
+    if (!summary.three_good_things || summary.three_good_things.length === 0) return '';
+
+    const completionRate = Math.round((summary.good_things_stats.total_days / 10) * 100);
+
+    return `
+        <section class="rounded-2xl border border-gray-100 bg-gradient-to-br from-amber-50 to-orange-50 p-5 shadow-sm md:col-span-2 relative overflow-hidden">
+            <!-- 背景装饰 -->
+            <div class="absolute top-0 right-0 w-32 h-32 bg-amber-100 rounded-full opacity-20 -translate-y-16 translate-x-16"></div>
+            <div class="absolute bottom-0 left-0 w-24 h-24 bg-orange-100 rounded-full opacity-20 translate-y-12 -translate-x-12"></div>
+            
+            <div class="relative z-10">
+                <!-- 标题和统计 -->
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-base font-medium text-gray-700 flex items-center gap-2">
+                        <span class="w-1 h-4 rounded-full bg-amber-400"></span> 
+                        <span class="text-lg">✨ 本旬美好回顾</span>
+                    </h3>
+                    <div class="flex items-center gap-4 text-sm">
+                        <div class="flex items-center gap-1 text-amber-600">
+                            <span class="text-xs">📝</span>
+                            <span class="font-medium">${summary.good_things_stats.total_days}/10 天</span>
+                        </div>
+                        <div class="flex items-center gap-1 text-orange-600">
+                            <span class="text-xs">🎯</span>
+                            <span class="font-medium">${completionRate}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- 时间线展示 -->
+                <div class="space-y-4">
+                    ${Object.entries(summary.three_good_things_by_date)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([date, things]) => {
+                            const dateObj = new Date(date);
+                            const monthDay = `${dateObj.getMonth() + 1}.${dateObj.getDate()}`;
+                            const weekDay = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][dateObj.getDay()];
+                            
+                            return `
+                                <div class="bg-white/60 rounded-xl p-4 border border-amber-100/50 hover:shadow-md transition-all duration-300 hover:bg-white/80">
+                                    <div class="flex items-start gap-3">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                            ${dateObj.getDate()}
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-2">
+                                                <span class="text-sm font-medium text-gray-700">${monthDay}</span>
+                                                <span class="text-xs text-gray-400">${weekDay}</span>
+                                                ${things.length >= 3 ? '<span class="text-xs bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">满记录</span>' : ''}
+                                            </div>
+                                            <div class="space-y-2">
+                                                ${things.map((thing, index) => `
+                                                    <div class="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+                                                        <span class="flex-shrink-0 w-5 h-5 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-xs font-medium mt-0.5">
+                                                            ${index + 1}
+                                                        </span>
+                                                        <span class="flex-1 hover:text-amber-700 transition-colors">${thing}</span>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                </div>
+
+                <!-- 感恩寄语 -->
+                <div class="mt-6 p-4 bg-gradient-to-r from-amber-100/50 to-orange-100/50 rounded-xl border border-amber-200/50">
+                    <div class="flex items-start gap-2">
+                        <span class="text-2xl">💝</span>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium text-amber-800 mb-1">感恩时刻</div>
+                            <p class="text-xs text-amber-600 leading-relaxed">
+                                这${summary.good_things_stats.total_days}天里，您记录了${summary.good_things_stats.total_items}件美好小事。
+                                ${summary.good_things_stats.total_days >= 7 ? '您真是个善于发现美好的生活观察家！' : '继续保持这份发现美好的心，让每个日子都闪闪发光。'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    `;
+};
+
 export class SummaryView {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
@@ -204,6 +292,9 @@ export class SummaryView {
                         ${emotionWordCloud(summary.emotionFrequency)}
                     </section>
 
+                    <!-- 三件好事汇总模块 -->
+                    ${generateGoodThingsSection(summary)}
+
                     <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                         <h3 class="mb-4 text-base font-medium text-gray-700">4. 高精力日</h3>
                         <div class="space-y-2 text-sm text-gray-700">
@@ -220,7 +311,7 @@ export class SummaryView {
                     </section>
 
                     <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2">
-                        <h3 class="mb-4 text-base font-medium text-gray-700">5. 智能洞察</h3>
+                        <h3 class="mb-4 text-base font-medium text-gray-700">6. 智能洞察</h3>
                         <ul class="list-disc space-y-2 pl-5 text-sm text-gray-700">
                             ${summary.insights.map((insight) => `<li>${insight}</li>`).join('')}
                         </ul>

@@ -1,7 +1,7 @@
 
 import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
-import { CONFIG } from '../config.js';
+import { CONFIG, DATA_VALIDATION_RULES, DAY_RECORD_SCHEMA } from '../config.js';
 import { CompleteSleepModule } from './CompleteSleepModule.js';
 import { BodyStateSelector } from './BodyStateSelector.js';
 
@@ -744,6 +744,108 @@ export class Modal {
         container.appendChild(addBtn);
     }
 
+    // 数据验证函数
+    validateDataField(value, rules, fieldName) {
+        if (!rules.required && (value === null || value === undefined || value === '')) {
+            return { isValid: true, normalizedValue: null };
+        }
+        
+        const numValue = Number(value);
+        if (!Number.isFinite(numValue)) {
+            console.warn(`⚠️ Invalid ${fieldName}: ${value}`);
+            return { isValid: false, error: `Invalid ${fieldName}: ${value}` };
+        }
+        
+        if (numValue < rules.min || numValue > rules.max) {
+            console.warn(`⚠️ ${fieldName} ${numValue} out of range [${rules.min}, ${rules.max}]`);
+            return { 
+                isValid: false, 
+                error: `${fieldName} ${numValue} out of range [${rules.min}, ${rules.max}]` 
+            };
+        }
+        
+        return { isValid: true, normalizedValue: numValue };
+    }
+
+    // 数据格式验证和清理
+    validateAndCleanData(data) {
+        const cleanedData = { ...data };
+        const validationErrors = [];
+        
+        // 验证睡眠数据
+        if (cleanedData.sleepData) {
+            const sleepDurationValidation = this.validateDataField(
+                cleanedData.sleepData.duration, 
+                DATA_VALIDATION_RULES.sleepDuration, 
+                'sleep duration'
+            );
+            const sleepQualityValidation = this.validateDataField(
+                cleanedData.sleepData.quality, 
+                DATA_VALIDATION_RULES.sleepQuality, 
+                'sleep quality'
+            );
+            
+            if (sleepDurationValidation.isValid) {
+                cleanedData.sleepData.duration = sleepDurationValidation.normalizedValue;
+            } else {
+                validationErrors.push(sleepDurationValidation.error);
+            }
+            
+            if (sleepQualityValidation.isValid) {
+                cleanedData.sleepData.quality = sleepQualityValidation.normalizedValue;
+            } else {
+                validationErrors.push(sleepQualityValidation.error);
+            }
+        }
+        
+        // 验证指标数据
+        if (cleanedData.metrics) {
+            const exerciseValidation = this.validateDataField(
+                cleanedData.metrics.exercise, 
+                DATA_VALIDATION_RULES.exerciseMinutes, 
+                'exercise minutes'
+            );
+            const readingValidation = this.validateDataField(
+                cleanedData.metrics.reading, 
+                DATA_VALIDATION_RULES.readingMinutes, 
+                'reading minutes'
+            );
+            
+            if (exerciseValidation.isValid) {
+                cleanedData.metrics.exercise = exerciseValidation.normalizedValue;
+            } else {
+                validationErrors.push(exerciseValidation.error);
+            }
+            
+            if (readingValidation.isValid) {
+                cleanedData.metrics.reading = readingValidation.normalizedValue;
+            } else {
+                validationErrors.push(readingValidation.error);
+            }
+        }
+        
+        // 验证情绪数据
+        if (cleanedData.emotions && !Array.isArray(cleanedData.emotions)) {
+            cleanedData.emotions = [];
+            validationErrors.push('Emotions must be an array');
+        }
+        
+        // 验证关键词数据
+        if (cleanedData.keywords && !Array.isArray(cleanedData.keywords)) {
+            cleanedData.keywords = [];
+            validationErrors.push('Keywords must be an array');
+        }
+        
+        // 记录验证结果
+        if (validationErrors.length > 0) {
+            console.error('❌ Data validation errors:', validationErrors);
+        } else {
+            console.log('✅ Data validation passed');
+        }
+        
+        return { cleanedData, validationErrors };
+    }
+
     hasMeaningfulCheckinData() {
         const hasMood = Number.isInteger(this.currentMood);
         const hasBodyState = this.bodyStateSelector && !!this.bodyStateSelector.getValue();
@@ -901,25 +1003,33 @@ export class Modal {
             }
         });
         
+        // 数据验证和清理
+        const { cleanedData, validationErrors } = this.validateAndCleanData(data);
+        
+        if (validationErrors.length > 0) {
+            console.warn('⚠️ Data validation warnings:', validationErrors);
+            // 继续保存，但记录警告
+        }
+        
         this.modalState = {
             status: {
-                mood: data.mood,
-                emotions: data.emotions,
-                weather: data.weather,
-                body_state: data.body_state,
-                vitality: data.vitality,
-                body_condition: data.body_condition,
-                nourishments: data.nourishments
+                mood: cleanedData.mood,
+                emotions: cleanedData.emotions,
+                weather: cleanedData.weather,
+                body_state: cleanedData.body_state,
+                vitality: cleanedData.vitality,
+                body_condition: cleanedData.body_condition,
+                nourishments: cleanedData.nourishments
             },
             log: {
-                keywords: data.keywords,
-                metrics: data.metrics,
-                sleepData: data.sleepData,
-                three_good_things: data.three_good_things,
-                journal: data.journal,
-                indicator_checkins: data.indicator_checkins,
-                checkin_texts: data.checkin_texts,
-                custom_activities: data.custom_activities
+                keywords: cleanedData.keywords,
+                metrics: cleanedData.metrics,
+                sleepData: cleanedData.sleepData,
+                three_good_things: cleanedData.three_good_things,
+                journal: cleanedData.journal,
+                indicator_checkins: cleanedData.indicator_checkins,
+                checkin_texts: cleanedData.checkin_texts,
+                custom_activities: cleanedData.custom_activities
             }
         };
 
@@ -943,7 +1053,7 @@ export class Modal {
 
         // Update User Data
         const userData = { ...state.userData };
-        userData[this.currentDateStr] = { ...userData[this.currentDateStr], ...data };
+        userData[this.currentDateStr] = { ...userData[this.currentDateStr], ...cleanedData };
 
         // Save everything
         store.setState({ userData, macroGoals });
@@ -954,7 +1064,7 @@ export class Modal {
         if (options.closeAfterSave || options.closeAfterSave === undefined) {
             this.closeModal();
         }
-        if (this.onSave) this.onSave({ action: 'save', dateStr: this.currentDateStr, dayData: data });
+        if (this.onSave) this.onSave({ action: 'save', dateStr: this.currentDateStr, dayData: cleanedData });
         console.log('dailyRecords saved:', localStorage.getItem('dailyRecords'));
     }
 

@@ -1,56 +1,135 @@
 import { Calendar } from './Calendar.js';
 import { store } from './State.js';
-import { CONFIG } from '../config.js';
+import { CONFIG, VITALITY_TO_ENERGY, DATA_VALIDATION_RULES } from '../config.js';
 
-// Vitality到精力值的映射（按指令要求）
-const vitalityToEnergy = {
-    "需要恢复": 3,
-    "正常运转": 5,
-    "状态很好": 7,
-    "高能日": 9
-};
-
-// 数据转换函数：将当前复杂数据结构映射为指令要求的简单结构
-function normalizeRecord(record) {
-    console.log('🔧 Normalizing record:', record);
-
-    const status = (record && typeof record.status === 'object' && record.status) ? record.status : {};
-    const log = (record && typeof record.log === 'object' && record.log) ? record.log : {};
-    const sleepData = log.sleepData || record.sleepData || {};
-    const metrics = log.metrics || record.metrics || {};
-    const keywords = log.keywords || record.keywords || [];
-    const emotionTags = status.emotions || record.emotions || [];
-    const mood = status.mood ?? record.mood ?? null;
-    const bodyState = status.body_state || record.body_state || null;
-    const vitality = status.vitality ?? record.vitality;
-    
-    // 从Vitality状态获取精力值（按指令要求）
-    let energy = null;
-    if (Number.isFinite(Number(record.energy))) {
-        energy = Number(record.energy);
-    } else if (bodyState && bodyState.title) {
-        energy = vitalityToEnergy[bodyState.title] || null;
-        console.log(`🎯 Vitality "${bodyState.title}" → Energy: ${energy}`);
-    } else if (Number.isFinite(Number(vitality))) {
-        energy = Number(vitality);
-    } else {
-        console.log('⚠️ No body_state found in record (status/log or flat)');
+// 数据验证函数
+function validateFieldValue(value, rules) {
+    if (!rules.required && (value === null || value === undefined || value === '')) {
+        return { isValid: true, normalizedValue: null };
     }
     
-    const normalized = {
-        sleepDuration: toNumber(record.sleepDuration ?? sleepData.duration),
-        sleepQuality: toNumber(sleepData.quality),
-        exerciseMinutes: toNumber(metrics.exercise || 0),
-        readingMinutes: toNumber(metrics.reading || 0),
-        energy: energy, // 重要：必须来自Vitality状态
-        mood,
-        emotionTags,
-        keywords,
-        vitality: bodyState?.title || vitality || null // 保存原始vitality状态
-    };
+    const numValue = Number(value);
+    if (!Number.isFinite(numValue)) {
+        return { isValid: false, error: `Invalid number: ${value}` };
+    }
     
-    console.log('✅ Normalized result:', normalized);
-    return normalized;
+    if (numValue < rules.min || numValue > rules.max) {
+        return { 
+            isValid: false, 
+            error: `Value ${numValue} out of range [${rules.min}, ${rules.max}]` 
+        };
+    }
+    
+    return { isValid: true, normalizedValue: numValue };
+}
+
+// 重构后的数据转换函数：统一数据结构，增加验证和调试
+function normalizeRecord(record, dateStr) {
+    console.log(`🔧 Normalizing record for ${dateStr}:`, record);
+    
+    // 处理空记录或无效记录
+    if (!record || typeof record !== 'object') {
+        console.warn(`⚠️ Invalid record for ${dateStr}:`, record);
+        return null;
+    }
+    
+    try {
+        // 统一数据提取逻辑，支持新旧格式兼容
+        const extractField = (primaryPath, secondaryPath, defaultValue = null) => {
+            const primaryValue = getNestedValue(record, primaryPath);
+            if (primaryValue !== undefined && primaryValue !== null) {
+                return primaryValue;
+            }
+            const secondaryValue = getNestedValue(record, secondaryPath);
+            return secondaryValue !== undefined && secondaryValue !== null ? secondaryValue : defaultValue;
+        };
+        
+        // 提取并验证睡眠数据
+        const sleepData = extractField('sleepData', 'log.sleepData', {});
+        const sleepDurationValidation = validateFieldValue(sleepData.duration, DATA_VALIDATION_RULES.sleepDuration);
+        const sleepQualityValidation = validateFieldValue(sleepData.quality, DATA_VALIDATION_RULES.sleepQuality);
+        
+        // 提取并验证指标数据
+        const metrics = extractField('metrics', 'log.metrics', {});
+        const exerciseValidation = validateFieldValue(metrics.exercise, DATA_VALIDATION_RULES.exerciseMinutes);
+        const readingValidation = validateFieldValue(metrics.reading, DATA_VALIDATION_RULES.readingMinutes);
+        
+        // 提取情绪和关键词
+        const emotions = extractField('emotions', 'status.emotions', []);
+        const keywords = extractField('keywords', 'log.keywords', []);
+        const mood = extractField('mood', 'status.mood', null);
+        
+        // 提取身体状态并计算精力值
+        const bodyState = extractField('body_state', 'status.body_state', null);
+        let energy = null;
+        
+        if (bodyState && bodyState.title) {
+            energy = VITALITY_TO_ENERGY[bodyState.title];
+            console.log(`🎯 Vitality "${bodyState.title}" → Energy: ${energy}`);
+        } else {
+            // 尝试从其他字段获取精力值
+            const directEnergy = extractField('energy', null, null);
+            if (directEnergy !== null) {
+                const energyValidation = validateFieldValue(directEnergy, DATA_VALIDATION_RULES.energy);
+                if (energyValidation.isValid) {
+                    energy = energyValidation.normalizedValue;
+                }
+            }
+        }
+        
+        // 构建标准化记录
+        const normalized = {
+            date: dateStr,
+            sleepDuration: sleepDurationValidation.isValid ? sleepDurationValidation.normalizedValue : 0,
+            sleepQuality: sleepQualityValidation.isValid ? sleepQualityValidation.normalizedValue : null,
+            exerciseMinutes: exerciseValidation.isValid ? exerciseValidation.normalizedValue : 0,
+            readingMinutes: readingValidation.isValid ? readingValidation.normalizedValue : 0,
+            energy: energy,
+            mood: mood !== null ? Number(mood) : null,
+            emotionTags: Array.isArray(emotions) ? emotions : [],
+            keywords: Array.isArray(keywords) ? keywords : [],
+            vitality: bodyState?.title || null,
+            bodyState: bodyState,
+            // 保留原始数据用于调试
+            _original: record
+        };
+        
+        // 验证必需字段
+        const hasAnyData = normalized.sleepDuration > 0 || 
+                          normalized.exerciseMinutes > 0 || 
+                          normalized.readingMinutes > 0 || 
+                          normalized.energy !== null || 
+                          normalized.emotionTags.length > 0;
+        
+        if (!hasAnyData) {
+            console.log(`⚠️ No valid data found in record for ${dateStr}`);
+            return null;
+        }
+        
+        console.log(`✅ Normalized record for ${dateStr}:`, normalized);
+        return normalized;
+        
+    } catch (error) {
+        console.error(`❌ Error normalizing record for ${dateStr}:`, error);
+        return null;
+    }
+}
+
+// 辅助函数：获取嵌套对象的值
+function getNestedValue(obj, path) {
+    if (!path || !obj) return undefined;
+    
+    const keys = path.split('.');
+    let current = obj;
+    
+    for (const key of keys) {
+        if (current === null || current === undefined) {
+            return undefined;
+        }
+        current = current[key];
+    }
+    
+    return current;
 }
 
 const toNumber = (value) => {
@@ -165,7 +244,25 @@ export function buildXunSummary(targetDate = new Date()) {
 
     const xunEntries = recordsInXun.records
         .map((row) => [row.date, records[row.date] || {}])
-        .filter(([, record]) => record && typeof record === 'object' && Object.keys(record).length > 0);
+        .filter(([, record]) => {
+            // 放宽过滤条件：只要记录存在且不为空就认为是有效记录
+            if (!record || typeof record !== 'object') {
+                return false;
+            }
+            
+            // 检查是否有任何有意义的数据
+            const hasData = Object.keys(record).length > 0 && 
+                           (record.sleepData || 
+                            record.metrics || 
+                            record.emotions || 
+                            record.body_state ||
+                            record.energy ||
+                            record.mood ||
+                            record.status ||
+                            record.log);
+            
+            return hasData;
+        });
 
     console.log('Filtered Xun Entries:', xunEntries.map(([date]) => date));
     console.log('Filtered Count:', xunEntries.length);
@@ -202,7 +299,15 @@ export function buildXunSummary(targetDate = new Date()) {
         highEnergyDaysCount: 0,
         highEnergyDates: [],
         avgEnergyGoodSleep: 0,
-        avgEnergyBadSleep: 0
+        avgEnergyBadSleep: 0,
+        // 三件好事相关统计
+        three_good_things: [],
+        three_good_things_by_date: {},
+        good_things_stats: {
+            total_days: 0,
+            total_items: 0,
+            keywords: {}
+        }
     };
 
     // 修复：不过滤记录，而是分别统计有/无精力值的记录
@@ -210,7 +315,12 @@ export function buildXunSummary(targetDate = new Date()) {
     const allValidEntries = [];
     
     xunEntries.forEach(([dateStr, record]) => {
-        const normalizedRecord = normalizeRecord(record);
+        const normalizedRecord = normalizeRecord(record, dateStr);
+        if (!normalizedRecord) {
+            console.log(`⚠️ Skipping invalid record for ${dateStr}`);
+            return;
+        }
+        
         allValidEntries.push([dateStr, normalizedRecord]);
         
         console.log(`📝 Record ${dateStr}:`, {
@@ -238,9 +348,20 @@ export function buildXunSummary(targetDate = new Date()) {
 
     // 如果没有精力值记录，给出提示但继续统计其他指标
     if (validEnergyEntries.length === 0) {
-        stats.insights.push('本旬暂无精力状态记录，请在每日记录中选择身心状态。');
+        stats.insights.push('本旬暂无精力状态记录，请在每日记录中选择身心状态以获得更准确的分析。');
         // 继续处理其他统计，但精力相关指标保持默认值
-        stats.avgEnergy = 0; // 明确设置为0而不是null
+        stats.avgEnergy = null; // 使用null而不是0，明确区分"无数据"和"数据为0"
+        stats.minEnergy = null;
+        stats.maxEnergy = null;
+        stats.energyVolatility = 0;
+        stats.highEnergyDaysCount = 0;
+        stats.highEnergyDays = 0;
+        stats.highEnergyAverageSleep = 0;
+        stats.highEnergyAverageExercise = 0;
+        stats.avgEnergyGoodSleep = 0;
+        stats.avgEnergyBadSleep = 0;
+        
+        console.log('⚠️ No energy data found in current xun, using null values for energy metrics');
     }
 
     let sleepSum = 0;
@@ -271,6 +392,30 @@ export function buildXunSummary(targetDate = new Date()) {
                 if (!tag) return;
                 stats.emotionFrequency[tag] = (stats.emotionFrequency[tag] || 0) + 1;
             });
+        }
+
+        // 三件好事数据处理
+        const originalRecord = normalizedRecord._original;
+        if (originalRecord && originalRecord.three_good_things) {
+            const goodThings = originalRecord.three_good_things.filter(t => t && t.trim() !== '');
+            if (goodThings.length > 0) {
+                stats.three_good_things_by_date[dateStr] = goodThings;
+                stats.three_good_things.push(...goodThings);
+                stats.good_things_stats.total_days++;
+                stats.good_things_stats.total_items += goodThings.length;
+                
+                // 提取关键词
+                goodThings.forEach(thing => {
+                    const keywords = thing
+                        .replace(/[，。！？；：""''（）【】《》、]/g, ' ')
+                        .split(/\s+/)
+                        .filter(word => word.length > 1 && !['的', '了', '是', '在', '有', '和', '与', '或', '但', '而', '也', '就', '都', '很', '非常', '特别', '今天', '昨天', '明天'].includes(word));
+                    
+                    keywords.forEach(keyword => {
+                        stats.good_things_stats.keywords[keyword] = (stats.good_things_stats.keywords[keyword] || 0) + 1;
+                    });
+                });
+            }
         }
 
         // 精力相关统计（仅使用有精力值的记录）
@@ -376,7 +521,11 @@ export function buildXunSummary(targetDate = new Date()) {
         maxEnergy: stats.maxEnergy,
         highEnergyDates: stats.highEnergyDates,
         avgEnergyGoodSleep: stats.avgEnergyGoodSleep,
-        avgEnergyBadSleep: stats.avgEnergyBadSleep
+        avgEnergyBadSleep: stats.avgEnergyBadSleep,
+        // 三件好事数据
+        three_good_things: stats.three_good_things,
+        three_good_things_by_date: stats.three_good_things_by_date,
+        good_things_stats: stats.good_things_stats
     };
 }
 

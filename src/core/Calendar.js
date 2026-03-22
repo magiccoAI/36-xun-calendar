@@ -45,12 +45,13 @@ export const Calendar = {
                 
                 let daysInXun = CONFIG.XUN_DAYS;
                 
-                // Special handling for last period to cover rest of year
+                // Special handling for last period to cover rest of year (15 days for year-end summary)
                 if (i === CONFIG.XUN_COUNT) {
                      const yearEnd = new Date(year, 11, 31);
                      const diffTime = Math.abs(yearEnd - startDate);
                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                     daysInXun = diffDays + 1; // +1 to include today
+                     daysInXun = Math.max(diffDays + 1, CONFIG.LAST_XUN_DAYS || 15); // 确保至少15天
+                     console.log(`Last xun (${i}): ${diffDays + 1} days calculated, using ${daysInXun} days`);
                 }
 
                 // 计算结束日期

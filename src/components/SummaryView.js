@@ -1,5 +1,6 @@
-import { buildXunSummary, getRangeLabel } from '../core/XunSummary.js';
+import { buildXunSummary, getRangeLabel, getRecordsByCurrentXun } from '../core/XunSummary.js';
 import { store } from '../core/State.js';
+import { renderSleepTrendChart } from './XunSleepTrendChart.js';
 
 const emotionRows = (emotionFrequency) => {
     const entries = Object.entries(emotionFrequency).sort((a, b) => b[1] - a[1]);
@@ -113,7 +114,7 @@ export class SummaryView {
                 </header>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <section id="xun-summary-container" class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                         <h3 class="mb-4 text-base font-medium text-gray-700">1. 数据概览</h3>
                         <div class="grid grid-cols-2 gap-3 text-sm">
                             <div class="rounded-xl bg-gray-50 p-3"><p class="text-gray-500">平均睡眠</p><p class="text-xl text-gray-800">${summary.avgSleep}小时</p></div>
@@ -127,6 +128,10 @@ export class SummaryView {
                             <p class="text-xs text-gray-500 mb-2">精力波动范围：${summary.minEnergy || '--'} - ${summary.maxEnergy || '--'}</p>
                             <div class="text-xs leading-none text-gray-600">${energyBar(summary.avgEnergy)}</div>
                         </div>
+                    </section>
+                    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2">
+                        <h3 class="mb-4 text-base font-medium text-gray-700">最近10天睡眠时长趋势</h3>
+                        <div id="sleep-trend-chart" class="h-64"></div>
                     </section>
 
                     <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -174,6 +179,20 @@ export class SummaryView {
         this.container.querySelector('[data-action="go-detail"]')?.addEventListener('click', () => {
             store.setState({ currentView: 'detail' });
         });
+
+        this.afterSummaryRender();
+    }
+
+    afterSummaryRender() {
+        const dataService = {
+            getRecordsByCurrentXun
+        };
+        const xunData = dataService.getRecordsByCurrentXun();
+        renderSleepTrendChart(xunData.records || []);
+    }
+
+    afterModalSave() {
+        this.afterSummaryRender();
     }
 
     destroy() {

@@ -59,7 +59,7 @@ export class SummaryView {
             this.unsubscribe();
         }
         this.unsubscribe = store.subscribe((state, key, value) => {
-            if (key === 'userData') {
+            if (key === 'userData' || key === 'viewedXunIndex' || key === 'currentView') {
                 this.refresh();
             }
         });
@@ -109,7 +109,7 @@ export class SummaryView {
 
                 <header class="mb-8 text-center">
                     <h2 class="text-3xl font-light text-gray-800">本旬小结 · Xun Summary</h2>
-                    <p class="mt-2 text-sm text-gray-500">本旬已记录 ${summary.recordCount} 天</p>
+                    <p class="mt-2 text-sm text-gray-500">本旬已记录 ${summary.recordCount} 天 · 完成率 ${summary.completionRate || 0}%</p>
                 </header>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">

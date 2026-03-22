@@ -1,5 +1,6 @@
 import { Calendar } from './Calendar.js';
 import { store } from './State.js';
+import { CONFIG } from '../config.js';
 
 // Vitality到精力值的映射（按指令要求）
 const vitalityToEnergy = {
@@ -17,7 +18,9 @@ function normalizeRecord(record) {
     
     // 从Vitality状态获取精力值（按指令要求）
     let energy = null;
-    if (record.body_state && record.body_state.title) {
+    if (Number.isFinite(Number(record.energy))) {
+        energy = Number(record.energy);
+    } else if (record.body_state && record.body_state.title) {
         energy = vitalityToEnergy[record.body_state.title] || null;
         console.log(`🎯 Vitality "${record.body_state.title}" → Energy: ${energy}`);
     } else {
@@ -25,7 +28,7 @@ function normalizeRecord(record) {
     }
     
     const normalized = {
-        sleepDuration: toNumber(sleepData.duration),
+        sleepDuration: toNumber(record.sleepDuration ?? sleepData.duration),
         sleepQuality: toNumber(sleepData.quality),
         exerciseMinutes: toNumber(record.metrics?.exercise || 0),
         readingMinutes: toNumber(record.metrics?.reading || 0),
@@ -44,6 +47,14 @@ const toNumber = (value) => {
     const num = Number(value);
     return Number.isFinite(num) ? num : 0;
 };
+
+function parseDateStringToLocalNoon(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return null;
+    const [year, month, day] = dateStr.split('-').map(Number);
+    if (!year || !month || !day) return null;
+    const date = new Date(year, month - 1, day, 12, 0, 0, 0);
+    return Number.isNaN(date.getTime()) ? null : date;
+}
 
 export function getXunRange(inputDate = new Date()) {
     // 使用年历系统获取旬范围，确保与全景视图一致
@@ -68,15 +79,68 @@ export function getXunRange(inputDate = new Date()) {
 }
 
 export function loadDailyRecords() {
-    const data = store.getAllData();
+    const storeData = store.getAllData();
+    const legacyData = JSON.parse(localStorage.getItem('dailyRecords') || '{}');
+    const data = {
+        ...(legacyData && typeof legacyData === 'object' ? legacyData : {}),
+        ...(storeData && typeof storeData === 'object' ? storeData : {})
+    };
     console.log('📋 All User Data:', data);
     console.log('📋 Data Keys:', Object.keys(data));
     console.log('📋 Data Count:', Object.keys(data).length);
     return data;
 }
 
+export function getRecordsByCurrentXun(targetDate = null) {
+    const state = store.getState();
+    const periods = Calendar.getXunPeriods(CONFIG.YEAR);
+    const selectedXunIndex = state.viewedXunIndex;
+    const dateBasedXun = targetDate ? Calendar.getXunPeriodByDateStr(periods, Calendar.formatLocalDate(targetDate)) : null;
+    const currentXun = Calendar.getCurrentXun(periods);
+    const targetXunIndex = dateBasedXun?.index || selectedXunIndex || currentXun?.index || 1;
+    const targetPeriod = periods.find((period) => period.index === targetXunIndex) || periods[0];
+
+    const startDate = new Date(
+        targetPeriod.startDate.getFullYear(),
+        targetPeriod.startDate.getMonth(),
+        targetPeriod.startDate.getDate(),
+        0, 0, 0, 0
+    );
+    const endDate = new Date(
+        targetPeriod.endDate.getFullYear(),
+        targetPeriod.endDate.getMonth(),
+        targetPeriod.endDate.getDate(),
+        23, 59, 59, 999
+    );
+
+    const records = loadDailyRecords();
+    const rows = Object.entries(records)
+        .map(([date, record]) => {
+            const parsedDate = parseDateStringToLocalNoon(date);
+            if (!parsedDate || parsedDate < startDate || parsedDate > endDate) return null;
+            const normalized = normalizeRecord(record || {});
+            return {
+                date,
+                sleepDuration: normalized.sleepDuration,
+                mood: normalized.mood ?? null,
+                energy: normalized.energy
+            };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+        xunIndex: targetXunIndex,
+        startDate: targetPeriod.startDate,
+        endDate: targetPeriod.endDate,
+        daysInXun: targetPeriod.days || 10,
+        records: rows
+    };
+}
+
 export function buildXunSummary(targetDate = new Date()) {
-    const { startDate, endDate } = getXunRange(targetDate);
+    const recordsInXun = getRecordsByCurrentXun(targetDate);
+    const { startDate, endDate, daysInXun } = recordsInXun;
     const records = loadDailyRecords();
 
     // 调试信息
@@ -89,20 +153,9 @@ export function buildXunSummary(targetDate = new Date()) {
     console.log('All Records:', Object.keys(records));
     console.log('Records Count:', Object.keys(records).length);
 
-    const xunEntries = Object.entries(records)
-        .filter(([dateStr, record]) => {
-            const date = new Date(dateStr);
-            const isValidDate = !Number.isNaN(date.getTime()) && date >= startDate && date <= endDate;
-            const hasData = record && typeof record === 'object' && Object.keys(record).length > 0;
-            console.log(`🔍 Filtering ${dateStr}:`, {
-                dateValid: isValidDate,
-                hasData: hasData,
-                dateInRange: date >= startDate && date <= endDate,
-                recordKeys: record ? Object.keys(record) : null
-            });
-            return isValidDate && hasData;
-        })
-        .sort(([a], [b]) => a.localeCompare(b));
+    const xunEntries = recordsInXun.records
+        .map((row) => [row.date, records[row.date] || {}])
+        .filter(([, record]) => record && typeof record === 'object' && Object.keys(record).length > 0);
 
     console.log('Filtered Xun Entries:', xunEntries.map(([date]) => date));
     console.log('Filtered Count:', xunEntries.length);
@@ -121,6 +174,7 @@ export function buildXunSummary(targetDate = new Date()) {
     const stats = {
         avgSleep: 0,
         avgEnergy: 0,
+        completionRate: 0,
         totalExercise: 0,
         totalReading: 0,
         exerciseDays: 0,
@@ -169,7 +223,7 @@ export function buildXunSummary(targetDate = new Date()) {
     // 如果没有任何记录，返回空状态
     if (allValidEntries.length === 0) {
         stats.insights.push('本旬暂无记录，从今天开始一次小小的打卡吧。');
-        return { ...stats, startDate, endDate, recordCount: 0 };
+        return { ...stats, startDate, endDate, recordCount: 0, completionRate: 0 };
     }
 
     // 如果没有精力值记录，给出提示但继续统计其他指标
@@ -237,6 +291,7 @@ export function buildXunSummary(targetDate = new Date()) {
 
     // 计算基础统计（使用所有记录）
     stats.avgSleep = Number((sleepSum / allValidEntries.length).toFixed(1));
+    stats.completionRate = Number(((allValidEntries.length / Math.max(daysInXun || 10, 1)) * 100).toFixed(0));
     
     // 计算精力统计（仅使用有精力值的记录）
     if (validEnergyEntries.length > 0) {
@@ -295,6 +350,7 @@ export function buildXunSummary(targetDate = new Date()) {
         insights: stats.insights,
         // 额外的元数据和其他统计
         avgSleep: stats.avgSleep,
+        completionRate: stats.completionRate,
         totalExercise: stats.totalExercise,
         totalReading: stats.totalReading,
         exerciseDays: stats.exerciseDays,

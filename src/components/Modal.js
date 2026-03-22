@@ -23,6 +23,8 @@ export class Modal {
         this.isHydrating = false;
         this.softPromptVisible = false;
         this.autoProgressionTimer = null;
+        this.previouslyFocusedElement = null;
+        this.saveFeedbackTimer = null;
         
         this.initElements();
         this.initListeners();
@@ -74,16 +76,18 @@ export class Modal {
             cancelBtn: document.getElementById('cancelBtn'),
             deleteBtn: document.getElementById('modal-delete'),
             saveBtn: document.getElementById('saveDailyRecordBtn'),
+            saveFeedback: document.getElementById('modal-save-feedback'),
             autoProgressToast: document.getElementById('auto-progress-toast'),
             autoProgressCancelBtn: document.getElementById('auto-progress-cancel')
         };
     }
 
     initListeners() {
-        this.elements.closeBtn.onclick = () => this.closeWithAutoSave();
+        this.elements.closeBtn.onclick = () => this.close();
         this.modal.onclick = (e) => {
-            if (e.target === this.modal) this.closeWithAutoSave();
+            if (e.target === this.modal) this.close();
         };
+        this.handleKeydown = this.handleKeydown.bind(this);
 
         // Mood Buttons
         this.elements.moodBtns.forEach(btn => {
@@ -292,14 +296,19 @@ export class Modal {
         // Show Modal
         this.modal.classList.remove('hidden');
         this.modal.classList.add('flex');
+        this.previouslyFocusedElement = document.activeElement;
         requestAnimationFrame(() => {
             this.panel.classList.remove('scale-95');
             this.panel.classList.add('scale-100');
+            this.panel.focus();
         });
+        document.addEventListener('keydown', this.handleKeydown);
         this.syncStatusStateFromUI();
     }
 
     close() {
+        document.removeEventListener('keydown', this.handleKeydown);
+        this.resetSaveFeedback();
         this.clearAutoProgressionTimer();
         this.hideAutoProgressToast();
         this.panel.classList.remove('scale-100');
@@ -310,6 +319,9 @@ export class Modal {
             this.modal.classList.add('hidden');
             this.modal.classList.remove('flex');
             this.panel.removeEventListener('transitionend', handleTransitionEnd);
+            if (this.previouslyFocusedElement && typeof this.previouslyFocusedElement.focus === 'function') {
+                this.previouslyFocusedElement.focus();
+            }
         };
 
         this.panel.addEventListener('transitionend', handleTransitionEnd);
@@ -469,6 +481,8 @@ export class Modal {
             btn.classList.toggle('text-black', selected);
             btn.classList.toggle('font-medium', selected);
             btn.classList.toggle('border-blue-400', selected);
+            btn.classList.toggle('bg-white/80', selected);
+            btn.classList.toggle('shadow-sm', selected);
             btn.classList.toggle('text-gray-400', !selected);
         });
 
@@ -963,8 +977,30 @@ export class Modal {
         this.handleSaveDailyRecord(options);
     }
 
+    setSaveFeedback(text, tone = 'neutral') {
+        if (!this.elements.saveFeedback) return;
+        this.elements.saveFeedback.textContent = text;
+        this.elements.saveFeedback.classList.remove('text-gray-500', 'text-blue-600', 'text-green-600', 'text-red-500');
+        if (tone === 'info') this.elements.saveFeedback.classList.add('text-blue-600');
+        else if (tone === 'success') this.elements.saveFeedback.classList.add('text-green-600');
+        else if (tone === 'error') this.elements.saveFeedback.classList.add('text-red-500');
+        else this.elements.saveFeedback.classList.add('text-gray-500');
+    }
+
+    resetSaveFeedback() {
+        if (this.saveFeedbackTimer) {
+            clearTimeout(this.saveFeedbackTimer);
+            this.saveFeedbackTimer = null;
+        }
+        this.setSaveFeedback('');
+    }
+
     handleSaveDailyRecord(options = {}) {
         if (!this.currentDateStr) return;
+        this.setSaveFeedback('正在保存…', 'info');
+        this.elements.saveBtn.disabled = true;
+        this.elements.saveBtn.classList.add('opacity-70', 'cursor-not-allowed');
+        this.elements.saveBtn.setAttribute('aria-busy', 'true');
 
         const data = {
             mood: this.currentMood,
@@ -1009,6 +1045,9 @@ export class Modal {
         if (validationErrors.length > 0) {
             console.warn('⚠️ Data validation warnings:', validationErrors);
             // 继续保存，但记录警告
+            this.setSaveFeedback('部分字段超出建议范围，已保存。', 'error');
+        } else {
+            this.setSaveFeedback('已保存', 'success');
         }
         
         this.modalState = {
@@ -1063,9 +1102,44 @@ export class Modal {
 
         if (options.closeAfterSave || options.closeAfterSave === undefined) {
             this.closeModal();
+        } else {
+            this.saveFeedbackTimer = setTimeout(() => this.resetSaveFeedback(), 1800);
         }
+        this.elements.saveBtn.disabled = false;
+        this.elements.saveBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+        this.elements.saveBtn.removeAttribute('aria-busy');
         if (this.onSave) this.onSave({ action: 'save', dateStr: this.currentDateStr, dayData: cleanedData });
         console.log('dailyRecords saved:', localStorage.getItem('dailyRecords'));
+    }
+
+    getFocusableElements() {
+        if (!this.panel) return [];
+        return Array.from(this.panel.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+            .filter(el => !el.hasAttribute('disabled') && !el.getAttribute('aria-hidden'));
+    }
+
+    trapFocus(event) {
+        const focusableElements = this.getFocusableElements();
+        if (!focusableElements.length) return;
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
+    handleKeydown(event) {
+        if (this.modal.classList.contains('hidden')) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            this.close();
+        } else if (event.key === 'Tab') {
+            this.trapFocus(event);
+        }
     }
 
 

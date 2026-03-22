@@ -15,6 +15,10 @@ export class Modal {
         this.bodyStateSelector = null;
         this.currentTab = 'checkin';
         this.currentBodyCondition = null;
+        this.modalState = {
+            status: {},
+            log: {}
+        };
         this.hasCheckinData = false;
         this.isHydrating = false;
         this.softPromptVisible = false;
@@ -67,8 +71,9 @@ export class Modal {
             customActivitiesContainer: document.getElementById('custom-activities-container'),
             addActivityBtn: document.getElementById('add-custom-activity'),
             journalInput: document.getElementById('journal-input'),
+            cancelBtn: document.getElementById('cancelBtn'),
             deleteBtn: document.getElementById('modal-delete'),
-            saveBtn: document.getElementById('modal-save'),
+            saveBtn: document.getElementById('saveDailyRecordBtn'),
             autoProgressToast: document.getElementById('auto-progress-toast'),
             autoProgressCancelBtn: document.getElementById('auto-progress-cancel')
         };
@@ -99,6 +104,7 @@ export class Modal {
                 }
                 this.currentMood = parseInt(btn.dataset.mood);
                 this.onCheckinInteraction('mood');
+                this.syncStatusStateFromUI();
             };
         });
 
@@ -108,6 +114,7 @@ export class Modal {
                 this.elements.weatherBtns.forEach(b => b.classList.remove('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg'));
                 btn.classList.add('bg-white/80', 'ring-2', 'ring-blue-300/60', 'shadow-lg');
                 this.currentWeather = btn.dataset.weather;
+                this.syncStatusStateFromUI();
             };
         });
 
@@ -121,11 +128,18 @@ export class Modal {
         });
 
         if (this.elements.bodyConditionNote) {
-            this.elements.bodyConditionNote.oninput = () => this.onCheckinInteraction('vitality');
+            this.elements.bodyConditionNote.oninput = () => {
+                this.onCheckinInteraction('vitality');
+                this.syncStatusStateFromUI();
+            };
+        }
+
+        if (this.elements.cancelBtn) {
+            this.elements.cancelBtn.onclick = () => this.close();
         }
 
         // Save Button
-        this.elements.saveBtn.onclick = () => this.save({ closeAfterSave: true });
+        this.elements.saveBtn.addEventListener('click', this.handleSaveDailyRecord.bind(this));
 
         // Delete Button
         this.elements.deleteBtn.onclick = () => this.delete();
@@ -147,6 +161,17 @@ export class Modal {
                 this.hideAutoProgressToast();
             };
         }
+
+        this.bindRealtimeStateUpdates();
+    }
+
+    bindRealtimeStateUpdates() {
+        if (this.elements.keywordsInput) this.elements.keywordsInput.addEventListener('input', () => this.syncLogStateFromUI());
+        if (this.elements.journalInput) this.elements.journalInput.addEventListener('input', () => this.syncLogStateFromUI());
+        this.elements.habitInputs.forEach(input => input && input.addEventListener('input', () => this.syncLogStateFromUI()));
+        this.elements.habitChecks.forEach(input => input && input.addEventListener('change', () => this.syncLogStateFromUI()));
+        Object.values(this.elements.metrics).forEach(input => input && input.addEventListener('input', () => this.syncLogStateFromUI()));
+        this.elements.goodThings.forEach(input => input && input.addEventListener('input', () => this.syncLogStateFromUI()));
     }
 
     clearAutoProgressionTimer() {
@@ -175,7 +200,9 @@ export class Modal {
         this.elements.dateTitle.innerHTML = `${dateStr} <span class="text-sm text-gray-500">${dayOfWeek}</span>`;
         
         const state = store.getState();
-        const data = state.userData[dateStr] || {};
+        const fallbackData = state.userData[dateStr] || {};
+        this.loadDailyRecord(dateStr, fallbackData);
+        const data = { ...this.modalState.status, ...this.modalState.log };
         const macroGoal = state.macroGoals[xunIndex] || {};
 
         console.log('Modal open:', dateStr, 'sleepData:', data.sleepData);
@@ -257,6 +284,9 @@ export class Modal {
         // Journal
         this.elements.journalInput.value = data.journal || '';
 
+        this.syncStatusStateFromUI();
+        this.syncLogStateFromUI();
+
         this.isHydrating = false;
         this.autoProgressCancelled = false;
         this.clearAutoProgressionTimer();
@@ -270,6 +300,7 @@ export class Modal {
             this.panel.classList.remove('scale-95');
             this.panel.classList.add('scale-100');
         });
+        this.syncStatusStateFromUI();
     }
 
     close() {
@@ -290,7 +321,7 @@ export class Modal {
 
 
     closeWithAutoSave() {
-        this.save({ closeAfterSave: true });
+        this.handleSaveDailyRecord();
     }
 
     resetUI() {
@@ -301,6 +332,10 @@ export class Modal {
         this.elements.keywordsInput.value = '';
         this.elements.bodyConditionNote.value = '';
         this.currentBodyCondition = null;
+        this.modalState = {
+            status: {},
+            log: {}
+        };
         this.hasCheckinData = false;
         this.isHydrating = false;
         this.softPromptVisible = false;
@@ -353,12 +388,13 @@ export class Modal {
             initialSleepData: savedSleepData,
             initialQuality: savedSleepData.quality,
             onSleepChange: (sleepData) => {
-                // 可以在这里处理睡眠时间变化的逻辑
+                this.syncLogStateFromUI();
             },
             onQualityChange: (quality, option) => {
-                // 可以在这里处理睡眠质量变化的逻辑
+                this.syncLogStateFromUI();
             }
         });
+        this.syncStatusStateFromUI();
     }
 
     initBodyStateSelector(savedBodyState = null) {
@@ -368,6 +404,7 @@ export class Modal {
             this.bodyStateSelector = new BodyStateSelector(this.elements.bodyStateSelectorContainer, {
                 onChange: () => {
                     this.onCheckinInteraction('vitality');
+                    this.syncStatusStateFromUI();
                 }
             });
         }
@@ -401,6 +438,7 @@ export class Modal {
                 }
             }
         });
+        this.syncStatusStateFromUI();
     }
 
     setBodyCondition(bodyCondition) {
@@ -470,10 +508,12 @@ export class Modal {
                     this.selectedEmotions.delete(emo.value);
                     tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors';
                     this.updateTabStatusIndicators();
+                    this.syncStatusStateFromUI();
                 } else {
                     this.selectedEmotions.add(emo.value);
                     tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-blue-100 border-blue-300 text-blue-700 transition-colors';
                     this.onCheckinInteraction('feelings');
+                    this.syncStatusStateFromUI();
                 }
             };
             
@@ -801,9 +841,16 @@ export class Modal {
         // </div>
         // So we should insert before the button.
         this.elements.addActivityBtn.insertAdjacentElement('beforebegin', div);
+        div.querySelectorAll('input').forEach((input) => {
+            input.addEventListener('input', () => this.syncLogStateFromUI());
+        });
     }
 
     save(options = {}) {
+        this.handleSaveDailyRecord(options);
+    }
+
+    handleSaveDailyRecord(options = {}) {
         if (!this.currentDateStr) return;
 
         const data = {
@@ -843,6 +890,36 @@ export class Modal {
             }
         });
         
+        this.modalState = {
+            status: {
+                mood: data.mood,
+                emotions: data.emotions,
+                weather: data.weather,
+                body_state: data.body_state,
+                vitality: data.vitality,
+                body_condition: data.body_condition,
+                nourishments: data.nourishments
+            },
+            log: {
+                keywords: data.keywords,
+                metrics: data.metrics,
+                sleepData: data.sleepData,
+                three_good_things: data.three_good_things,
+                journal: data.journal,
+                indicator_checkins: data.indicator_checkins,
+                checkin_texts: data.checkin_texts,
+                custom_activities: data.custom_activities
+            }
+        };
+
+        const currentDate = this.currentDateStr;
+        const records = JSON.parse(localStorage.getItem('dailyRecords') || '{}');
+        records[currentDate] = {
+            status: this.modalState.status,
+            log: this.modalState.log
+        };
+        localStorage.setItem('dailyRecords', JSON.stringify(records));
+
         // Save Habits Definition as well (Update Macro Goals)
         const habits = this.elements.habitInputs.map(el => el.value.trim());
         const state = store.getState();
@@ -860,12 +937,142 @@ export class Modal {
         // Save everything
         store.setState({ userData, macroGoals });
         
-        if (options.closeAfterSave) {
-            this.close();
+        this.refreshCalendar();
+        this.refreshSummary();
+
+        if (options.closeAfterSave || options.closeAfterSave === undefined) {
+            this.closeModal();
         }
         if (this.onSave) this.onSave({ action: 'save', dateStr: this.currentDateStr, dayData: data });
+        console.log('dailyRecords saved:', localStorage.getItem('dailyRecords'));
     }
 
+
+    syncStatusStateFromUI() {
+        this.modalState.status = {
+            mood: this.currentMood || null,
+            emotions: Array.from(this.selectedEmotions || []),
+            weather: this.currentWeather || null,
+            body_state: this.bodyStateSelector ? this.bodyStateSelector.getValue() : null,
+            vitality: this.getVitalityLevel(this.bodyStateSelector ? this.bodyStateSelector.getValue() : null),
+            body_condition: {
+                level: this.currentBodyCondition,
+                note: this.elements.bodyConditionNote.value.trim()
+            },
+            nourishments: Array.from(this.selectedNourishments || [])
+        };
+    }
+
+    syncLogStateFromUI() {
+        const rows = this.elements.customActivitiesContainer.querySelectorAll('.activity-row');
+        const customActivities = [];
+        rows.forEach(row => {
+            const name = row.querySelector('.activity-name').value.trim();
+            const val = row.querySelector('.activity-value').value.trim();
+            if (name) customActivities.push({ name, value: val });
+        });
+
+        this.modalState.log = {
+            keywords: this.elements.keywordsInput.value.split(/[,，]/).map(k => k.trim()).filter(k => k),
+            metrics: {
+                exercise: (this.elements.metrics.exercise && parseInt(this.elements.metrics.exercise.value)) || 0,
+                reading: (this.elements.metrics.reading && parseInt(this.elements.metrics.reading.value)) || 0,
+                wealth: (this.elements.metrics.wealth && parseFloat(this.elements.metrics.wealth.value)) || 0,
+                social: (this.elements.metrics.social && this.elements.metrics.social.value) || ''
+            },
+            sleepData: this.sleepSelector ? this.sleepSelector.getValue() : {},
+            three_good_things: this.elements.goodThings.map(el => el.value).filter(v => v),
+            journal: this.elements.journalInput.value,
+            indicator_checkins: this.elements.habitChecks.map(el => el.checked),
+            checkin_texts: this.elements.habitInputs.map(el => el.value.trim()),
+            custom_activities: customActivities
+        };
+    }
+
+    loadDailyRecord(date, fallbackRecord = {}) {
+        const records = JSON.parse(localStorage.getItem('dailyRecords') || '{}');
+
+        if (records[date]) {
+            this.modalState.status = records[date].status || {};
+            this.modalState.log = records[date].log || {};
+            return;
+        }
+
+        this.modalState.status = {
+            mood: fallbackRecord.mood || null,
+            emotions: fallbackRecord.emotions || [],
+            weather: fallbackRecord.weather || null,
+            body_state: fallbackRecord.body_state || null,
+            vitality: fallbackRecord.vitality || null,
+            body_condition: fallbackRecord.body_condition || {},
+            nourishments: fallbackRecord.nourishments || []
+        };
+
+        this.modalState.log = {
+            keywords: fallbackRecord.keywords || [],
+            metrics: fallbackRecord.metrics || {},
+            sleepData: fallbackRecord.sleepData || {},
+            three_good_things: fallbackRecord.three_good_things || [],
+            journal: fallbackRecord.journal || '',
+            indicator_checkins: fallbackRecord.indicator_checkins || [],
+            checkin_texts: fallbackRecord.checkin_texts || [],
+            custom_activities: fallbackRecord.custom_activities || []
+        };
+    }
+
+    refreshCalendar() {
+        if (typeof globalThis.refreshCalendar === 'function') globalThis.refreshCalendar();
+    }
+
+    refreshSummary() {
+        const records = JSON.parse(localStorage.getItem('dailyRecords') || '{}');
+        const periods = Calendar.getXunPeriods(new Date().getFullYear());
+        const period = periods.find((item) => item.index === this.currentXunIndex);
+
+        const vitalityToEnergy = {
+            '需要恢复': 3,
+            '正常运转': 5,
+            '状态很好': 7,
+            '高能日': 9
+        };
+
+        let entries = Object.entries(records || {});
+        if (period) {
+            const start = Calendar.formatLocalDate(period.startDate);
+            const end = Calendar.formatLocalDate(period.endDate);
+            entries = entries.filter(([date]) => date >= start && date <= end);
+        }
+
+        const sleepValues = entries
+            .map(([, record]) => Number(record?.log?.sleepData?.duration))
+            .filter((value) => Number.isFinite(value) && value > 0);
+
+        const energyValues = entries
+            .map(([, record]) => {
+                const vitality = record?.status?.body_state?.title;
+                if (vitality && vitalityToEnergy[vitality]) return vitalityToEnergy[vitality];
+                const numericVitality = Number(record?.status?.vitality);
+                return Number.isFinite(numericVitality) ? numericVitality : null;
+            })
+            .filter((value) => Number.isFinite(value));
+
+        const recordDays = entries.length;
+        const daysInXun = period?.days || 10;
+        const summarySnapshot = {
+            avgSleep: sleepValues.length ? Number((sleepValues.reduce((a, b) => a + b, 0) / sleepValues.length).toFixed(1)) : 0,
+            avgEnergy: energyValues.length ? Number((energyValues.reduce((a, b) => a + b, 0) / energyValues.length).toFixed(1)) : 0,
+            recordDays,
+            completionRate: Math.round((recordDays / daysInXun) * 100)
+        };
+
+        globalThis.__dailyRecordsSummarySnapshot = summarySnapshot;
+
+        if (typeof globalThis.refreshSummary === 'function') globalThis.refreshSummary();
+    }
+
+    closeModal() {
+        this.close();
+    }
     delete() {
         if (!confirm('确定要删除今天的记录吗？')) return;
         const state = store.getState();

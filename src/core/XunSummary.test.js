@@ -60,9 +60,10 @@ describe('buildXunSummary - Energy Refactor', () => {
         const summary = buildXunSummary(new Date('2026-03-06'));
         
         // 验证Vitality到Energy的映射
-        // 需要恢复: 3, 正常运转: 5, 状态很好: 7, 高能日: 9
-        // 平均精力 = (3 + 5 + 7 + 9 + 3) / 5 = 5.4
-        expect(summary.avgEnergy).toBe(5.4);
+        // 当前旬是 3月2日-3月11日，纳入 3月2~5日
+        // 正常运转: 5, 状态很好: 7, 高能日: 9, 需要恢复: 3
+        // 平均精力 = (5 + 7 + 9 + 3) / 4 = 6.0
+        expect(summary.avgEnergy).toBe(6.0);
         
         // 验证新的精力指标
         expect(summary.minEnergy).toBe(3);
@@ -108,7 +109,7 @@ describe('buildXunSummary - Energy Refactor', () => {
     test('handles records without vitality gracefully', () => {
         // 测试没有Vitality状态的记录
         const mockUserDataNoVitality = {
-            '2026-03-01': {
+            '2026-03-02': {
                 sleepData: { duration: 6, quality: 7 },
                 metrics: { wealth: 6, exercise: 0, reading: 10 },
                 emotions: ['tired']
@@ -128,9 +129,44 @@ describe('buildXunSummary - Energy Refactor', () => {
         const summary = buildXunSummary(new Date('2026-03-06'));
         
         // 验证精力值确实来自Vitality而不是wealth
-        // 如果使用wealth，平均精力应该是 (6+8+9+7+5)/5 = 7.0
-        // 但实际使用Vitality，平均精力是 5.4
-        expect(summary.avgEnergy).toBe(5.4);
+        // 如果使用wealth，平均精力应该更高
+        // 但实际使用Vitality（旬内 3月2~5日）平均精力是 6.0
+        expect(summary.avgEnergy).toBe(6.0);
         expect(summary.avgEnergy).not.toBe(7.0);
+    });
+
+    test('reads exercise and reading from DailyRecord.status/log structure', () => {
+        store.setState({ userData: {} });
+        localStorage.setItem('dailyRecords', JSON.stringify({
+            '2026-03-02': {
+                status: {
+                    mood: 'calm',
+                    body_state: { title: '正常运转', id: 'normal' }
+                },
+                log: {
+                    sleepData: { duration: 7 },
+                    metrics: { exercise: 45, reading: 30 },
+                    keywords: ['专注']
+                }
+            },
+            '2026-03-03': {
+                status: {
+                    mood: 'focused',
+                    body_state: { title: '状态很好', id: 'good' }
+                },
+                log: {
+                    sleepData: { duration: 8 },
+                    metrics: { exercise: 20, reading: 60 }
+                }
+            }
+        }));
+
+        const summary = buildXunSummary(new Date('2026-03-06'));
+
+        expect(summary.totalExercise).toBe(65);
+        expect(summary.totalReading).toBe(90);
+        expect(summary.exerciseDays).toBe(2);
+        expect(summary.readingDays).toBe(2);
+        expect(summary.avgEnergy).toBe(6.0);
     });
 });

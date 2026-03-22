@@ -927,9 +927,9 @@ export class Modal {
     }
 
     scrollToTopOfRecordTab() {
-        // 需要滚动的是模态框面板，因为它是具有 overflow-y-auto 的容器
-        if (this.panel) {
-            this.panel.scrollTop = 0;
+        // 当前由外层 modal 容器承担滚动
+        if (this.modal) {
+            this.modal.scrollTop = 0;
         }
     }
 

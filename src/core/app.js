@@ -130,6 +130,7 @@ class App {
         this.modal = new Modal('modal', (payload) => {
             // 记录一次单日 patch，避免保存后整个月历重绘
             this.pendingDayCellPatch = payload || null;
+            this.afterModalSave();
         });
 
         // The logic for the modal's internal elements is being initialized here.
@@ -920,10 +921,19 @@ class App {
             const period = this.xunPeriods.find(p => p.index === index);
             if (period) {
                 this.summaryView.render(period);
+                this.afterSummaryRender();
             }
         }
 
         this.checkMenstrualPrediction();
+    }
+
+    afterSummaryRender() {
+        this.summaryView?.afterSummaryRender?.();
+    }
+
+    afterModalSave() {
+        this.summaryView?.afterModalSave?.();
     }
 
     getWeightedPeriodPredictionInfo(cycles) {

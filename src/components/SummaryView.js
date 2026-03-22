@@ -1,6 +1,8 @@
 import { buildXunSummary, getRangeLabel, getRecordsByCurrentXun } from '../core/XunSummary.js';
 import { store } from '../core/State.js';
 import { renderSleepTrendChart } from './XunSleepTrendChart.js';
+import { Calendar } from '../core/Calendar.js';
+import { CONFIG } from '../config.js';
 
 const emotionWordCloud = (emotionFrequency) => {
     const entries = Object.entries(emotionFrequency).sort((a, b) => b[1] - a[1]);
@@ -86,7 +88,18 @@ export class SummaryView {
             return;
         }
 
-        const summary = buildXunSummary(new Date());
+        // 获取当前选中的旬索引，确保显示正确的旬数据
+        const state = store.getState();
+        const xunPeriods = Calendar.getXunPeriods(CONFIG.YEAR);
+        const targetPeriod = xunPeriods.find(p => p.index === state.viewedXunIndex);
+        const targetDate = targetPeriod ? targetPeriod.startDate : new Date();
+        
+        console.log('🎯 Xun Summary Debug:');
+        console.log('Current viewedXunIndex:', state.viewedXunIndex);
+        console.log('Target period:', targetPeriod);
+        console.log('Target date:', targetDate.toISOString().split('T')[0]);
+
+        const summary = buildXunSummary(targetDate);
         const rangeLabel = getRangeLabel(summary.startDate, summary.endDate);
 
         // UI调试信息
@@ -106,8 +119,32 @@ export class SummaryView {
             console.log('❌ No data to display');
         }
 
-        // 按指令要求：如果没有数据显示"--"
-        const displayAvgEnergy = summary.avgEnergy !== null && summary.avgEnergy !== undefined && summary.avgEnergy !== 0 ? summary.avgEnergy.toFixed(1) : '--';
+        // 按指令要求：如果没有数据显示"--"，但如果有任何数据就显示有意义的信息
+        const hasAnyValidData = summary.recordCount > 0;
+        const displayAvgEnergy = hasAnyValidData && summary.avgEnergy !== null && summary.avgEnergy !== undefined ? 
+            summary.avgEnergy.toFixed(1) : '--';
+
+        // 数据完整性指示器
+        const getDataCompletenessIndicator = () => {
+            if (!hasAnyValidData) return '';
+            const hasEnergyData = summary.avgEnergy !== null;
+            const completenessClass = hasEnergyData ? 'text-green-600' : 'text-yellow-600';
+            const completenessText = hasEnergyData ? '数据完整' : '缺少精力数据';
+            const completenessIcon = hasEnergyData ? '✅' : '⚠️';
+            
+            return `<span class="text-xs ${completenessClass} ml-2">${completenessIcon} ${completenessText}</span>`;
+        };
+
+        // 根据数据完整性显示不同的状态信息
+        const getDataStatusMessage = () => {
+            if (!hasAnyValidData) {
+                return '本旬暂无记录，从今天开始一次小小的打卡吧。';
+            }
+            if (summary.avgEnergy === null) {
+                return '本旬有基础记录，但缺少精力状态数据，请在每日记录中选择身心状态。';
+            }
+            return `本旬已记录 ${summary.recordCount} 天，数据完整度良好。`;
+        };
 
         console.log('🖼️ About to render HTML with displayAvgEnergy:', displayAvgEnergy);
 
@@ -122,7 +159,8 @@ export class SummaryView {
 
                 <header class="mb-8 text-center">
                     <h2 class="text-3xl font-light text-gray-800">本旬小结 · Xun Summary</h2>
-                    <p class="mt-2 text-sm text-gray-500">本旬已记录 ${summary.recordCount} 天 · 完成率 ${summary.completionRate || 0}%</p>
+                    <p class="mt-2 text-sm text-gray-500">${getDataStatusMessage()}</p>
+                    ${hasAnyValidData ? `<p class="text-xs text-gray-400">完成率 ${summary.completionRate || 0}%</p>` : ''}
                 </header>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -130,7 +168,13 @@ export class SummaryView {
                         <h3 class="mb-4 text-base font-medium text-gray-700">1. 数据概览</h3>
                         <div class="grid grid-cols-2 gap-3 text-sm">
                             <div class="rounded-xl bg-gray-50 p-3"><p class="text-gray-500">平均睡眠</p><p class="text-xl text-gray-800">${summary.avgSleep}小时</p></div>
-                            <div class="rounded-xl bg-gray-50 p-3"><p class="text-gray-500">平均精力</p><p class="text-xl text-gray-800">${displayAvgEnergy}</p></div>
+                            <div class="rounded-xl bg-gray-50 p-3">
+                                <p class="text-gray-500">平均精力</p>
+                                <div class="flex items-center">
+                                    <p class="text-xl text-gray-800">${displayAvgEnergy}</p>
+                                    ${getDataCompletenessIndicator()}
+                                </div>
+                            </div>
                             <div class="rounded-xl bg-gray-50 p-3"><p class="text-gray-500">累计运动</p><p class="text-xl text-gray-800">${summary.totalExercise}分钟</p></div>
                             <div class="rounded-xl bg-gray-50 p-3"><p class="text-gray-500">累计阅读</p><p class="text-xl text-gray-800">${summary.totalReading}分钟</p></div>
                         </div>

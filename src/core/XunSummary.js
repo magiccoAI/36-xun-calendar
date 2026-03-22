@@ -13,30 +13,40 @@ const vitalityToEnergy = {
 // 数据转换函数：将当前复杂数据结构映射为指令要求的简单结构
 function normalizeRecord(record) {
     console.log('🔧 Normalizing record:', record);
-    
-    const sleepData = record.sleepData || {};
+
+    const status = (record && typeof record.status === 'object' && record.status) ? record.status : {};
+    const log = (record && typeof record.log === 'object' && record.log) ? record.log : {};
+    const sleepData = log.sleepData || record.sleepData || {};
+    const metrics = log.metrics || record.metrics || {};
+    const keywords = log.keywords || record.keywords || [];
+    const emotionTags = status.emotions || record.emotions || [];
+    const mood = status.mood ?? record.mood ?? null;
+    const bodyState = status.body_state || record.body_state || null;
+    const vitality = status.vitality ?? record.vitality;
     
     // 从Vitality状态获取精力值（按指令要求）
     let energy = null;
     if (Number.isFinite(Number(record.energy))) {
         energy = Number(record.energy);
-    } else if (record.body_state && record.body_state.title) {
-        energy = vitalityToEnergy[record.body_state.title] || null;
-        console.log(`🎯 Vitality "${record.body_state.title}" → Energy: ${energy}`);
+    } else if (bodyState && bodyState.title) {
+        energy = vitalityToEnergy[bodyState.title] || null;
+        console.log(`🎯 Vitality "${bodyState.title}" → Energy: ${energy}`);
+    } else if (Number.isFinite(Number(vitality))) {
+        energy = Number(vitality);
     } else {
-        console.log('⚠️ No body_state found in record');
+        console.log('⚠️ No body_state found in record (status/log or flat)');
     }
     
     const normalized = {
         sleepDuration: toNumber(record.sleepDuration ?? sleepData.duration),
         sleepQuality: toNumber(sleepData.quality),
-        exerciseMinutes: toNumber(record.metrics?.exercise || 0),
-        readingMinutes: toNumber(record.metrics?.reading || 0),
+        exerciseMinutes: toNumber(metrics.exercise || 0),
+        readingMinutes: toNumber(metrics.reading || 0),
         energy: energy, // 重要：必须来自Vitality状态
-        mood: record.mood,
-        emotionTags: record.emotions || [],
-        keywords: record.keywords || [],
-        vitality: record.body_state?.title || null // 保存原始vitality状态
+        mood,
+        emotionTags,
+        keywords,
+        vitality: bodyState?.title || vitality || null // 保存原始vitality状态
     };
     
     console.log('✅ Normalized result:', normalized);
@@ -244,8 +254,7 @@ export function buildXunSummary(targetDate = new Date()) {
     const energyValues = [];
 
     // 使用所有有效记录进行基础统计
-    allValidEntries.forEach(([dateStr, record]) => {
-        const normalizedRecord = normalizeRecord(record);
+    allValidEntries.forEach(([dateStr, normalizedRecord]) => {
         const { sleepDuration, energy, exerciseMinutes, readingMinutes } = normalizedRecord;
 
         // 基础统计（使用所有记录）

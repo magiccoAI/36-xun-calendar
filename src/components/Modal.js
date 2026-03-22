@@ -214,11 +214,7 @@ export class Modal {
         this.hideSoftTransitionPrompt();
 
         // Populate Data
-        // Mood
-        if (data.mood) {
-            const btn = document.querySelector(`.mood-btn[data-mood="${data.mood}"]`);
-            if (btn) btn.click();
-        }
+        // Mood 默认保持空状态，用户需主动选择（不做预填）
 
         // Emotions
         this.renderEmotionTags(data.emotions || []);
@@ -340,7 +336,8 @@ export class Modal {
         this.isHydrating = false;
         this.softPromptVisible = false;
         this.elements.bodyConditionBtns.forEach(btn => {
-            btn.classList.remove('bg-green-100', 'border-green-400', 'text-green-700',
+            btn.classList.remove('ring-2', 'ring-offset-1',
+                              'bg-green-100', 'border-green-400', 'text-green-700',
                               'bg-yellow-100', 'border-yellow-400', 'text-yellow-700',
                               'bg-red-100', 'border-red-400', 'text-red-700');
         });
@@ -417,25 +414,39 @@ export class Modal {
     }
 
     selectBodyCondition(condition) {
-        this.currentBodyCondition = condition;
+        const normalizedCondition = condition === '明显不适' ? '严重不适' : condition;
+        this.currentBodyCondition = normalizedCondition;
         this.onCheckinInteraction('vitality');
         this.elements.bodyConditionBtns.forEach(btn => {
-            const selected = btn.dataset.condition === condition;
-            
-            // 移除所有状态样式
-            btn.classList.remove('bg-green-100', 'border-green-400', 'text-green-700',
-                              'bg-yellow-100', 'border-yellow-400', 'text-yellow-700',
-                              'bg-red-100', 'border-red-400', 'text-red-700');
-            
-            // 根据条件添加对应的样式
+            const btnCondition = btn.dataset.condition === '明显不适' ? '严重不适' : btn.dataset.condition;
+            const selected = btnCondition === normalizedCondition;
+
+            // 统一基础样式后，仅通过颜色区分状态
+            btn.classList.remove(
+                'ring-2', 'ring-offset-1',
+                'bg-green-100', 'border-green-400', 'text-green-700',
+                'bg-yellow-100', 'border-yellow-400', 'text-yellow-700',
+                'bg-red-100', 'border-red-400', 'text-red-700',
+                'bg-green-50', 'border-green-300', 'text-green-600',
+                'bg-yellow-50', 'border-yellow-300', 'text-yellow-600',
+                'bg-red-50', 'border-red-300', 'text-red-600'
+            );
+
             if (selected) {
-                if (condition === '良好') {
+                btn.classList.add('ring-2', 'ring-offset-1');
+                if (normalizedCondition === '良好') {
                     btn.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
-                } else if (condition === '轻微不适') {
+                } else if (normalizedCondition === '轻微不适') {
                     btn.classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
-                } else if (condition === '明显不适') {
+                } else if (normalizedCondition === '严重不适') {
                     btn.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
                 }
+            } else if (btnCondition === '良好') {
+                btn.classList.add('bg-green-50', 'border-green-300', 'text-green-600');
+            } else if (btnCondition === '轻微不适') {
+                btn.classList.add('bg-yellow-50', 'border-yellow-300', 'text-yellow-600');
+            } else if (btnCondition === '严重不适') {
+                btn.classList.add('bg-red-50', 'border-red-300', 'text-red-600');
             }
         });
         this.syncStatusStateFromUI();

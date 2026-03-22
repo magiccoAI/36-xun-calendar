@@ -2,18 +2,30 @@ import { buildXunSummary, getRangeLabel, getRecordsByCurrentXun } from '../core/
 import { store } from '../core/State.js';
 import { renderSleepTrendChart } from './XunSleepTrendChart.js';
 
-const emotionRows = (emotionFrequency) => {
+const emotionWordCloud = (emotionFrequency) => {
     const entries = Object.entries(emotionFrequency).sort((a, b) => b[1] - a[1]);
     if (!entries.length) {
         return '<p class="text-sm text-gray-500">本旬暂无情绪标签记录。</p>';
     }
 
+    const maxCount = Math.max(...entries.map(([, count]) => count));
+    const minCount = Math.min(...entries.map(([, count]) => count));
+    const sizeClassByWeight = ['text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl'];
+    const normalizeWeight = (count) => {
+        if (maxCount === minCount) return 2;
+        const ratio = (count - minCount) / (maxCount - minCount);
+        return Math.min(4, Math.max(0, Math.round(ratio * 4)));
+    };
+
     return `
-        <div class="space-y-2">
+        <div class="flex flex-wrap items-center gap-2 rounded-xl bg-gray-50 p-3">
             ${entries.map(([emotion, count]) => `
-                <div class="flex items-center justify-between rounded-xl bg-gray-50 px-3 py-2">
-                    <span class="text-sm text-gray-700">${emotion}</span>
-                    <span class="text-xs font-semibold text-gray-500">${count}</span>
+                <div
+                    class="inline-flex items-end gap-1 rounded-full bg-white px-3 py-1 shadow-sm ${sizeClassByWeight[normalizeWeight(count)]}"
+                    title="${emotion} · ${count}次"
+                >
+                    <span class="font-medium text-gray-700">${emotion}</span>
+                    <span class="text-[10px] font-semibold text-gray-400">${count}</span>
                 </div>
             `).join('')}
         </div>
@@ -145,7 +157,7 @@ export class SummaryView {
 
                     <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
                         <h3 class="mb-4 text-base font-medium text-gray-700">3. 情绪分布</h3>
-                        ${emotionRows(summary.emotionFrequency)}
+                        ${emotionWordCloud(summary.emotionFrequency)}
                     </section>
 
                     <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">

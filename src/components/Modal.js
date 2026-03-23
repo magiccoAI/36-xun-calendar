@@ -432,34 +432,7 @@ export class Modal {
         this.elements.bodyConditionBtns.forEach(btn => {
             const btnCondition = btn.dataset.condition === '明显不适' ? '严重不适' : btn.dataset.condition;
             const selected = btnCondition === normalizedCondition;
-
-            // 统一基础样式后，仅通过颜色区分状态
-            btn.classList.remove(
-                'ring-2', 'ring-offset-1',
-                'bg-green-100', 'border-green-400', 'text-green-700',
-                'bg-yellow-100', 'border-yellow-400', 'text-yellow-700',
-                'bg-red-100', 'border-red-400', 'text-red-700',
-                'bg-green-50', 'border-green-300', 'text-green-600',
-                'bg-yellow-50', 'border-yellow-300', 'text-yellow-600',
-                'bg-red-50', 'border-red-300', 'text-red-600'
-            );
-
-            if (selected) {
-                btn.classList.add('ring-2', 'ring-offset-1');
-                if (normalizedCondition === '良好') {
-                    btn.classList.add('bg-green-100', 'border-green-400', 'text-green-700');
-                } else if (normalizedCondition === '轻微不适') {
-                    btn.classList.add('bg-yellow-100', 'border-yellow-400', 'text-yellow-700');
-                } else if (normalizedCondition === '严重不适') {
-                    btn.classList.add('bg-red-100', 'border-red-400', 'text-red-700');
-                }
-            } else if (btnCondition === '良好') {
-                btn.classList.add('bg-green-50', 'border-green-300', 'text-green-600');
-            } else if (btnCondition === '轻微不适') {
-                btn.classList.add('bg-yellow-50', 'border-yellow-300', 'text-yellow-600');
-            } else if (btnCondition === '严重不适') {
-                btn.classList.add('bg-red-50', 'border-red-300', 'text-red-600');
-            }
+            btn.classList.toggle('selected', selected);
         });
         this.syncStatusStateFromUI();
     }

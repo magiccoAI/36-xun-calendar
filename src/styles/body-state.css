@@ -1,0 +1,41 @@
+@layer components {
+    .body-state-button {
+        background: transparent;
+        border: 1px solid #E2E8F0;
+        color: #64748B;
+        border-radius: 12px;
+        padding: 8px 16px;
+        font-size: 14px;
+        line-height: 1.25;
+        transition: all 0.15s ease;
+        cursor: pointer;
+    }
+
+    .body-state-button:hover {
+        background: #F8FAFC;
+        border-color: #CBD5E1;
+    }
+
+    .body-state-button.selected {
+        box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.15);
+    }
+
+    .body-state-button.selected[data-condition="良好"] {
+        background: #E2E8F0;
+        border-color: #CBD5E1;
+        color: #334155;
+    }
+
+    .body-state-button.selected[data-condition="轻微不适"] {
+        background: #CBD5E1;
+        border-color: #94A3B8;
+        color: #1E293B;
+    }
+
+    .body-state-button.selected[data-condition="严重不适"],
+    .body-state-button.selected[data-condition="明显不适"] {
+        background: #94A3B8;
+        border-color: #64748B;
+        color: #FFFFFF;
+    }
+}

@@ -38,4 +38,27 @@
         border-color: #64748B;
         color: #FFFFFF;
     }
+
+    .money-state-button {
+        background: transparent;
+        border: 1px solid #CBD5E1;
+        color: #64748B;
+        border-radius: 12px;
+        padding: 6px 14px;
+        font-size: 13px;
+        line-height: 1.25;
+        transition: all 0.15s ease;
+        cursor: pointer;
+    }
+
+    .money-state-button:hover {
+        background: #F8FAFC;
+    }
+
+    .money-state-button.selected {
+        background: #E2E8F0;
+        border-color: #94A3B8;
+        color: #334155;
+        box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.15);
+    }
 }

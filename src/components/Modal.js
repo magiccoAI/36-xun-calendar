@@ -15,6 +15,12 @@ export class Modal {
         this.bodyStateSelector = null;
         this.currentTab = 'checkin';
         this.currentBodyCondition = null;
+        this.currentMoneyState = {
+            money_feeling: null,
+            money_saving: null,
+            money_impulse: null,
+            money_note: ''
+        };
         this.modalState = {
             status: {},
             log: {}
@@ -62,9 +68,10 @@ export class Modal {
                 // sleep: document.getElementById('metric-sleep'), // 已替换为睡眠滑块
                 exercise: document.getElementById('metric-exercise'),
                 reading: document.getElementById('metric-reading'),
-                wealth: document.getElementById('metric-wealth'),
                 social: document.getElementById('metric-social')
             },
+            moneyStateButtons: document.querySelectorAll('.money-state-button'),
+            moneyNote: document.getElementById('money-note'),
             goodThings: [
                 document.getElementById('good-thing-1'),
                 document.getElementById('good-thing-2'),
@@ -130,6 +137,17 @@ export class Modal {
         this.elements.bodyConditionBtns.forEach(btn => {
             btn.onclick = () => this.selectBodyCondition(btn.dataset.condition);
         });
+
+        this.elements.moneyStateButtons.forEach(btn => {
+            btn.onclick = () => this.selectMoneyState(btn.dataset.moneyGroup, btn.dataset.moneyValue);
+        });
+
+        if (this.elements.moneyNote) {
+            this.elements.moneyNote.addEventListener('input', () => {
+                this.currentMoneyState.money_note = this.elements.moneyNote.value.slice(0, 120);
+                this.syncLogStateFromUI();
+            });
+        }
 
         if (this.elements.bodyConditionNote) {
             this.elements.bodyConditionNote.oninput = () => {
@@ -256,9 +274,10 @@ export class Modal {
             // this.elements.metrics.sleep.value = data.metrics.sleep || ''; // 已替换为睡眠滑块
             if (this.elements.metrics.exercise) this.elements.metrics.exercise.value = data.metrics.exercise || '';
             if (this.elements.metrics.reading) this.elements.metrics.reading.value = data.metrics.reading || '';
-            if (this.elements.metrics.wealth) this.elements.metrics.wealth.value = data.metrics.wealth || '';
             if (this.elements.metrics.social) this.elements.metrics.social.value = data.metrics.social || '';
         }
+
+        this.hydrateMoneyState(data);
         
         this.initSleepSelector(data.sleepData || {});
         this.initBodyStateSelector(data.body_state || null);
@@ -340,6 +359,12 @@ export class Modal {
         this.elements.keywordsInput.value = '';
         this.elements.bodyConditionNote.value = '';
         this.currentBodyCondition = null;
+        this.currentMoneyState = {
+            money_feeling: null,
+            money_saving: null,
+            money_impulse: null,
+            money_note: ''
+        };
         this.modalState = {
             status: {},
             log: {}
@@ -361,6 +386,7 @@ export class Modal {
         this.elements.goodThings.forEach(el => el.value = '');
         this.elements.journalInput.value = '';
         this.elements.habitChecks.forEach(el => el.checked = false);
+        this.resetMoneyStateUI();
         
         // Clear tags selection visual
         this.selectedEmotions = new Set();
@@ -443,6 +469,55 @@ export class Modal {
             this.selectBodyCondition(bodyCondition.level);
         }
         this.elements.bodyConditionNote.value = bodyCondition.note || '';
+    }
+
+    selectMoneyState(groupName, value) {
+        if (!groupName) return;
+        this.elements.moneyStateButtons.forEach(btn => {
+            if (btn.dataset.moneyGroup !== groupName) return;
+            btn.classList.toggle('selected', btn.dataset.moneyValue === value);
+        });
+        this.currentMoneyState[groupName] = value || null;
+        this.syncLogStateFromUI();
+    }
+
+    resetMoneyStateUI() {
+        this.elements.moneyStateButtons.forEach(btn => btn.classList.remove('selected'));
+        if (this.elements.moneyNote) this.elements.moneyNote.value = '';
+    }
+
+    hydrateMoneyState(data = {}) {
+        const moneyData = data.money || {};
+        this.currentMoneyState = {
+            money_feeling: moneyData.feeling || data.money_feeling || null,
+            money_saving: moneyData.saving || data.money_saving || null,
+            money_impulse: moneyData.impulse || data.money_impulse || null,
+            money_note: moneyData.note || data.money_note || ''
+        };
+
+        this.elements.moneyStateButtons.forEach(btn => {
+            const group = btn.dataset.moneyGroup;
+            const value = btn.dataset.moneyValue;
+            btn.classList.toggle('selected', this.currentMoneyState[group] === value);
+        });
+        if (this.elements.moneyNote) this.elements.moneyNote.value = this.currentMoneyState.money_note;
+    }
+
+    buildMoneyData() {
+        const feeling = this.currentMoneyState.money_feeling || null;
+        return {
+            money_feeling: feeling,
+            money_saving: this.currentMoneyState.money_saving || null,
+            money_impulse: this.currentMoneyState.money_impulse || null,
+            money_note: (this.currentMoneyState.money_note || '').slice(0, 120),
+            money_alignment_score: feeling === 'aligned' ? 1 : feeling === 'misaligned' ? -1 : 0,
+            money: {
+                feeling,
+                saving: this.currentMoneyState.money_saving || null,
+                impulse: this.currentMoneyState.money_impulse || null,
+                note: (this.currentMoneyState.money_note || '').slice(0, 120)
+            }
+        };
     }
 
     switchTab(tabName) {
@@ -991,9 +1066,9 @@ export class Modal {
                 // sleep: this.elements.metrics.sleep.value || 0, // 已替换为睡眠滑块
                 exercise: (this.elements.metrics.exercise && parseInt(this.elements.metrics.exercise.value)) || 0,
                 reading: (this.elements.metrics.reading && parseInt(this.elements.metrics.reading.value)) || 0,
-                wealth: (this.elements.metrics.wealth && parseFloat(this.elements.metrics.wealth.value)) || 0,
                 social: (this.elements.metrics.social && this.elements.metrics.social.value) || ''
             },
+            ...this.buildMoneyData(),
             sleepData: this.sleepSelector ? this.sleepSelector.getValue() : {},
             three_good_things: this.elements.goodThings.map(el => el.value).filter(v => v),
             journal: this.elements.journalInput.value,
@@ -1036,6 +1111,12 @@ export class Modal {
             log: {
                 keywords: cleanedData.keywords,
                 metrics: cleanedData.metrics,
+                money_feeling: cleanedData.money_feeling,
+                money_saving: cleanedData.money_saving,
+                money_impulse: cleanedData.money_impulse,
+                money_note: cleanedData.money_note,
+                money_alignment_score: cleanedData.money_alignment_score,
+                money: cleanedData.money,
                 sleepData: cleanedData.sleepData,
                 three_good_things: cleanedData.three_good_things,
                 journal: cleanedData.journal,
@@ -1145,9 +1226,9 @@ export class Modal {
             metrics: {
                 exercise: (this.elements.metrics.exercise && parseInt(this.elements.metrics.exercise.value)) || 0,
                 reading: (this.elements.metrics.reading && parseInt(this.elements.metrics.reading.value)) || 0,
-                wealth: (this.elements.metrics.wealth && parseFloat(this.elements.metrics.wealth.value)) || 0,
                 social: (this.elements.metrics.social && this.elements.metrics.social.value) || ''
             },
+            ...this.buildMoneyData(),
             sleepData: this.sleepSelector ? this.sleepSelector.getValue() : {},
             three_good_things: this.elements.goodThings.map(el => el.value).filter(v => v),
             journal: this.elements.journalInput.value,
@@ -1179,6 +1260,17 @@ export class Modal {
         this.modalState.log = {
             keywords: fallbackRecord.keywords || [],
             metrics: fallbackRecord.metrics || {},
+            money_feeling: fallbackRecord.money_feeling || fallbackRecord.money?.feeling || null,
+            money_saving: fallbackRecord.money_saving || fallbackRecord.money?.saving || null,
+            money_impulse: fallbackRecord.money_impulse || fallbackRecord.money?.impulse || null,
+            money_note: fallbackRecord.money_note || fallbackRecord.money?.note || '',
+            money_alignment_score: fallbackRecord.money_alignment_score ?? 0,
+            money: fallbackRecord.money || {
+                feeling: fallbackRecord.money_feeling || null,
+                saving: fallbackRecord.money_saving || null,
+                impulse: fallbackRecord.money_impulse || null,
+                note: fallbackRecord.money_note || ''
+            },
             sleepData: fallbackRecord.sleepData || {},
             three_good_things: fallbackRecord.three_good_things || [],
             journal: fallbackRecord.journal || '',

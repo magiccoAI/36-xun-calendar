@@ -21,6 +21,15 @@ export class Modal {
             money_impulse: null,
             money_note: ''
         };
+        this.moneyWisdomQuotes = [
+            '“真正的财富是你不必花掉的钱，它换来了选择权。”',
+            '“用金钱购买时间，是把注意力还给真正重要的事。”',
+            '“储蓄不是克制快乐，而是为未来保留自由。”',
+            '“如果花费让你更专注、更健康，它可能是在增值而非消耗。”',
+            '“长期主义的每一笔投入，都在悄悄降低未来焦虑。”',
+            '“财富不仅是收入，更是你与欲望之间的距离。”',
+            '“钱是工具，不是身份；掌控感比数字更重要。”'
+        ];
         this.modalState = {
             status: {},
             log: {}
@@ -72,6 +81,7 @@ export class Modal {
             },
             moneyStateButtons: document.querySelectorAll('.money-state-button'),
             moneyNote: document.getElementById('money-note'),
+            moneyQuote: document.getElementById('money-quote'),
             goodThings: [
                 document.getElementById('good-thing-1'),
                 document.getElementById('good-thing-2'),
@@ -485,12 +495,17 @@ export class Modal {
             btn.classList.toggle('selected', btn.dataset.moneyValue === value);
         });
         this.currentMoneyState[groupName] = value || null;
+        this.refreshMoneyQuote();
         this.syncLogStateFromUI();
     }
 
     resetMoneyStateUI() {
         this.elements.moneyStateButtons.forEach(btn => btn.classList.remove('selected'));
         if (this.elements.moneyNote) this.elements.moneyNote.value = '';
+        if (this.elements.moneyQuote) {
+            this.elements.moneyQuote.classList.add('hidden');
+            this.elements.moneyQuote.textContent = '';
+        }
     }
 
     hydrateMoneyState(data = {}) {
@@ -508,16 +523,42 @@ export class Modal {
             btn.classList.toggle('selected', this.currentMoneyState[group] === value);
         });
         if (this.elements.moneyNote) this.elements.moneyNote.value = this.currentMoneyState.money_note;
+        this.refreshMoneyQuote();
+    }
+
+    refreshMoneyQuote() {
+        if (!this.elements.moneyQuote) return;
+        const requiredSelections = [
+            this.currentMoneyState.money_feeling,
+            this.currentMoneyState.money_saving,
+            this.currentMoneyState.money_impulse
+        ];
+        const hasCompletedCoreSelection = requiredSelections.every(Boolean);
+        if (!hasCompletedCoreSelection) {
+            this.elements.moneyQuote.classList.add('hidden');
+            this.elements.moneyQuote.textContent = '';
+            return;
+        }
+
+        const quote = this.moneyWisdomQuotes[Math.floor(Math.random() * this.moneyWisdomQuotes.length)];
+        this.elements.moneyQuote.textContent = `🎁 随机锦囊：${quote}`;
+        this.elements.moneyQuote.classList.remove('hidden');
     }
 
     buildMoneyData() {
         const feeling = this.currentMoneyState.money_feeling || null;
+        const moneyScoreByAwareness = {
+            in_rhythm: 1,
+            windfall: 1,
+            flowing: 0,
+            inertia: -1
+        };
         return {
             money_feeling: feeling,
             money_saving: this.currentMoneyState.money_saving || null,
             money_impulse: this.currentMoneyState.money_impulse || null,
             money_note: (this.currentMoneyState.money_note || '').slice(0, 120),
-            money_alignment_score: feeling === 'aligned' ? 1 : feeling === 'misaligned' ? -1 : 0,
+            money_alignment_score: moneyScoreByAwareness[this.currentMoneyState.money_saving] ?? 0,
             money: {
                 feeling,
                 saving: this.currentMoneyState.money_saving || null,

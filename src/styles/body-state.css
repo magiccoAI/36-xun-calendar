@@ -61,4 +61,29 @@
         color: #334155;
         box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.15);
     }
+
+    .money-state-button.selected[data-money-value="long_term"] {
+        background: #E8F7EC;
+        border-color: #86D1A4;
+        color: #24553A;
+    }
+
+    .money-state-button.selected[data-money-value="buying_time"] {
+        background: #ECF4FF;
+        border-color: #A8C5F7;
+        color: #294B7A;
+    }
+
+    .money-state-button.selected[data-money-value="inertia"],
+    .money-state-button.selected[data-money-value="scarcity"] {
+        background: #F1F3F5;
+        border-color: #C4CCD4;
+        color: #495460;
+    }
+
+    .money-state-button.selected[data-money-value="abundant"] {
+        background: #F4EEFF;
+        border-color: #C9B2F8;
+        color: #5D418A;
+    }
 }

@@ -1145,38 +1145,41 @@
                         <label for="metric-reading" class="text-xs text-gray-500">阅读 (min)</label>
                         <input type="number" id="metric-reading" class="w-24 sm:w-28 p-2 border border-white/70 rounded-lg text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-200">
                     </div>
-                    <div class="bg-white/55 rounded-xl px-3 py-3 border border-white/60 space-y-3">
-                        <h4 class="text-[15px] font-semibold text-gray-700">💰 今日金钱观察</h4>
-                        <p class="text-xs text-gray-500">观察金钱使用的状态，而不是记录金额。轻轻点几下即可完成记录。</p>
+                    <div class="bg-white/55 rounded-xl px-3 py-3 border border-white/60 space-y-4">
+                        <h4 class="text-[15px] font-semibold text-gray-700">💰 今日金钱觉察</h4>
+                        <p id="money-intro" class="text-xs text-gray-500 transition-all duration-700">今天的钱，投向了什么样的生活？哪些人、哪些事值得我投入？</p>
 
                         <div class="space-y-2">
-                            <p class="text-xs text-gray-600">今天的金钱使用是否符合预期？</p>
+                            <p class="text-xs text-gray-600">不看数额，看金钱在今天扮演的角色。</p>
                             <div class="flex flex-wrap gap-2" id="money-feeling-group">
-                                <button type="button" class="money-state-button" data-money-group="money_feeling" data-money-value="aligned">符合预期</button>
-                                <button type="button" class="money-state-button" data-money-group="money_feeling" data-money-value="neutral">基本符合</button>
-                                <button type="button" class="money-state-button" data-money-group="money_feeling" data-money-value="misaligned">不太符合</button>
+                                <button type="button" class="money-state-button" data-money-group="money_feeling" data-money-value="long_term">🌱 长期主义</button>
+                                <button type="button" class="money-state-button" data-money-group="money_feeling" data-money-value="emotional">☕️ 情绪价值</button>
+                                <button type="button" class="money-state-button" data-money-group="money_feeling" data-money-value="maintenance">🏠 维持系统</button>
+                                <button type="button" class="money-state-button" data-money-group="money_feeling" data-money-value="buying_time">🛡️ 购买时间</button>
                             </div>
                         </div>
 
                         <div class="space-y-2">
-                            <p class="text-xs text-gray-600">今天有没有为未来目标储蓄？</p>
+                            <p class="text-xs text-gray-600">对金钱使用的觉察是……</p>
                             <div class="flex flex-wrap gap-2" id="money-saving-group">
-                                <button type="button" class="money-state-button" data-money-group="money_saving" data-money-value="saved">有储蓄</button>
-                                <button type="button" class="money-state-button" data-money-group="money_saving" data-money-value="none">未储蓄</button>
-                                <button type="button" class="money-state-button" data-money-group="money_saving" data-money-value="planned">计划中</button>
+                                <button type="button" class="money-state-button" data-money-group="money_saving" data-money-value="in_rhythm">⚖️ 节奏之中</button>
+                                <button type="button" class="money-state-button" data-money-group="money_saving" data-money-value="flowing">🌊 随性流淌</button>
+                                <button type="button" class="money-state-button" data-money-group="money_saving" data-money-value="inertia">🕳️ 盲目惯性</button>
+                                <button type="button" class="money-state-button" data-money-group="money_saving" data-money-value="windfall">💰 意外之获</button>
                             </div>
                         </div>
 
                         <div class="space-y-2">
-                            <p class="text-xs text-gray-600">今天的消费是否符合计划？</p>
+                            <p class="text-xs text-gray-600">此刻我与金钱的关系是……</p>
                             <div class="flex flex-wrap gap-2" id="money-impulse-group">
-                                <button type="button" class="money-state-button" data-money-group="money_impulse" data-money-value="planned">按计划消费</button>
-                                <button type="button" class="money-state-button" data-money-group="money_impulse" data-money-value="routine">日常消费</button>
-                                <button type="button" class="money-state-button" data-money-group="money_impulse" data-money-value="unplanned">偏计划外消费</button>
+                                <button type="button" class="money-state-button" data-money-group="money_impulse" data-money-value="abundant">🕊️ 自由/丰盛</button>
+                                <button type="button" class="money-state-button" data-money-group="money_impulse" data-money-value="balanced">🤝 合作/知足</button>
+                                <button type="button" class="money-state-button" data-money-group="money_impulse" data-money-value="scarcity">⛓️ 紧绷/匮乏</button>
                             </div>
                         </div>
 
-                        <textarea id="money-note" maxlength="120" rows="2" class="w-full p-2 border border-white/70 rounded-lg text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="可以写一句今天的金钱体验（可选）"></textarea>
+                        <textarea id="money-note" maxlength="120" rows="2" class="w-full p-2 border border-white/70 rounded-lg text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="(可选) 一句金钱体悟或体验..."></textarea>
+                        <p id="money-quote" class="hidden text-xs text-amber-700/90 bg-amber-50/80 border border-amber-100 rounded-lg px-3 py-2"></p>
                     </div>
                     <div class="flex items-center justify-between gap-3 bg-white/55 rounded-xl px-3 py-2 border border-white/60">
                         <label for="metric-social" class="text-xs text-gray-500">社交/备注</label>

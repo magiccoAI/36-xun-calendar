@@ -16,11 +16,21 @@ export class Modal {
         this.currentTab = 'checkin';
         this.currentBodyCondition = null;
         this.currentMoneyState = {
-            money_feeling: null,
+            money_feeling: [],
             money_saving: null,
             money_impulse: null,
             money_note: ''
         };
+        this.moneyIntroPool = [
+            '今天的钱，投向了什么样的生活？哪些人、哪些事值得我投入？',
+            '每一笔花费都在塑造生活方式：我今天在支持怎样的自己？'
+        ];
+        this.moneyReflectionPrompts = [
+            '如果今天是我理想生活的一天，这笔钱花得值吗？',
+            '今天哪个支出让我感觉离“想成为的人”更近了一步？',
+            '今天有什么财富是金钱买不到的？'
+        ];
+        this.moneyIntroTimer = null;
         this.modalState = {
             status: {},
             log: {}
@@ -71,7 +81,9 @@ export class Modal {
                 social: document.getElementById('metric-social')
             },
             moneyStateButtons: document.querySelectorAll('.money-state-button'),
+            moneyIntro: document.getElementById('money-intro'),
             moneyNote: document.getElementById('money-note'),
+            moneyQuote: document.getElementById('money-quote'),
             goodThings: [
                 document.getElementById('good-thing-1'),
                 document.getElementById('good-thing-2'),
@@ -332,6 +344,7 @@ export class Modal {
         this.resetSaveFeedback();
         this.clearAutoProgressionTimer();
         this.hideAutoProgressToast();
+        this.stopMoneyIntroRotation();
         this.panel.classList.remove('scale-100');
         this.panel.classList.add('scale-95');
 
@@ -367,7 +380,7 @@ export class Modal {
         this.elements.bodyConditionNote.value = '';
         this.currentBodyCondition = null;
         this.currentMoneyState = {
-            money_feeling: null,
+            money_feeling: [],
             money_saving: null,
             money_impulse: null,
             money_note: ''
@@ -393,6 +406,7 @@ export class Modal {
         this.elements.goodThings.forEach(el => el.value = '');
         this.elements.journalInput.value = '';
         this.elements.habitChecks.forEach(el => el.checked = false);
+        this.stopMoneyIntroRotation();
         this.resetMoneyStateUI();
         
         // Clear tags selection visual
@@ -480,23 +494,52 @@ export class Modal {
 
     selectMoneyState(groupName, value) {
         if (!groupName) return;
-        this.elements.moneyStateButtons.forEach(btn => {
-            if (btn.dataset.moneyGroup !== groupName) return;
-            btn.classList.toggle('selected', btn.dataset.moneyValue === value);
-        });
-        this.currentMoneyState[groupName] = value || null;
+        if (groupName === 'money_feeling') {
+            const selectedValues = Array.isArray(this.currentMoneyState.money_feeling)
+                ? [...this.currentMoneyState.money_feeling]
+                : [];
+            const existingIndex = selectedValues.indexOf(value);
+            if (existingIndex >= 0) {
+                selectedValues.splice(existingIndex, 1);
+            } else {
+                selectedValues.push(value);
+            }
+            this.currentMoneyState.money_feeling = selectedValues;
+            this.elements.moneyStateButtons.forEach(btn => {
+                if (btn.dataset.moneyGroup !== groupName) return;
+                btn.classList.toggle('selected', selectedValues.includes(btn.dataset.moneyValue));
+            });
+        } else {
+            this.elements.moneyStateButtons.forEach(btn => {
+                if (btn.dataset.moneyGroup !== groupName) return;
+                btn.classList.toggle('selected', btn.dataset.moneyValue === value);
+            });
+            this.currentMoneyState[groupName] = value || null;
+        }
+        this.refreshMoneyQuote();
         this.syncLogStateFromUI();
     }
 
     resetMoneyStateUI() {
         this.elements.moneyStateButtons.forEach(btn => btn.classList.remove('selected'));
         if (this.elements.moneyNote) this.elements.moneyNote.value = '';
+        if (this.elements.moneyQuote) {
+            this.elements.moneyQuote.classList.add('hidden');
+            this.elements.moneyQuote.textContent = '';
+        }
+        if (this.elements.moneyIntro && this.moneyIntroPool.length) {
+            this.elements.moneyIntro.textContent = this.moneyIntroPool[0];
+        }
     }
 
     hydrateMoneyState(data = {}) {
         const moneyData = data.money || {};
+        const rawFeeling = moneyData.feeling ?? data.money_feeling ?? [];
+        const normalizedFeeling = Array.isArray(rawFeeling)
+            ? rawFeeling.filter(Boolean)
+            : (rawFeeling ? [rawFeeling] : []);
         this.currentMoneyState = {
-            money_feeling: moneyData.feeling || data.money_feeling || null,
+            money_feeling: normalizedFeeling,
             money_saving: moneyData.saving || data.money_saving || null,
             money_impulse: moneyData.impulse || data.money_impulse || null,
             money_note: moneyData.note || data.money_note || ''
@@ -505,19 +548,79 @@ export class Modal {
         this.elements.moneyStateButtons.forEach(btn => {
             const group = btn.dataset.moneyGroup;
             const value = btn.dataset.moneyValue;
+            if (group === 'money_feeling') {
+                btn.classList.toggle('selected', normalizedFeeling.includes(value));
+                return;
+            }
             btn.classList.toggle('selected', this.currentMoneyState[group] === value);
         });
         if (this.elements.moneyNote) this.elements.moneyNote.value = this.currentMoneyState.money_note;
+        this.refreshMoneyQuote();
+        this.startMoneyIntroRotation();
+    }
+
+    refreshMoneyQuote() {
+        if (!this.elements.moneyQuote) return;
+        const requiredSelections = [
+            Array.isArray(this.currentMoneyState.money_feeling) && this.currentMoneyState.money_feeling.length > 0,
+            this.currentMoneyState.money_saving,
+            this.currentMoneyState.money_impulse
+        ];
+        const hasCompletedCoreSelection = requiredSelections.every(Boolean);
+        if (!hasCompletedCoreSelection) {
+            this.elements.moneyQuote.classList.add('hidden');
+            this.elements.moneyQuote.textContent = '';
+            return;
+        }
+
+        const prompt = this.moneyReflectionPrompts[Math.floor(Math.random() * this.moneyReflectionPrompts.length)];
+        this.elements.moneyQuote.textContent = `📝 价值留白：${prompt}`;
+        this.elements.moneyQuote.classList.remove('hidden');
+    }
+
+    startMoneyIntroRotation() {
+        if (!this.elements.moneyIntro || !this.moneyIntroPool.length) return;
+        this.stopMoneyIntroRotation();
+        let currentIndex = 0;
+        this.elements.moneyIntro.textContent = this.moneyIntroPool[currentIndex];
+        this.elements.moneyIntro.classList.add('animate-pulse');
+        this.moneyIntroTimer = setInterval(() => {
+            currentIndex = (currentIndex + 1) % this.moneyIntroPool.length;
+            this.elements.moneyIntro.classList.add('opacity-70');
+            setTimeout(() => {
+                if (!this.elements.moneyIntro) return;
+                this.elements.moneyIntro.textContent = this.moneyIntroPool[currentIndex];
+                this.elements.moneyIntro.classList.remove('opacity-70');
+            }, 220);
+        }, 4000);
+    }
+
+    stopMoneyIntroRotation() {
+        if (this.moneyIntroTimer) {
+            clearInterval(this.moneyIntroTimer);
+            this.moneyIntroTimer = null;
+        }
+        if (this.elements && this.elements.moneyIntro) {
+            this.elements.moneyIntro.classList.remove('animate-pulse', 'opacity-70');
+        }
     }
 
     buildMoneyData() {
-        const feeling = this.currentMoneyState.money_feeling || null;
+        const feeling = Array.isArray(this.currentMoneyState.money_feeling)
+            ? this.currentMoneyState.money_feeling
+            : (this.currentMoneyState.money_feeling ? [this.currentMoneyState.money_feeling] : []);
+        const moneyScoreByAwareness = {
+            in_rhythm: 1,
+            windfall: 1,
+            flowing: 0,
+            inertia: -1
+        };
         return {
             money_feeling: feeling,
             money_saving: this.currentMoneyState.money_saving || null,
             money_impulse: this.currentMoneyState.money_impulse || null,
             money_note: (this.currentMoneyState.money_note || '').slice(0, 120),
-            money_alignment_score: feeling === 'aligned' ? 1 : feeling === 'misaligned' ? -1 : 0,
+            money_alignment_score: moneyScoreByAwareness[this.currentMoneyState.money_saving] ?? 0,
             money: {
                 feeling,
                 saving: this.currentMoneyState.money_saving || null,

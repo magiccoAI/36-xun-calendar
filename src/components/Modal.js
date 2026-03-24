@@ -326,6 +326,8 @@ export class Modal {
     }
 
     close() {
+        if (this.modal.classList.contains('hidden')) return;
+
         document.removeEventListener('keydown', this.handleKeydown);
         this.resetSaveFeedback();
         this.clearAutoProgressionTimer();
@@ -333,8 +335,11 @@ export class Modal {
         this.panel.classList.remove('scale-100');
         this.panel.classList.add('scale-95');
 
+        let closed = false;
         const handleTransitionEnd = (event) => {
+            if (closed) return;
             if (event && event.target !== this.panel) return;
+            closed = true;
             this.modal.classList.add('hidden');
             this.modal.classList.remove('flex');
             this.panel.removeEventListener('transitionend', handleTransitionEnd);
@@ -344,6 +349,8 @@ export class Modal {
         };
 
         this.panel.addEventListener('transitionend', handleTransitionEnd);
+        // Fallback: in some environments transitionend does not fire reliably.
+        setTimeout(() => handleTransitionEnd(), 320);
     }
 
 

@@ -16,20 +16,21 @@ export class Modal {
         this.currentTab = 'checkin';
         this.currentBodyCondition = null;
         this.currentMoneyState = {
-            money_feeling: null,
+            money_feeling: [],
             money_saving: null,
             money_impulse: null,
             money_note: ''
         };
-        this.moneyWisdomQuotes = [
-            '“真正的财富是你不必花掉的钱，它换来了选择权。”',
-            '“用金钱购买时间，是把注意力还给真正重要的事。”',
-            '“储蓄不是克制快乐，而是为未来保留自由。”',
-            '“如果花费让你更专注、更健康，它可能是在增值而非消耗。”',
-            '“长期主义的每一笔投入，都在悄悄降低未来焦虑。”',
-            '“财富不仅是收入，更是你与欲望之间的距离。”',
-            '“钱是工具，不是身份；掌控感比数字更重要。”'
+        this.moneyIntroPool = [
+            '今天的钱，投向了什么样的生活？哪些人、哪些事值得我投入？',
+            '每一笔花费都在塑造生活方式：我今天在支持怎样的自己？'
         ];
+        this.moneyReflectionPrompts = [
+            '如果今天是我理想生活的一天，这笔钱花得值吗？',
+            '今天哪个支出让我感觉离“想成为的人”更近了一步？',
+            '今天有什么财富是金钱买不到的？'
+        ];
+        this.moneyIntroTimer = null;
         this.modalState = {
             status: {},
             log: {}
@@ -80,6 +81,7 @@ export class Modal {
                 social: document.getElementById('metric-social')
             },
             moneyStateButtons: document.querySelectorAll('.money-state-button'),
+            moneyIntro: document.getElementById('money-intro'),
             moneyNote: document.getElementById('money-note'),
             moneyQuote: document.getElementById('money-quote'),
             goodThings: [
@@ -342,6 +344,7 @@ export class Modal {
         this.resetSaveFeedback();
         this.clearAutoProgressionTimer();
         this.hideAutoProgressToast();
+        this.stopMoneyIntroRotation();
         this.panel.classList.remove('scale-100');
         this.panel.classList.add('scale-95');
 
@@ -377,7 +380,7 @@ export class Modal {
         this.elements.bodyConditionNote.value = '';
         this.currentBodyCondition = null;
         this.currentMoneyState = {
-            money_feeling: null,
+            money_feeling: [],
             money_saving: null,
             money_impulse: null,
             money_note: ''
@@ -403,6 +406,7 @@ export class Modal {
         this.elements.goodThings.forEach(el => el.value = '');
         this.elements.journalInput.value = '';
         this.elements.habitChecks.forEach(el => el.checked = false);
+        this.stopMoneyIntroRotation();
         this.resetMoneyStateUI();
         
         // Clear tags selection visual
@@ -490,11 +494,28 @@ export class Modal {
 
     selectMoneyState(groupName, value) {
         if (!groupName) return;
-        this.elements.moneyStateButtons.forEach(btn => {
-            if (btn.dataset.moneyGroup !== groupName) return;
-            btn.classList.toggle('selected', btn.dataset.moneyValue === value);
-        });
-        this.currentMoneyState[groupName] = value || null;
+        if (groupName === 'money_feeling') {
+            const selectedValues = Array.isArray(this.currentMoneyState.money_feeling)
+                ? [...this.currentMoneyState.money_feeling]
+                : [];
+            const existingIndex = selectedValues.indexOf(value);
+            if (existingIndex >= 0) {
+                selectedValues.splice(existingIndex, 1);
+            } else {
+                selectedValues.push(value);
+            }
+            this.currentMoneyState.money_feeling = selectedValues;
+            this.elements.moneyStateButtons.forEach(btn => {
+                if (btn.dataset.moneyGroup !== groupName) return;
+                btn.classList.toggle('selected', selectedValues.includes(btn.dataset.moneyValue));
+            });
+        } else {
+            this.elements.moneyStateButtons.forEach(btn => {
+                if (btn.dataset.moneyGroup !== groupName) return;
+                btn.classList.toggle('selected', btn.dataset.moneyValue === value);
+            });
+            this.currentMoneyState[groupName] = value || null;
+        }
         this.refreshMoneyQuote();
         this.syncLogStateFromUI();
     }
@@ -506,12 +527,19 @@ export class Modal {
             this.elements.moneyQuote.classList.add('hidden');
             this.elements.moneyQuote.textContent = '';
         }
+        if (this.elements.moneyIntro && this.moneyIntroPool.length) {
+            this.elements.moneyIntro.textContent = this.moneyIntroPool[0];
+        }
     }
 
     hydrateMoneyState(data = {}) {
         const moneyData = data.money || {};
+        const rawFeeling = moneyData.feeling ?? data.money_feeling ?? [];
+        const normalizedFeeling = Array.isArray(rawFeeling)
+            ? rawFeeling.filter(Boolean)
+            : (rawFeeling ? [rawFeeling] : []);
         this.currentMoneyState = {
-            money_feeling: moneyData.feeling || data.money_feeling || null,
+            money_feeling: normalizedFeeling,
             money_saving: moneyData.saving || data.money_saving || null,
             money_impulse: moneyData.impulse || data.money_impulse || null,
             money_note: moneyData.note || data.money_note || ''
@@ -520,16 +548,21 @@ export class Modal {
         this.elements.moneyStateButtons.forEach(btn => {
             const group = btn.dataset.moneyGroup;
             const value = btn.dataset.moneyValue;
+            if (group === 'money_feeling') {
+                btn.classList.toggle('selected', normalizedFeeling.includes(value));
+                return;
+            }
             btn.classList.toggle('selected', this.currentMoneyState[group] === value);
         });
         if (this.elements.moneyNote) this.elements.moneyNote.value = this.currentMoneyState.money_note;
         this.refreshMoneyQuote();
+        this.startMoneyIntroRotation();
     }
 
     refreshMoneyQuote() {
         if (!this.elements.moneyQuote) return;
         const requiredSelections = [
-            this.currentMoneyState.money_feeling,
+            Array.isArray(this.currentMoneyState.money_feeling) && this.currentMoneyState.money_feeling.length > 0,
             this.currentMoneyState.money_saving,
             this.currentMoneyState.money_impulse
         ];
@@ -540,13 +573,42 @@ export class Modal {
             return;
         }
 
-        const quote = this.moneyWisdomQuotes[Math.floor(Math.random() * this.moneyWisdomQuotes.length)];
-        this.elements.moneyQuote.textContent = `🎁 随机锦囊：${quote}`;
+        const prompt = this.moneyReflectionPrompts[Math.floor(Math.random() * this.moneyReflectionPrompts.length)];
+        this.elements.moneyQuote.textContent = `📝 价值留白：${prompt}`;
         this.elements.moneyQuote.classList.remove('hidden');
     }
 
+    startMoneyIntroRotation() {
+        if (!this.elements.moneyIntro || !this.moneyIntroPool.length) return;
+        this.stopMoneyIntroRotation();
+        let currentIndex = 0;
+        this.elements.moneyIntro.textContent = this.moneyIntroPool[currentIndex];
+        this.elements.moneyIntro.classList.add('animate-pulse');
+        this.moneyIntroTimer = setInterval(() => {
+            currentIndex = (currentIndex + 1) % this.moneyIntroPool.length;
+            this.elements.moneyIntro.classList.add('opacity-70');
+            setTimeout(() => {
+                if (!this.elements.moneyIntro) return;
+                this.elements.moneyIntro.textContent = this.moneyIntroPool[currentIndex];
+                this.elements.moneyIntro.classList.remove('opacity-70');
+            }, 220);
+        }, 4000);
+    }
+
+    stopMoneyIntroRotation() {
+        if (this.moneyIntroTimer) {
+            clearInterval(this.moneyIntroTimer);
+            this.moneyIntroTimer = null;
+        }
+        if (this.elements && this.elements.moneyIntro) {
+            this.elements.moneyIntro.classList.remove('animate-pulse', 'opacity-70');
+        }
+    }
+
     buildMoneyData() {
-        const feeling = this.currentMoneyState.money_feeling || null;
+        const feeling = Array.isArray(this.currentMoneyState.money_feeling)
+            ? this.currentMoneyState.money_feeling
+            : (this.currentMoneyState.money_feeling ? [this.currentMoneyState.money_feeling] : []);
         const moneyScoreByAwareness = {
             in_rhythm: 1,
             windfall: 1,

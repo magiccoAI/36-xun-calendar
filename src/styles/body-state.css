@@ -68,6 +68,18 @@
         color: #24553A;
     }
 
+    .money-state-button.selected[data-money-value="emotional"] {
+        background: #FFF4EA;
+        border-color: #F8CAA3;
+        color: #7A4A2D;
+    }
+
+    .money-state-button.selected[data-money-value="maintenance"] {
+        background: #EEF3FF;
+        border-color: #BED0F5;
+        color: #3C4B73;
+    }
+
     .money-state-button.selected[data-money-value="buying_time"] {
         background: #ECF4FF;
         border-color: #A8C5F7;

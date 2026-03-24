@@ -184,9 +184,10 @@ export function getRecordsByCurrentXun(targetDate = null) {
     const state = store.getState();
     const periods = Calendar.getXunPeriods(CONFIG.YEAR);
     const selectedXunIndex = state.viewedXunIndex;
-    const dateBasedXun = targetDate ? Calendar.getXunPeriodByDateStr(periods, Calendar.formatLocalDate(targetDate)) : null;
+    const selectedDateStr = targetDate ? Calendar.formatLocalDate(targetDate) : null;
+    const dateBasedXun = selectedDateStr ? Calendar.getXunPeriodByDateStr(periods, selectedDateStr) : null;
     const currentXun = Calendar.getCurrentXun(periods);
-    const targetXunIndex = dateBasedXun?.index || selectedXunIndex || currentXun?.index || 1;
+    const targetXunIndex = selectedXunIndex || dateBasedXun?.index || currentXun?.index || 1;
     const targetPeriod = periods.find((period) => period.index === targetXunIndex) || periods[0];
 
     const startDate = new Date(
@@ -203,11 +204,22 @@ export function getRecordsByCurrentXun(targetDate = null) {
     );
 
     const records = loadDailyRecords();
+    const xunStartDate = Calendar.formatLocalDate(startDate);
+    const xunEndDate = Calendar.formatLocalDate(endDate);
+
+    console.log('🧭 Xun Selection Debug:', {
+        selectedDate: selectedDateStr,
+        calculatedXunIndex: targetXunIndex,
+        xunStartDate,
+        xunEndDate
+    });
+
     const rows = Object.entries(records)
         .map(([date, record]) => {
             const parsedDate = parseDateStringToLocalNoon(date);
             if (!parsedDate || parsedDate < startDate || parsedDate > endDate) return null;
-            const normalized = normalizeRecord(record || {});
+            const normalized = normalizeRecord(record || {}, date);
+            if (!normalized) return null;
             return {
                 date,
                 sleepDuration: normalized.sleepDuration,
@@ -217,6 +229,14 @@ export function getRecordsByCurrentXun(targetDate = null) {
         })
         .filter(Boolean)
         .sort((a, b) => a.date.localeCompare(b.date));
+
+    console.log('🧪 Xun Filter Debug:', {
+        selectedDate: selectedDateStr,
+        calculatedXunIndex: targetXunIndex,
+        xunStartDate,
+        xunEndDate,
+        filteredRecordsLength: rows.length
+    });
 
     return {
         xunIndex: targetXunIndex,

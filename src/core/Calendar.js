@@ -1,6 +1,26 @@
 import { CONFIG } from '../config.js';
 
 export const Calendar = {
+    parseDateStrToLocalDate(dateStr, hour = 12) {
+        try {
+            if (!dateStr || typeof dateStr !== 'string') {
+                throw new Error('Invalid date string');
+            }
+            const [year, month, day] = dateStr.split('-').map(Number);
+            if (!year || !month || !day) {
+                throw new Error(`Unable to parse date string: ${dateStr}`);
+            }
+            const localDate = new Date(year, month - 1, day, hour, 0, 0, 0);
+            if (Number.isNaN(localDate.getTime())) {
+                throw new Error(`Invalid local date: ${dateStr}`);
+            }
+            return localDate;
+        } catch (error) {
+            console.error('Calendar.parseDateStrToLocalDate error:', error, { dateStr });
+            return null;
+        }
+    },
+
     pad2(n) {
         try {
             return String(n).padStart(2, '0');
@@ -248,8 +268,8 @@ export const Calendar = {
                 return null;
             }
             
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) {
+            const d = this.parseDateStrToLocalDate(dateStr);
+            if (!d || isNaN(d.getTime())) {
                 console.warn('Calendar.getXunPeriodByDateStr: invalid date', dateStr);
                 return null;
             }

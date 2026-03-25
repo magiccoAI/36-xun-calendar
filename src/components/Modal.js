@@ -4,6 +4,7 @@ import { Calendar } from '../core/Calendar.js';
 import { CONFIG, DATA_VALIDATION_RULES, DAY_RECORD_SCHEMA } from '../config.js';
 import { CompleteSleepModule } from './CompleteSleepModule.js';
 import { BodyStateSelector } from './BodyStateSelector.js';
+import { MoneyAwarenessModule } from './MoneyAwarenessModule.js';
 
 export class Modal {
     constructor(modalId, onSave) {
@@ -13,6 +14,7 @@ export class Modal {
         this.currentDateStr = null;
         this.sleepSelector = null;
         this.bodyStateSelector = null;
+        this.moneyAwarenessModule = null;
         this.currentTab = 'checkin';
         this.currentBodyCondition = null;
         this.currentMoneyState = {
@@ -293,6 +295,7 @@ export class Modal {
         
         this.initSleepSelector(data.sleepData || {});
         this.initBodyStateSelector(data.body_state || null);
+        this.initMoneyAwarenessModule(data.money_awareness || null);
         this.setBodyCondition(data.body_condition || null);
 
         // Good Things
@@ -425,6 +428,11 @@ export class Modal {
         if (this.bodyStateSelector) {
             this.bodyStateSelector.reset();
         }
+
+        // Reset money awareness module
+        if (this.moneyAwarenessModule) {
+            this.moneyAwarenessModule.reset();
+        }
     }
 
     initSleepSelector(savedSleepData = {}) {
@@ -469,6 +477,21 @@ export class Modal {
 
         if (savedBodyState) {
             this.bodyStateSelector.setValue(savedBodyState);
+        }
+    }
+
+    initMoneyAwarenessModule(savedMoneyData = null) {
+        if (!document.getElementById('money-awareness-module')) return;
+
+        if (!this.moneyAwarenessModule) {
+            this.moneyAwarenessModule = new MoneyAwarenessModule(this);
+        }
+
+        if (savedMoneyData) {
+            this.moneyAwarenessModule.setData(savedMoneyData);
+        } else {
+            // 尝试加载草稿
+            this.moneyAwarenessModule.loadDraft();
         }
     }
 
@@ -606,6 +629,10 @@ export class Modal {
     }
 
     buildMoneyData() {
+        // 获取新的MoneyAwarenessModule数据
+        const moneyAwarenessData = this.moneyAwarenessModule ? this.moneyAwarenessModule.getData() : {};
+        
+        // 保持向后兼容的旧数据格式
         const feeling = Array.isArray(this.currentMoneyState.money_feeling)
             ? this.currentMoneyState.money_feeling
             : (this.currentMoneyState.money_feeling ? [this.currentMoneyState.money_feeling] : []);
@@ -615,7 +642,12 @@ export class Modal {
             flowing: 0,
             inertia: -1
         };
+
         return {
+            // 新的金钱观察数据
+            money_awareness: moneyAwarenessData,
+            
+            // 保持向后兼容的旧数据格式
             money_feeling: feeling,
             money_saving: this.currentMoneyState.money_saving || null,
             money_impulse: this.currentMoneyState.money_impulse || null,

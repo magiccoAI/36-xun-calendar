@@ -24,9 +24,6 @@ export class MoneyAwarenessModule {
             module: document.getElementById('money-awareness-module'),
             insightInput: document.getElementById('money-insight-input'),
             insightCount: document.getElementById('money-insight-count'),
-            suggestions: document.querySelectorAll('.insight-suggestion-btn'),
-            tagContainer: document.getElementById('money-tag-container'),
-            tag: document.getElementById('money-tag'),
             buttonGrids: document.querySelectorAll('.money-button-grid'),
             tabButtons: document.querySelectorAll('.money-tab-btn'),
             tabContents: document.querySelectorAll('.money-tab-content'),
@@ -34,7 +31,9 @@ export class MoneyAwarenessModule {
             skipAllBtn: document.getElementById('money-skip-all'),
             skipBtns: document.querySelectorAll('.money-skip-btn'),
             nextBtns: document.querySelectorAll('.money-next-btn'),
-            completeBtn: document.querySelector('.money-complete-btn')
+            completeBtn: document.querySelector('.money-complete-btn'),
+            identityConfirmation: document.getElementById('identity-confirmation'),
+            identityConfirmationText: document.getElementById('identity-confirmation-text')
         };
     }
 
@@ -57,7 +56,7 @@ export class MoneyAwarenessModule {
             this.elements.insightInput.addEventListener('input', (e) => {
                 this.updateInsightCount(e.target.value.length);
                 this.currentData.insight = e.target.value;
-                this.generateMoneyTag();
+                this.generateInstantInsight();
                 this.syncToModal();
                 this.updateSectionCompletion('insight');
             });
@@ -67,21 +66,6 @@ export class MoneyAwarenessModule {
                 this.saveDraft();
             });
         }
-
-        // 快捷填充建议
-        this.elements.suggestions.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const suggestion = btn.dataset.suggestion;
-                if (this.elements.insightInput && suggestion) {
-                    this.elements.insightInput.value = suggestion;
-                    this.updateInsightCount(suggestion.length);
-                    this.currentData.insight = suggestion;
-                    this.generateMoneyTag();
-                    this.syncToModal();
-                    this.updateSectionCompletion('insight');
-                }
-            });
-        });
 
         // 跳过按钮
         this.elements.skipBtns.forEach(btn => {
@@ -135,6 +119,7 @@ export class MoneyAwarenessModule {
                 this.currentData.identity_states = null;
                 this.currentData.flow_rhythm = null;
                 this.currentData.money_relationship = null;
+                this.hideIdentityConfirmation();
                 break;
             case 'insight':
                 this.currentData.insight = '';
@@ -326,7 +311,8 @@ export class MoneyAwarenessModule {
         }
 
         this.updateSectionCompletion(sectionName);
-        this.generateMoneyTag();
+        this.generateInstantInsight();
+        this.updateIdentityConfirmation();
         this.updateProgress();
         this.syncToModal();
     }
@@ -337,63 +323,27 @@ export class MoneyAwarenessModule {
         }
     }
 
-    generateMoneyTag() {
-        // 基于生活方向选择生成标签
-        const lifeDirections = this.currentData.life_directions || [];
-        if (lifeDirections.length === 0) {
-            this.hideMoneyTag();
+    generateInstantInsight() {
+        // Check if user has completed the deep analysis step
+        if (!this.currentData.life_directions || this.currentData.life_directions.length === 0 ||
+            !this.currentData.identity_states || 
+            !this.currentData.money_relationship) {
+            this.hideInstantInsight();
             return;
         }
 
-        const tagMap = {
-            'long_term': '建设型',
-            'maintenance': '维护型',
-            'relationship': '关系型',
-            'exploration': '探索型',
-            'emotional': '情绪型',
-            'buy_time': '恢复型'
+        const insight = this.buildInsightSummary();
+        this.displayInstantInsight(insight);
+        this.saveInsightToLocalStorage(insight);
+    }
+
+    getData() {
+        return {
+            ...this.currentData,
+            skipped_sections: Array.from(this.skippedSections),
+            completed_sections: Array.from(this.completedSections),
+            current_tab: this.currentTab
         };
-
-        // 生成主要标签
-        let primaryTag = '平衡型';
-        if (lifeDirections.includes('long_term')) {
-            primaryTag = '建设型';
-        } else if (lifeDirections.includes('relationship')) {
-            primaryTag = '关系型';
-        } else if (lifeDirections.includes('exploration')) {
-            primaryTag = '探索型';
-        } else if (lifeDirections.includes('emotional')) {
-            primaryTag = '情绪型';
-        } else if (lifeDirections.includes('maintenance')) {
-            primaryTag = '维护型';
-        }
-
-        this.showMoneyTag(primaryTag);
-    }
-
-    showMoneyTag(tag) {
-        if (this.elements.tag && this.elements.tagContainer) {
-            this.elements.tag.textContent = `${tag}一天`;
-            this.elements.tagContainer.classList.remove('hidden');
-        }
-    }
-
-    hideMoneyTag() {
-        if (this.elements.tagContainer) {
-            this.elements.tagContainer.classList.add('hidden');
-        }
-    }
-
-    syncToModal() {
-        // 将数据同步到Modal实例
-        if (this.modal) {
-            this.modal.currentMoneyState = {
-                ...this.modal.currentMoneyState,
-                ...this.currentData,
-                skipped_sections: Array.from(this.skippedSections),
-                completed_sections: Array.from(this.completedSections)
-            };
-        }
     }
 
     saveDraft() {
@@ -453,7 +403,6 @@ export class MoneyAwarenessModule {
         };
 
         this.updateUI();
-        this.generateMoneyTag();
         this.syncToModal();
     }
 
@@ -500,7 +449,8 @@ export class MoneyAwarenessModule {
         this.currentTab = 'basic';
         
         this.updateUI();
-        this.hideMoneyTag();
+        this.hideInstantInsight();
+        this.hideIdentityConfirmation();
         this.updateProgress();
         this.switchTab('basic'); // 重置到第一个标签
         this.syncToModal();
@@ -524,5 +474,158 @@ export class MoneyAwarenessModule {
             completed_sections: Array.from(this.completedSections),
             current_tab: this.currentTab
         };
+    }
+
+    generateInstantInsight() {
+        // Check if user has completed the deep analysis step
+        if (!this.currentData.life_directions || this.currentData.life_directions.length === 0 ||
+            !this.currentData.identity_states || 
+            !this.currentData.money_relationship) {
+            this.hideInstantInsight();
+            return;
+        }
+
+        const insight = this.buildInsightSummary();
+        this.displayInstantInsight(insight);
+        this.saveInsightToLocalStorage(insight);
+    }
+
+    buildInsightSummary() {
+        const lifeDirection = this.getPrimaryLifeDirection();
+        const identityExplanation = this.getIdentityExplanation();
+        const relationshipExplanation = this.getMoneyRelationshipExplanation();
+
+        return {
+            life_direction: lifeDirection,
+            identity_explanation: identityExplanation,
+            money_relationship: relationshipExplanation
+        };
+    }
+
+    getPrimaryLifeDirection() {
+        const directions = this.currentData.life_directions;
+        const directionMap = {
+            'long_term': '长期主义 · 为未来投资',
+            'maintenance': '支撑生活的基石 · 维持日常运转',
+            'relationship': '关系连接 · 投资情感纽带',
+            'exploration': '探索世界 · 拓展生命体验',
+            'emotional': '情绪调节 · 关照内在状态',
+            'buy_time': '购买时间 · 获得自由空间'
+        };
+
+        // Use the first selected direction as primary
+        const primary = directions[0];
+        return directionMap[primary] || '生活支持';
+    }
+
+    getIdentityExplanation() {
+        const identity = this.currentData.identity_states;
+        const identityMap = {
+            'goal_oriented': '投资目标中的自己 · 正在推进长期方向',
+            'structure_maintaining': '维持结构的自己 · 支持日常稳定运转',
+            'active_choice': '主动选择的自己 · 这是自己决定的投入',
+            'reality_responding': '回应现实的自己 · 这是生活需要的一部分',
+            'emotion_caring': '照顾情绪的自己 · 在支持当下状态'
+        };
+
+        return identityMap[identity] || '成为更好的自己';
+    }
+
+    getMoneyRelationshipExplanation() {
+        const relationship = this.currentData.money_relationship;
+        const relationshipMap = {
+            'freedom': '自由流动 · 金钱是选择的工具',
+            'cooperation': '合作共生 · 金钱是生活的伙伴',
+            'control': '谨慎管理 · 金钱需要规划掌控',
+            'anxiety': '焦虑不安 · 金钱带来压力担忧',
+            'gratitude': '感恩珍惜 · 金钱是生活的礼物',
+            'confusion': '迷茫探索 · 与金钱的关系正在重塑'
+        };
+
+        return relationshipMap[relationship] || '与金钱共舞';
+    }
+
+    displayInstantInsight(insight) {
+        const summaryElement = document.getElementById('money-insight-summary');
+        if (!summaryElement) return;
+
+        // Update content
+        document.getElementById('insight-life-direction').textContent = insight.life_direction;
+        document.getElementById('insight-identity-explanation').textContent = insight.identity_explanation;
+        document.getElementById('insight-money-relationship').textContent = insight.money_relationship;
+
+        // Show with animation
+        summaryElement.classList.remove('hidden');
+        
+        // Trigger reflow for animation
+        summaryElement.offsetHeight;
+        summaryElement.querySelector('.animate-fade-in').style.animation = 'fadeIn 0.6s ease-out';
+    }
+
+    hideInstantInsight() {
+        const summaryElement = document.getElementById('money-insight-summary');
+        if (summaryElement) {
+            summaryElement.classList.add('hidden');
+        }
+    }
+
+    saveInsightToLocalStorage(insight) {
+        try {
+            const insightData = {
+                ...insight,
+                timestamp: new Date().toISOString(),
+                date: new Date().toDateString(),
+                raw_data: {
+                    life_directions: this.currentData.life_directions,
+                    identity_states: this.currentData.identity_states,
+                    money_relationship: this.currentData.money_relationship
+                }
+            };
+            localStorage.setItem('moneyDailyInsight', JSON.stringify(insightData));
+        } catch (error) {
+            console.warn('Failed to save money insight to localStorage:', error);
+        }
+    }
+
+    updateIdentityConfirmation() {
+        if (!this.currentData.identity_states) {
+            this.hideIdentityConfirmation();
+            return;
+        }
+
+        const confirmationText = this.getIdentityConfirmationText(this.currentData.identity_states);
+        this.showIdentityConfirmation(confirmationText);
+    }
+
+    getIdentityConfirmationText(identity) {
+        const confirmationMap = {
+            'goal_oriented': '「建设未来的我」',
+            'structure_maintaining': '「维持结构的我」',
+            'active_choice': '「主动选择的我」',
+            'reality_responding': '「回应现实的我」',
+            'emotion_caring': '「照顾情绪的我」'
+        };
+
+        return confirmationMap[identity] || '「成为自己的我」';
+    }
+
+    showIdentityConfirmation(text) {
+        if (this.elements.identityConfirmation && this.elements.identityConfirmationText) {
+            this.elements.identityConfirmationText.textContent = text;
+            this.elements.identityConfirmation.classList.remove('hidden');
+            
+            // Trigger reflow for animation
+            this.elements.identityConfirmation.offsetHeight;
+            const confirmCard = this.elements.identityConfirmation.querySelector('.animate-fade-in');
+            if (confirmCard) {
+                confirmCard.style.animation = 'fadeIn 0.6s ease-out';
+            }
+        }
+    }
+
+    hideIdentityConfirmation() {
+        if (this.elements.identityConfirmation) {
+            this.elements.identityConfirmation.classList.add('hidden');
+        }
     }
 }

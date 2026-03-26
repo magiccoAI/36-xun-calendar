@@ -689,6 +689,10 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
         /* Menstrual button visual effects */
         #menstrual-view-btn {
             transition: all 0.3s ease;
@@ -1221,7 +1225,7 @@
                                             <span class="button-subtitle">学习 / 健身 / 储蓄 / 能力建设</span>
                                         </button>
                                         <button type="button" class="money-awareness-button" data-money-value="maintenance">
-                                            <span class="button-title">系统维护</span>
+                                            <span class="button-title">支撑生活的基石</span>
                                             <span class="button-subtitle">房租 / 餐饮 / 通勤 / 生活成本</span>
                                         </button>
                                         <button type="button" class="money-awareness-button" data-money-value="relationship">
@@ -1259,36 +1263,47 @@
                             <div class="space-y-4">
                                 <!-- ③ 资金接近的身份状态（单选） -->
                                 <section class="money-awareness-section">
-                                    <h5 class="text-[15px] font-medium text-gray-700 mb-2">这笔钱让我更接近哪种自己</h5>
-                                    <p class="text-xs text-gray-500 mb-3">今天的钱，更像哪种选择？（单选）</p>
+                                    <h5 class="text-[15px] font-medium text-gray-700 mb-2">今天的钱，更像是在支持哪个版本的我？</h5>
+                                    <p class="text-xs text-gray-500 mb-3">（选择最接近的一项）</p>
                                     <div class="money-button-grid" data-money-group="identity_states" data-single-select="true">
-                                        <button type="button" class="money-awareness-button" data-money-value="ideal_self">
-                                            <span class="button-title">理想的我</span>
-                                            <span class="button-subtitle">符合长期目标</span>
+                                        <button type="button" class="money-awareness-button" data-money-value="goal_oriented">
+                                            <span class="button-title">靠近目标的我</span>
+                                            <span class="button-subtitle">在推进长期方向</span>
                                         </button>
-                                        <button type="button" class="money-awareness-button" data-money-value="future_self">
-                                            <span class="button-title">长期的我</span>
-                                            <span class="button-subtitle">为未来积累</span>
+                                        <button type="button" class="money-awareness-button" data-money-value="structure_maintaining">
+                                            <span class="button-title">维持结构的我</span>
+                                            <span class="button-subtitle">在支持日常运转</span>
                                         </button>
                                         <button type="button" class="money-awareness-button" data-money-value="active_choice">
                                             <span class="button-title">主动选择的我</span>
-                                            <span class="button-subtitle">我自己决定</span>
+                                            <span class="button-subtitle">这是我决定的投入</span>
                                         </button>
-                                        <button type="button" class="money-awareness-button" data-money-value="environment_driven">
-                                            <span class="button-title">被环境推动的我</span>
-                                            <span class="button-subtitle">不得不花</span>
+                                        <button type="button" class="money-awareness-button" data-money-value="reality_responding">
+                                            <span class="button-title">回应现实的我</span>
+                                            <span class="button-subtitle">这是生活需要的一部分</span>
                                         </button>
-                                        <button type="button" class="money-awareness-button" data-money-value="stress_escape">
-                                            <span class="button-title">逃避压力的我</span>
-                                            <span class="button-subtitle">情绪消费</span>
+                                        <button type="button" class="money-awareness-button" data-money-value="emotion_caring">
+                                            <span class="button-title">照顾情绪的我</span>
+                                            <span class="button-subtitle">在支持当下状态</span>
                                         </button>
                                     </div>
                                 </section>
 
+                                <!-- 身份状态确认反馈 -->
+                                <div id="identity-confirmation" class="hidden">
+                                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100/60 animate-fade-in">
+                                        <p class="text-sm text-gray-700 text-center">
+                                            <span class="inline-block">今天的钱，更接近</span>
+                                            <span id="identity-confirmation-text" class="font-medium text-blue-700 mx-1"></span>
+                                            <span class="inline-block">✨</span>
+                                        </p>
+                                    </div>
+                                </div>
+
                                 <!-- ④ 今日资金流动节奏（单选） -->
                                 <section class="money-awareness-section">
                                     <h5 class="text-[15px] font-medium text-gray-700 mb-2">今日资金流动节奏</h5>
-                                    <p class="text-xs text-gray-500 mb-3">今天的钱流动感觉如何？（单选）</p>
+                                    <p class="text-xs text-gray-500 mb-3">今天的钱流动感觉如何？（选择最接近的一项）</p>
                                     <div class="money-button-grid" data-money-group="flow_rhythm" data-single-select="true">
                                         <button type="button" class="money-awareness-button" data-money-value="in_rhythm">
                                             <span class="button-title">节奏之中</span>
@@ -1316,15 +1331,15 @@
                                 <!-- ⑤ 此刻我与钱的关系（单选） -->
                                 <section class="money-awareness-section">
                                     <h5 class="text-[15px] font-medium text-gray-700 mb-2">此刻我与钱的关系</h5>
-                                    <p class="text-xs text-gray-500 mb-3">今天的我，与金钱关系更像？（单选）</p>
+                                    <p class="text-xs text-gray-500 mb-3">今天的我，与金钱关系更像？（选择最接近的一项）</p>
                                     <div class="money-button-grid" data-money-group="money_relationship" data-single-select="true">
                                         <button type="button" class="money-awareness-button" data-money-value="freedom">
                                             <span class="button-title">自由感</span>
-                                            <span class="button-subtitle">有空间选择</span>
+                                            <span class="button-subtitle">有选择空间</span>
                                         </button>
                                         <button type="button" class="money-awareness-button" data-money-value="cooperation">
-                                            <span class="button-title">合作感</span>
-                                            <span class="button-subtitle">支持生活运行</span>
+                                            <span class="button-title">支持感</span>
+                                            <span class="button-subtitle">生活可运转</span>
                                         </button>
                                         <button type="button" class="money-awareness-button" data-money-value="control">
                                             <span class="button-title">掌控感</span>
@@ -1371,20 +1386,6 @@
                                             <span id="money-insight-count">0</span>/80
                                         </div>
                                     </div>
-                                    
-                                    <!-- 快捷填充建议 -->
-                                    <div class="mt-3 flex flex-wrap gap-2" id="money-insight-suggestions">
-                                        <button type="button" class="insight-suggestion-btn" data-suggestion="今天的钱更像在建设未来">建设型</button>
-                                        <button type="button" class="insight-suggestion-btn" data-suggestion="今天的钱主要维持生活系统">维护型</button>
-                                        <button type="button" class="insight-suggestion-btn" data-suggestion="今天的钱服务关系连接">关系型</button>
-                                        <button type="button" class="insight-suggestion-btn" data-suggestion="今天的钱有点情绪补偿">情绪型</button>
-                                    </div>
-
-                                    <!-- AI 生成的资金标签 -->
-                                    <div id="money-tag-container" class="mt-3 hidden">
-                                        <p class="text-xs text-gray-500 mb-2">今日资金标签</p>
-                                        <div id="money-tag" class="inline-block px-3 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full"></div>
-                                    </div>
                                 </section>
                             </div>
                             
@@ -1399,6 +1400,18 @@
                         </div>
 
                         <p id="money-quote" class="hidden text-xs text-amber-700/90 bg-amber-50/80 border border-amber-100 rounded-lg px-3 py-2"></p>
+                        
+                        <!-- Instant Insight Summary Card -->
+                        <div id="money-insight-summary" class="hidden mt-4">
+                            <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200/60 animate-fade-in">
+                                <h5 class="text-[16px] font-semibold text-gray-700 mb-3">今日金钱观察 · 小结</h5>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <p><strong>今天的钱主要支持的是：</strong><br><span id="insight-life-direction"></span></p>
+                                    <p><strong>说明你正在：</strong><br><span id="insight-identity-explanation"></span></p>
+                                    <p><strong>当前你与金钱的关系更接近：</strong><br><span id="insight-money-relationship"></span></p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="flex items-center justify-between gap-3 bg-white/55 rounded-xl px-3 py-2 border border-white/60">
                         <label for="metric-social" class="text-xs text-gray-500">社交/备注</label>

@@ -1354,7 +1354,13 @@ export class Modal {
 
     handleKeydown(event) {
         if (this.modal.classList.contains('hidden')) return;
+        if (event.key === 'Enter' && this.moneyAwarenessModule && this.moneyAwarenessModule.handleEnter(event)) {
+            return;
+        }
         if (event.key === 'Escape') {
+            if (this.moneyAwarenessModule) {
+                this.moneyAwarenessModule.handleEscape();
+            }
             event.preventDefault();
             this.close();
         } else if (event.key === 'Tab') {

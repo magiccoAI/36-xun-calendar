@@ -1,631 +1,601 @@
+const DRAFT_KEY = 'moneyObservationDraft';
+
+const STEP1_OPTIONS = [
+    { value: '花掉的一笔', label: '花掉的一笔', desc: '买咖啡、午餐、零食、外卖' },
+    { value: '赚到的一笔', label: '赚到的一笔', desc: '接到订单、收到奖金、卖闲置' },
+    { value: '留下来的一笔', label: '留下来的一笔', desc: '存进零钱包、存进账户、没动的钱' },
+    { value: '投出去的一笔', label: '投出去的一笔', desc: '买基金、理财产品、股市投资' },
+    { value: '换时间的一笔', label: '换时间的一笔', desc: '打车代替走路、叫外卖代替做饭、请人帮忙' },
+    { value: '换收入的一笔', label: '换收入的一笔', desc: '加班赚加班费、接自由职业活、做兼职' }
+];
+
+const STEP2_LIFE_SUPPORT_OPTIONS = [
+    { value: '往长远处走', label: '往长远处走', desc: '学习、能力投资、健康投入、长期准备' },
+    { value: '让生活正常运转', label: '让生活正常运转', desc: '吃饭、通勤、房租、日常开支' },
+    { value: '维系重要关系', label: '维系重要关系', desc: '朋友、家人、社交、人情往来' },
+    { value: '去看看世界', label: '去看看世界', desc: '旅行、体验、探索新环境' },
+    { value: '给自己一点空间', label: '给自己一点空间', desc: '休息、兴趣、娱乐、奖励自己' },
+    { value: '帮我省出时间', label: '帮我省出时间', desc: '打车、外卖、工具付费、效率提升' }
+];
+
+const STEP2_SELF_STATE_OPTIONS = [
+    { value: '在推进未来的我', label: '在推进未来的我', desc: '学习 / 健康 / 能力 / 长期准备' },
+    { value: '在维持生活的我', label: '在维持生活的我', desc: '日常开支 / 必要支出 / 运转生活' },
+    { value: '在照顾当下的我', label: '在照顾当下的我', desc: '休息一下 / 奖励自己 / 开心一下 / 缓解压力' }
+];
+
+const STEP2_BREATH_OPTIONS = [
+    { value: '舒展的', label: '😌 舒展的', desc: '花钱不紧张，还有余裕' },
+    { value: '平稳的', label: '😊 平稳的', desc: '按计划来，没什么波动' },
+    { value: '留神的', label: '😐 留神的', desc: '开始注意每一笔了' },
+    { value: '收紧的', label: '😟 收紧的', desc: '得省着花，有点压力' },
+    { value: '憋闷的', label: '😣 憋闷的', desc: '喘不过来，很想逃避' }
+];
+
+const STEP3_OPTIONS = [
+    { value: '我愿意继续', label: '我愿意继续' },
+    { value: '我希望调整一点', label: '我希望调整一点' },
+    { value: '我不希望继续', label: '我不希望继续' }
+];
+
+const lifeMap = {
+    '往长远处走': '投资未来',
+    '让生活正常运转': '维持生活运转',
+    '维系重要关系': '维系重要关系',
+    '去看看世界': '探索世界',
+    '给自己一点空间': '取悦与疗愈自己',
+    '帮我省出时间': '用钱换效率'
+};
+
+const stateMap = {
+    '在推进未来的我': '在帮「未来的我」成长',
+    '在维持生活的我': '在帮「当下的基本运转」',
+    '在照顾当下的我': '在帮「此刻的我」喘口气'
+};
+
+const willingMap = {
+    '我愿意继续': '我愿意让它继续',
+    '我希望调整一点': '我想稍微调整一下',
+    '我不希望继续': '我不希望它继续'
+};
+
 export class MoneyAwarenessModule {
     constructor(modalInstance) {
         this.modal = modalInstance;
-        this.elements = {};
-        this.currentData = {
-            key_events: [],
-            life_directions: [],
-            identity_states: null,
-            flow_rhythm: null,
-            money_relationship: null,
-            insight: ''
-        };
-        this.currentTab = 'basic';
-        this.skippedSections = new Set();
-        this.completedSections = new Set();
-        
+        this.step = 1;
+        this.data = this.createDefaultData();
+        this.toastTimer = null;
         this.initElements();
-        this.initEventListeners();
-        this.updateProgress();
+        this.bindEvents();
+        this.render();
     }
 
     initElements() {
         this.elements = {
             module: document.getElementById('money-awareness-module'),
-            insightInput: document.getElementById('money-insight-input'),
-            insightCount: document.getElementById('money-insight-count'),
-            buttonGrids: document.querySelectorAll('.money-button-grid'),
-            tabButtons: document.querySelectorAll('.money-tab-btn'),
-            tabContents: document.querySelectorAll('.money-tab-content'),
-            progressText: document.getElementById('money-progress-text'),
-            skipAllBtn: document.getElementById('money-skip-all'),
-            skipBtns: document.querySelectorAll('.money-skip-btn'),
-            nextBtns: document.querySelectorAll('.money-next-btn'),
-            completeBtn: document.querySelector('.money-complete-btn'),
-            identityConfirmation: document.getElementById('identity-confirmation'),
-            identityConfirmationText: document.getElementById('identity-confirmation-text')
+            progress: document.getElementById('money-step-progress'),
+            content: document.getElementById('money-observation-content'),
+            footer: document.getElementById('money-observation-footer')
         };
     }
 
-    initEventListeners() {
-        // 标签页切换
-        this.elements.tabButtons.forEach(btn => {
-            btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
-        });
+    bindEvents() {
+        if (!this.elements.content || !this.elements.footer) return;
 
-        // 按钮点击事件
-        this.elements.buttonGrids.forEach(grid => {
-            const buttons = grid.querySelectorAll('.money-awareness-button');
-            buttons.forEach(button => {
-                button.addEventListener('click', () => this.handleButtonClick(button));
-            });
-        });
-
-        // 洞察输入框事件
-        if (this.elements.insightInput) {
-            this.elements.insightInput.addEventListener('input', (e) => {
-                this.updateInsightCount(e.target.value.length);
-                this.currentData.insight = e.target.value;
-                this.generateInstantInsight();
-                this.syncToModal();
-                this.updateSectionCompletion('insight');
-            });
-
-            // 自动保存草稿
-            this.elements.insightInput.addEventListener('blur', () => {
-                this.saveDraft();
-            });
-        }
-
-        // 跳过按钮
-        this.elements.skipBtns.forEach(btn => {
-            btn.addEventListener('click', () => this.skipSection(btn.dataset.skip));
-        });
-
-        // 下一步按钮
-        this.elements.nextBtns.forEach(btn => {
-            btn.addEventListener('click', () => this.switchTab(btn.dataset.next));
-        });
-
-        // 完成按钮
-        if (this.elements.completeBtn) {
-            this.elements.completeBtn.addEventListener('click', () => this.completeModule());
-        }
-
-        // 跳过整个模块
-        if (this.elements.skipAllBtn) {
-            this.elements.skipAllBtn.addEventListener('click', () => this.skipAll());
-        }
+        this.elements.content.addEventListener('click', (event) => this.onContentClick(event));
+        this.elements.content.addEventListener('input', (event) => this.onContentInput(event));
+        this.elements.footer.addEventListener('click', (event) => this.onFooterClick(event));
     }
 
-    switchTab(tabName) {
-        if (this.currentTab === tabName) return;
-
-        // 更新标签按钮状态
-        this.elements.tabButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === tabName);
-        });
-
-        // 更新内容显示
-        this.elements.tabContents.forEach(content => {
-            content.classList.toggle('active', content.id === `money-tab-${tabName}`);
-        });
-
-        this.currentTab = tabName;
-        this.updateProgress();
-    }
-
-    skipSection(sectionName) {
-        this.skippedSections.add(sectionName);
-        this.completedSections.delete(sectionName);
-        
-        // 清空该section的数据
-        switch(sectionName) {
-            case 'basic':
-                this.currentData.key_events = [];
-                this.currentData.life_directions = [];
-                break;
-            case 'deep':
-                this.currentData.identity_states = null;
-                this.currentData.flow_rhythm = null;
-                this.currentData.money_relationship = null;
-                this.hideIdentityConfirmation();
-                break;
-            case 'insight':
-                this.currentData.insight = '';
-                if (this.elements.insightInput) {
-                    this.elements.insightInput.value = '';
-                    this.updateInsightCount(0);
-                }
-                break;
-        }
-
-        // 自动切换到下一个标签
-        const tabOrder = ['basic', 'deep', 'insight'];
-        const currentIndex = tabOrder.indexOf(sectionName);
-        if (currentIndex < tabOrder.length - 1) {
-            this.switchTab(tabOrder[currentIndex + 1]);
-        }
-
-        this.updateProgress();
-        this.syncToModal();
-    }
-
-    skipAll() {
-        // 清空所有数据
-        this.reset();
-        // 标记所有section为跳过
-        ['basic', 'deep', 'insight'].forEach(section => {
-            this.skippedSections.add(section);
-        });
-        this.updateProgress();
-        this.syncToModal();
-        
-        // 折叠模块而不是隐藏
-        this.collapseModule();
-    }
-
-    collapseModule() {
-        if (this.elements.module) {
-            this.elements.module.classList.add('collapsed');
-            
-            // 创建恢复按钮
-            this.createRestoreButton();
-        }
-    }
-
-    createRestoreButton() {
-        // 检查是否已经有恢复按钮
-        if (document.getElementById('money-module-restore')) {
-            return;
-        }
-
-        const restoreBtn = document.createElement('button');
-        restoreBtn.id = 'money-module-restore';
-        restoreBtn.className = 'text-xs text-[#888888] hover:text-[#333333] px-3 py-2 rounded-full border border-[#EEEEEE] hover:bg-white transition-colors mt-2';
-        restoreBtn.innerHTML = '🔄 重新展开金钱观察模块';
-        
-        restoreBtn.addEventListener('click', () => {
-            this.restoreModule();
-        });
-
-        // 插入到模块后面
-        if (this.elements.module && this.elements.module.parentNode) {
-            this.elements.module.parentNode.insertBefore(restoreBtn, this.elements.module.nextSibling);
-        }
-    }
-
-    restoreModule() {
-        // 移除折叠状态
-        if (this.elements.module) {
-            this.elements.module.classList.remove('collapsed');
-        }
-
-        // 移除恢复按钮
-        const restoreBtn = document.getElementById('money-module-restore');
-        if (restoreBtn) {
-            restoreBtn.remove();
-        }
-
-        // 清除跳过状态，重置到第一个标签
-        this.skippedSections.clear();
-        this.completedSections.clear();
-        this.currentTab = 'basic';
-        this.switchTab('basic');
-        this.updateProgress();
-        this.syncToModal();
-    }
-
-    updateSectionCompletion(sectionName) {
-        let isCompleted = false;
-        
-        switch(sectionName) {
-            case 'basic':
-                isCompleted = this.currentData.key_events.length > 0 || this.currentData.life_directions.length > 0;
-                break;
-            case 'deep':
-                isCompleted = !!(this.currentData.identity_states && this.currentData.flow_rhythm && this.currentData.money_relationship);
-                break;
-            case 'insight':
-                isCompleted = this.currentData.insight.trim().length > 0;
-                break;
-        }
-
-        if (isCompleted) {
-            this.completedSections.add(sectionName);
-            this.skippedSections.delete(sectionName);
-        } else {
-            this.completedSections.delete(sectionName);
-        }
-    }
-
-    updateProgress() {
-        // 检查每个section的完成状态
-        this.updateSectionCompletion('basic');
-        this.updateSectionCompletion('deep');
-        this.updateSectionCompletion('insight');
-
-        const completedCount = this.completedSections.size;
-        const totalCount = 3;
-        
-        if (this.elements.progressText) {
-            this.elements.progressText.textContent = `${completedCount}/${totalCount}`;
-        }
-    }
-
-    completeModule() {
-        // 标记当前section为完成
-        this.updateSectionCompletion(this.currentTab);
-        
-        // 触发保存
-        this.syncToModal();
-        this.saveDraft();
-        
-        // 显示完成反馈
-        if (this.elements.completeBtn) {
-            const originalText = this.elements.completeBtn.textContent;
-            this.elements.completeBtn.textContent = '✓ 已完成';
-            this.elements.completeBtn.classList.add('done');
-            
-            setTimeout(() => {
-                this.elements.completeBtn.textContent = originalText;
-                this.elements.completeBtn.classList.remove('done');
-            }, 2000);
-        }
-    }
-
-    handleButtonClick(button) {
-        const grid = button.closest('.money-button-grid');
-        const group = grid.dataset.moneyGroup;
-        const value = button.dataset.moneyValue;
-        const maxSelect = parseInt(grid.dataset.maxSelect) || 1;
-        const isSingleSelect = grid.dataset.singleSelect === 'true';
-
-        // 确定这个按钮属于哪个section
-        let sectionName = 'basic';
-        if (['identity_states', 'flow_rhythm', 'money_relationship'].includes(group)) {
-            sectionName = 'deep';
-        }
-
-        if (isSingleSelect) {
-            // 单选模式
-            const buttons = grid.querySelectorAll('.money-awareness-button');
-            buttons.forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            this.currentData[group] = value;
-        } else {
-            // 多选模式
-            const currentSelection = this.currentData[group] || [];
-            const index = currentSelection.indexOf(value);
-            
-            if (index >= 0) {
-                // 取消选择
-                currentSelection.splice(index, 1);
-                button.classList.remove('selected');
-            } else {
-                // 检查最大选择数量
-                if (currentSelection.length >= maxSelect) {
-                    // 自动取消最早选择项
-                    const firstValue = currentSelection.shift();
-                    const firstButton = grid.querySelector(`[data-money-value="${firstValue}"]`);
-                    if (firstButton) {
-                        firstButton.classList.remove('selected');
-                    }
-                }
-                // 添加新选择
-                currentSelection.push(value);
-                button.classList.add('selected');
-            }
-            
-            this.currentData[group] = currentSelection;
-        }
-
-        this.updateSectionCompletion(sectionName);
-        this.generateInstantInsight();
-        this.updateIdentityConfirmation();
-        this.updateProgress();
-        this.syncToModal();
-    }
-
-    updateInsightCount(count) {
-        if (this.elements.insightCount) {
-            this.elements.insightCount.textContent = count;
-        }
-    }
-
-    generateInstantInsight() {
-        // Check if user has completed the deep analysis step
-        if (!this.currentData.life_directions || this.currentData.life_directions.length === 0 ||
-            !this.currentData.identity_states || 
-            !this.currentData.money_relationship) {
-            this.hideInstantInsight();
-            return;
-        }
-
-        const insight = this.buildInsightSummary();
-        this.displayInstantInsight(insight);
-        this.saveInsightToLocalStorage(insight);
-    }
-
-    getData() {
+    createDefaultData() {
         return {
-            ...this.currentData,
-            skipped_sections: Array.from(this.skippedSections),
-            completed_sections: Array.from(this.completedSections),
-            current_tab: this.currentTab
+            step1: [],
+            step2: {
+                lifeSupport: ['让生活正常运转'],
+                selfState: '在维持生活的我',
+                breathFeeling: '平稳的'
+            },
+            step3: '',
+            customText: '',
+            summary: ''
         };
     }
 
-    saveDraft() {
-        // 保存草稿到localStorage
-        try {
-            const draftData = {
-                ...this.currentData,
-                skipped_sections: Array.from(this.skippedSections),
-                completed_sections: Array.from(this.completedSections),
-                current_tab: this.currentTab
-            };
-            localStorage.setItem('money-awareness-draft', JSON.stringify(draftData));
-        } catch (error) {
-            console.warn('Failed to save money awareness draft:', error);
-        }
+    normalizeData(raw = {}) {
+        const defaults = this.createDefaultData();
+        const step2 = raw.step2 || {};
+        return {
+            step1: Array.isArray(raw.step1) ? raw.step1.slice(0, 2) : defaults.step1,
+            step2: {
+                lifeSupport: Array.isArray(step2.lifeSupport) && step2.lifeSupport.length
+                    ? step2.lifeSupport.slice(0, 6)
+                    : defaults.step2.lifeSupport,
+                selfState: step2.selfState || defaults.step2.selfState,
+                breathFeeling: step2.breathFeeling || defaults.step2.breathFeeling
+            },
+            step3: raw.step3 || '',
+            customText: (raw.customText || '').slice(0, 80),
+            summary: raw.summary || ''
+        };
     }
 
     loadDraft() {
-        // 从localStorage加载草稿
         try {
-            const draft = localStorage.getItem('money-awareness-draft');
-            if (draft) {
-                const data = JSON.parse(draft);
-                this.setData(data);
-                
-                // 恢复标签页状态
-                if (data.current_tab) {
-                    this.switchTab(data.current_tab);
-                }
-                
-                // 恢复跳过状态
-                if (data.skipped_sections) {
-                    this.skippedSections = new Set(data.skipped_sections);
-                }
-                
-                // 恢复完成状态
-                if (data.completed_sections) {
-                    this.completedSections = new Set(data.completed_sections);
-                }
-                
-                this.updateProgress();
+            const draft = localStorage.getItem(DRAFT_KEY);
+            if (!draft) {
+                this.data = this.createDefaultData();
+                this.step = 1;
+                this.render();
+                this.syncToModal();
+                return;
             }
+
+            const parsed = JSON.parse(draft);
+            this.data = this.normalizeData(parsed);
+            this.data.summary = this.buildSummary();
+            this.step = parsed.step && parsed.step >= 1 && parsed.step <= 3 ? parsed.step : this.getRecommendedStep();
+            this.render();
+            this.syncToModal();
         } catch (error) {
-            console.warn('Failed to load money awareness draft:', error);
+            console.warn('Failed to load money observation draft:', error);
         }
     }
 
-    setData(data) {
-        // 设置数据并更新UI
-        this.currentData = {
-            key_events: data.key_events || [],
-            life_directions: data.life_directions || [],
-            identity_states: data.identity_states || null,
-            flow_rhythm: data.flow_rhythm || null,
-            money_relationship: data.money_relationship || null,
-            insight: data.insight || ''
-        };
+    saveDraft() {
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...this.data, step: this.step }));
+        } catch (error) {
+            console.warn('Failed to save money observation draft:', error);
+        }
+    }
 
-        this.updateUI();
+    clearDraft() {
+        try {
+            localStorage.removeItem(DRAFT_KEY);
+        } catch (error) {
+            console.warn('Failed to clear money observation draft:', error);
+        }
+    }
+
+    setData(data = {}) {
+        this.data = this.normalizeData(data);
+        this.data.summary = this.buildSummary();
+        this.step = this.getRecommendedStep();
+        this.render();
         this.syncToModal();
-    }
-
-    updateUI() {
-        // 更新按钮状态
-        Object.keys(this.currentData).forEach(group => {
-            const grid = document.querySelector(`[data-money-group="${group}"]`);
-            if (!grid) return;
-
-            const buttons = grid.querySelectorAll('.money-awareness-button');
-            const value = this.currentData[group];
-
-            if (Array.isArray(value)) {
-                // 多选
-                buttons.forEach(btn => {
-                    btn.classList.toggle('selected', value.includes(btn.dataset.moneyValue));
-                });
-            } else {
-                // 单选
-                buttons.forEach(btn => {
-                    btn.classList.toggle('selected', btn.dataset.moneyValue === value);
-                });
-            }
-        });
-
-        // 更新洞察输入框
-        if (this.elements.insightInput) {
-            this.elements.insightInput.value = this.currentData.insight || '';
-            this.updateInsightCount(this.currentData.insight.length);
-        }
     }
 
     reset() {
-        this.currentData = {
-            key_events: [],
-            life_directions: [],
-            identity_states: null,
-            flow_rhythm: null,
-            money_relationship: null,
-            insight: ''
-        };
-        this.skippedSections.clear();
-        this.completedSections.clear();
-        this.currentTab = 'basic';
-        
-        this.updateUI();
-        this.hideInstantInsight();
-        this.hideIdentityConfirmation();
-        this.updateProgress();
-        this.switchTab('basic'); // 重置到第一个标签
+        this.step = 1;
+        this.data = this.createDefaultData();
+        this.render();
         this.syncToModal();
-        
-        // 显示模块（如果之前被折叠）
-        if (this.elements.module) {
-            this.elements.module.classList.remove('collapsed');
-        }
-        
-        // 移除恢复按钮
-        const restoreBtn = document.getElementById('money-module-restore');
-        if (restoreBtn) {
-            restoreBtn.remove();
-        }
     }
 
     getData() {
         return {
-            ...this.currentData,
-            skipped_sections: Array.from(this.skippedSections),
-            completed_sections: Array.from(this.completedSections),
-            current_tab: this.currentTab
+            ...this.data,
+            step: this.step
         };
     }
 
-    generateInstantInsight() {
-        // Check if user has completed the deep analysis step
-        if (!this.currentData.life_directions || this.currentData.life_directions.length === 0 ||
-            !this.currentData.identity_states || 
-            !this.currentData.money_relationship) {
-            this.hideInstantInsight();
+    getRecommendedStep() {
+        if (!this.data.step1.length) return 1;
+        if (!this.data.step3) return 3;
+        return 3;
+    }
+
+    isNoSpecialFlow() {
+        return this.data.step1.length === 1 && this.data.step1[0] === '无特别一笔';
+    }
+
+    onContentClick(event) {
+        const button = event.target.closest('[data-chip-group]');
+        if (!button || button.disabled) return;
+
+        const group = button.dataset.chipGroup;
+        const value = button.dataset.chipValue;
+
+        if (group === 'step1') {
+            this.toggleStep1(value);
+        } else if (group === 'step1-none') {
+            this.data.step1 = ['无特别一笔'];
+            this.data.step2.lifeSupport = [];
+            this.data.step2.selfState = '';
+        } else if (group === 'step2-life') {
+            this.toggleArrayValue(this.data.step2.lifeSupport, value);
+        } else if (group === 'step2-state') {
+            this.data.step2.selfState = value;
+        } else if (group === 'step2-breath') {
+            this.data.step2.breathFeeling = value;
+        } else if (group === 'step3-willing') {
+            this.data.step3 = value;
+        }
+
+        this.data.summary = this.buildSummary();
+        this.persistAndRender();
+    }
+
+    onContentInput(event) {
+        if (event.target.id !== 'money-custom-text') return;
+        this.data.customText = (event.target.value || '').slice(0, 80);
+        this.saveDraft();
+        this.syncToModal();
+        this.updateCustomCount();
+    }
+
+    onFooterClick(event) {
+        const actionBtn = event.target.closest('[data-action]');
+        if (!actionBtn) return;
+
+        const action = actionBtn.dataset.action;
+
+        if (action === 'save-draft') {
+            this.saveDraft();
+            this.showToast('已保存草稿');
             return;
         }
 
-        const insight = this.buildInsightSummary();
-        this.displayInstantInsight(insight);
-        this.saveInsightToLocalStorage(insight);
-    }
-
-    buildInsightSummary() {
-        const lifeDirection = this.getPrimaryLifeDirection();
-        const identityExplanation = this.getIdentityExplanation();
-        const relationshipExplanation = this.getMoneyRelationshipExplanation();
-
-        return {
-            life_direction: lifeDirection,
-            identity_explanation: identityExplanation,
-            money_relationship: relationshipExplanation
-        };
-    }
-
-    getPrimaryLifeDirection() {
-        const directions = this.currentData.life_directions;
-        const directionMap = {
-            'long_term': '长期主义 · 为未来投资',
-            'maintenance': '支撑生活的基石 · 维持日常运转',
-            'relationship': '关系连接 · 投资情感纽带',
-            'exploration': '探索世界 · 拓展生命体验',
-            'emotional': '情绪调节 · 关照内在状态',
-            'buy_time': '购买时间 · 获得自由空间'
-        };
-
-        // Use the first selected direction as primary
-        const primary = directions[0];
-        return directionMap[primary] || '生活支持';
-    }
-
-    getIdentityExplanation() {
-        const identity = this.currentData.identity_states;
-        const identityMap = {
-            'goal_oriented': '投资目标中的自己 · 正在推进长期方向',
-            'structure_maintaining': '维持结构的自己 · 支持日常稳定运转',
-            'active_choice': '主动选择的自己 · 这是自己决定的投入',
-            'reality_responding': '回应现实的自己 · 这是生活需要的一部分',
-            'emotion_caring': '照顾情绪的自己 · 在支持当下状态'
-        };
-
-        return identityMap[identity] || '成为更好的自己';
-    }
-
-    getMoneyRelationshipExplanation() {
-        const relationship = this.currentData.money_relationship;
-        const relationshipMap = {
-            'freedom': '自由流动 · 金钱是选择的工具',
-            'cooperation': '合作共生 · 金钱是生活的伙伴',
-            'control': '谨慎管理 · 金钱需要规划掌控',
-            'anxiety': '焦虑不安 · 金钱带来压力担忧',
-            'gratitude': '感恩珍惜 · 金钱是生活的礼物',
-            'confusion': '迷茫探索 · 与金钱的关系正在重塑'
-        };
-
-        return relationshipMap[relationship] || '与金钱共舞';
-    }
-
-    displayInstantInsight(insight) {
-        const summaryElement = document.getElementById('money-insight-summary');
-        if (!summaryElement) return;
-
-        // Update content
-        document.getElementById('insight-life-direction').textContent = insight.life_direction;
-        document.getElementById('insight-identity-explanation').textContent = insight.identity_explanation;
-        document.getElementById('insight-money-relationship').textContent = insight.money_relationship;
-
-        // Show with animation
-        summaryElement.classList.remove('hidden');
-        
-        // Trigger reflow for animation
-        summaryElement.offsetHeight;
-        summaryElement.querySelector('.animate-fade-in').style.animation = 'fadeIn 0.6s ease-out';
-    }
-
-    hideInstantInsight() {
-        const summaryElement = document.getElementById('money-insight-summary');
-        if (summaryElement) {
-            summaryElement.classList.add('hidden');
-        }
-    }
-
-    saveInsightToLocalStorage(insight) {
-        try {
-            const insightData = {
-                ...insight,
-                timestamp: new Date().toISOString(),
-                date: new Date().toDateString(),
-                raw_data: {
-                    life_directions: this.currentData.life_directions,
-                    identity_states: this.currentData.identity_states,
-                    money_relationship: this.currentData.money_relationship
-                }
-            };
-            localStorage.setItem('moneyDailyInsight', JSON.stringify(insightData));
-        } catch (error) {
-            console.warn('Failed to save money insight to localStorage:', error);
-        }
-    }
-
-    updateIdentityConfirmation() {
-        if (!this.currentData.identity_states) {
-            this.hideIdentityConfirmation();
+        if (action === 'prev' && this.step > 1) {
+            this.step -= 1;
+            this.render();
             return;
         }
 
-        const confirmationText = this.getIdentityConfirmationText(this.currentData.identity_states);
-        this.showIdentityConfirmation(confirmationText);
-    }
+        if (action === 'next') {
+            this.goNext();
+            return;
+        }
 
-    getIdentityConfirmationText(identity) {
-        const confirmationMap = {
-            'goal_oriented': '「建设未来的我」',
-            'structure_maintaining': '「维持结构的我」',
-            'active_choice': '「主动选择的我」',
-            'reality_responding': '「回应现实的我」',
-            'emotion_caring': '「照顾情绪的我」'
-        };
-
-        return confirmationMap[identity] || '「成为自己的我」';
-    }
-
-    showIdentityConfirmation(text) {
-        if (this.elements.identityConfirmation && this.elements.identityConfirmationText) {
-            this.elements.identityConfirmationText.textContent = text;
-            this.elements.identityConfirmation.classList.remove('hidden');
-            
-            // Trigger reflow for animation
-            this.elements.identityConfirmation.offsetHeight;
-            const confirmCard = this.elements.identityConfirmation.querySelector('.animate-fade-in');
-            if (confirmCard) {
-                confirmCard.style.animation = 'fadeIn 0.6s ease-out';
-            }
+        if (action === 'complete') {
+            this.completeRecord();
         }
     }
 
-    hideIdentityConfirmation() {
-        if (this.elements.identityConfirmation) {
-            this.elements.identityConfirmation.classList.add('hidden');
+    toggleStep1(value) {
+        if (this.isNoSpecialFlow()) {
+            this.data.step1 = [];
+            this.data.step2.lifeSupport = ['让生活正常运转'];
+            this.data.step2.selfState = '在维持生活的我';
         }
+
+        const current = this.data.step1;
+        const idx = current.indexOf(value);
+
+        if (idx >= 0) {
+            current.splice(idx, 1);
+            return;
+        }
+
+        if (current.length >= 2) {
+            this.showToast('最多选择2项');
+            return;
+        }
+
+        current.push(value);
+    }
+
+    toggleArrayValue(list, value) {
+        const idx = list.indexOf(value);
+        if (idx >= 0) {
+            list.splice(idx, 1);
+        } else {
+            list.push(value);
+        }
+    }
+
+    canGoNext() {
+        if (this.step === 1) {
+            return this.data.step1.length > 0;
+        }
+
+        if (this.step === 2) {
+            if (!this.data.step2.breathFeeling) return false;
+            if (this.isNoSpecialFlow()) return true;
+            return this.data.step2.lifeSupport.length > 0 && !!this.data.step2.selfState;
+        }
+
+        if (this.step === 3) {
+            return !!this.data.step3;
+        }
+
+        return false;
+    }
+
+    goNext() {
+        if (!this.canGoNext()) {
+            this.showToast('请先完成当前步骤');
+            return;
+        }
+
+        if (this.step < 3) {
+            this.step += 1;
+            this.render();
+        }
+    }
+
+    completeRecord() {
+        if (!this.canGoNext()) {
+            this.showToast('请先完成记录');
+            return;
+        }
+
+        this.data.summary = this.buildSummary();
+        this.syncToModal();
+
+        if (typeof this.modal?.onSubmit === 'function') {
+            this.modal.onSubmit(this.getData());
+        }
+
+        this.clearDraft();
+        this.showToast('已记录今日金钱观察');
+
+        if (typeof this.modal?.close === 'function') {
+            this.modal.close();
+        }
+    }
+
+    buildSummary() {
+        if (!this.data.step3) return '';
+
+        const willing = willingMap[this.data.step3] || this.data.step3;
+        const breathFeeling = this.data.step2.breathFeeling || '平稳的';
+
+        if (this.isNoSpecialFlow()) {
+            return `今天没有特别的钱的流动，呼吸感是${breathFeeling}。${willing}。`;
+        }
+
+        const primaryLife = lifeMap[this.data.step2.lifeSupport[0]] || '支持生活';
+        const state = stateMap[this.data.step2.selfState] || '在支持现在的我';
+
+        return `今天的钱主要在${primaryLife}，${state}。如果成为常态，${willing}。`;
+    }
+
+    handleEnter(event) {
+        if (!this.elements.module || this.elements.module.contains(event.target) === false) return false;
+        if (event.key !== 'Enter') return false;
+        if (event.shiftKey) return false;
+
+        event.preventDefault();
+        if (this.step === 3) {
+            this.completeRecord();
+        } else {
+            this.goNext();
+        }
+        return true;
+    }
+
+    handleEscape() {
+        this.saveDraft();
+        return true;
+    }
+
+    persistAndRender() {
+        this.data.summary = this.buildSummary();
+        this.saveDraft();
+        this.syncToModal();
+        this.render();
+    }
+
+    syncToModal() {
+        if (typeof this.modal?.syncLogStateFromUI === 'function') {
+            this.modal.syncLogStateFromUI();
+        }
+    }
+
+    showToast(message) {
+        if (!this.elements.module) return;
+
+        const existing = this.elements.module.querySelector('#money-observation-toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'money-observation-toast';
+        toast.className = 'absolute right-4 bottom-4 z-20 rounded-lg bg-gray-900 text-white text-xs px-3 py-2 shadow-lg';
+        toast.textContent = message;
+
+        this.elements.module.style.position = 'relative';
+        this.elements.module.appendChild(toast);
+
+        if (this.toastTimer) clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => toast.remove(), 1400);
+    }
+
+    render() {
+        if (!this.elements.module || !this.elements.content || !this.elements.footer || !this.elements.progress) return;
+        this.renderProgress();
+        this.renderStepContent();
+        this.renderFooter();
+    }
+
+    renderProgress() {
+        const bars = [1, 2, 3].map((n) => {
+            const active = n <= this.step;
+            return `<div class="h-2 flex-1 rounded-full ${active ? 'bg-amber-400' : 'bg-white border border-amber-100'}"></div>`;
+        }).join('');
+
+        this.elements.progress.innerHTML = `<div class="flex items-center gap-2">${bars}</div><p class="text-[12px] text-gray-500 mt-2">第 ${this.step}/3 步</p>`;
+    }
+
+    renderStepContent() {
+        if (this.step === 1) {
+            this.elements.content.innerHTML = this.renderStep1();
+        } else if (this.step === 2) {
+            this.elements.content.innerHTML = this.renderStep2();
+        } else {
+            this.elements.content.innerHTML = this.renderStep3();
+            this.updateCustomCount();
+        }
+    }
+
+    renderFooter() {
+        const primaryDisabled = !this.canGoNext();
+        if (this.step === 1) {
+            this.elements.footer.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <button type="button" data-action="save-draft" class="h-11 min-w-[44px] px-3 rounded-xl border border-amber-200 bg-white text-sm text-gray-600 hover:bg-amber-50 transition duration-200 ease-out">先保存草稿</button>
+                    <button type="button" data-action="next" ${primaryDisabled ? 'disabled' : ''} class="h-11 min-w-[44px] flex-1 rounded-xl text-sm text-white ${primaryDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600'} transition duration-200 ease-out">下一步</button>
+                </div>`;
+            return;
+        }
+
+        this.elements.footer.innerHTML = `
+            <div class="flex items-center gap-3">
+                <button type="button" data-action="prev" class="h-11 min-w-[44px] px-4 rounded-xl border border-amber-200 bg-white text-sm text-gray-600 hover:bg-amber-50 transition duration-200 ease-out">上一步</button>
+                <button type="button" data-action="${this.step === 3 ? 'complete' : 'next'}" ${primaryDisabled ? 'disabled' : ''} class="h-11 min-w-[44px] flex-1 rounded-xl text-sm text-white ${primaryDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600'} transition duration-200 ease-out">${this.step === 3 ? '完成记录' : '下一步'}</button>
+            </div>`;
+    }
+
+    renderStep1() {
+        return `
+            <section class="space-y-4">
+                <div>
+                    <h5 class="text-[15px] font-semibold text-gray-800">STEP 1 看见一笔钱</h5>
+                    <p class="text-sm text-gray-500 mt-1">今天最值得记的一笔钱，是怎么动的？（最多选2项）</p>
+                </div>
+                <div class="space-y-3">
+                    ${STEP1_OPTIONS.map((item) => this.renderChip({
+                        group: 'step1',
+                        value: item.value,
+                        label: item.label,
+                        desc: item.desc,
+                        selected: this.data.step1.includes(item.value)
+                    })).join('')}
+                </div>
+                <div class="pt-1">
+                    ${this.renderChip({
+                        group: 'step1-none',
+                        value: '无特别一笔',
+                        label: '今天没有特别的一笔',
+                        desc: '将直接进入下一步并简化分析问题',
+                        selected: this.isNoSpecialFlow()
+                    })}
+                </div>
+            </section>
+        `;
+    }
+
+    renderStep2() {
+        const disabled = this.isNoSpecialFlow();
+
+        return `
+            <section class="space-y-4">
+                <div>
+                    <h5 class="text-[15px] font-semibold text-gray-800">STEP 2 看懂它去了哪里</h5>
+                    <p class="text-sm text-gray-500 mt-1">回顾刚才记录的那笔钱，它到底支持了什么生活，帮了哪种状态的你？</p>
+                </div>
+
+                <div class="space-y-3">
+                    <h6 class="text-sm font-medium text-gray-700">钱支持的生活用途（多选）</h6>
+                    <div class="space-y-3 mt-1">
+                        ${STEP2_LIFE_SUPPORT_OPTIONS.map((item) => this.renderChip({
+                            group: 'step2-life',
+                            value: item.value,
+                            label: item.label,
+                            desc: item.desc,
+                            selected: this.data.step2.lifeSupport.includes(item.value),
+                            disabled
+                        })).join('')}
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h6 class="text-sm font-medium text-gray-700">今天这笔钱，更像在帮哪个状态的我？</h6>
+                    <div class="space-y-3 mt-1">
+                        ${STEP2_SELF_STATE_OPTIONS.map((item) => this.renderChip({
+                            group: 'step2-state',
+                            value: item.value,
+                            label: item.label,
+                            desc: item.desc,
+                            selected: this.data.step2.selfState === item.value,
+                            disabled
+                        })).join('')}
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h6 class="text-sm font-medium text-gray-700">今天我和钱的关系，呼吸感是——</h6>
+                    <div class="space-y-3 mt-1">
+                        ${STEP2_BREATH_OPTIONS.map((item) => this.renderChip({
+                            group: 'step2-breath',
+                            value: item.value,
+                            label: item.label,
+                            desc: item.desc,
+                            selected: this.data.step2.breathFeeling === item.value
+                        })).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    renderStep3() {
+        return `
+            <section class="space-y-4">
+                <div>
+                    <h5 class="text-[15px] font-semibold text-gray-800">STEP 3 看清它改变了什么</h5>
+                    <p class="text-sm text-gray-500 mt-1">如果这种用钱方式变成常态，我愿意继续吗？</p>
+                </div>
+
+                <div class="space-y-3">
+                    ${STEP3_OPTIONS.map((item) => this.renderChip({
+                        group: 'step3-willing',
+                        value: item.value,
+                        label: item.label,
+                        desc: '',
+                        selected: this.data.step3 === item.value
+                    })).join('')}
+                </div>
+
+                ${this.data.summary ? `<div class="rounded-xl border border-amber-200 bg-white px-3 py-3 text-sm text-gray-700">${this.data.summary}</div>` : ''}
+
+                <div>
+                    <textarea id="money-custom-text" maxlength="80" rows="2" class="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200 resize-none" placeholder="今天的钱，更像在帮我……">${this.escapeHtml(this.data.customText)}</textarea>
+                    <p id="money-custom-count" class="text-xs text-gray-500 mt-1 text-right">0/80</p>
+                </div>
+            </section>
+        `;
+    }
+
+    updateCustomCount() {
+        const counter = this.elements.content.querySelector('#money-custom-count');
+        const input = this.elements.content.querySelector('#money-custom-text');
+        if (!counter || !input) return;
+        counter.textContent = `${input.value.length}/80`;
+    }
+
+    renderChip({ group, value, label, desc, selected, disabled = false }) {
+        const baseClass = 'w-full min-h-[44px] rounded-xl border text-left px-3 py-2 transition duration-200 ease-out';
+        const stateClass = disabled
+            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+            : (selected
+                ? 'border-amber-400 bg-amber-50 text-gray-800 shadow-sm'
+                : 'border-amber-100 bg-white text-gray-700 hover:bg-amber-50 hover:border-amber-200');
+
+        return `
+            <button
+                type="button"
+                data-chip-group="${group}"
+                data-chip-value="${value}"
+                ${disabled ? 'disabled' : ''}
+                class="${baseClass} ${stateClass}">
+                <span class="flex items-start justify-between gap-3">
+                    <span>
+                        <span class="block text-sm font-medium">${label}</span>
+                        ${desc ? `<span class="block text-xs mt-1 ${disabled ? 'text-gray-400' : 'text-gray-500'}">${desc}</span>` : ''}
+                    </span>
+                    <span class="text-sm ${selected ? 'opacity-100' : 'opacity-0'}" aria-hidden="true">✓</span>
+                </span>
+            </button>
+        `;
+    }
+
+    escapeHtml(value = '') {
+        return value
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
     }
 }

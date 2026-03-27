@@ -172,7 +172,7 @@ export class MoneyAwarenessModule {
 
         const restoreBtn = document.createElement('button');
         restoreBtn.id = 'money-module-restore';
-        restoreBtn.className = 'text-xs text-amber-600 hover:text-amber-700 px-3 py-2 rounded-lg border border-amber-200 hover:bg-amber-50 transition-colors mt-2';
+        restoreBtn.className = 'text-xs text-[#888888] hover:text-[#333333] px-3 py-2 rounded-full border border-[#EEEEEE] hover:bg-white transition-colors mt-2';
         restoreBtn.innerHTML = '🔄 重新展开金钱观察模块';
         
         restoreBtn.addEventListener('click', () => {
@@ -255,11 +255,11 @@ export class MoneyAwarenessModule {
         if (this.elements.completeBtn) {
             const originalText = this.elements.completeBtn.textContent;
             this.elements.completeBtn.textContent = '✓ 已完成';
-            this.elements.completeBtn.classList.add('bg-green-600');
+            this.elements.completeBtn.classList.add('done');
             
             setTimeout(() => {
                 this.elements.completeBtn.textContent = originalText;
-                this.elements.completeBtn.classList.remove('bg-green-600');
+                this.elements.completeBtn.classList.remove('done');
             }, 2000);
         }
     }

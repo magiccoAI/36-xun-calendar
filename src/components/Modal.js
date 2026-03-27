@@ -43,6 +43,8 @@ export class Modal {
         this.autoProgressionTimer = null;
         this.previouslyFocusedElement = null;
         this.saveFeedbackTimer = null;
+        this.closeTransitionTimer = null;
+        this.closeTransitionHandler = null;
         
         this.initElements();
         this.initListeners();
@@ -230,6 +232,7 @@ export class Modal {
     }
 
     open(dateStr, xunIndex) {
+        this.clearPendingCloseTransition();
         this.currentDateStr = dateStr;
         this.currentXunIndex = xunIndex;
         const dayOfWeek = this.getDayOfWeek(dateStr);
@@ -351,22 +354,43 @@ export class Modal {
         this.panel.classList.remove('scale-100');
         this.panel.classList.add('scale-95');
 
-        let closed = false;
-        const handleTransitionEnd = (event) => {
-            if (closed) return;
+        this.clearPendingCloseTransition();
+        const finalize = (event) => {
             if (event && event.target !== this.panel) return;
-            closed = true;
-            this.modal.classList.add('hidden');
-            this.modal.classList.remove('flex');
-            this.panel.removeEventListener('transitionend', handleTransitionEnd);
-            if (this.previouslyFocusedElement && typeof this.previouslyFocusedElement.focus === 'function') {
-                this.previouslyFocusedElement.focus();
-            }
+            this.finalizeClose();
         };
-
-        this.panel.addEventListener('transitionend', handleTransitionEnd);
+        this.closeTransitionHandler = finalize;
+        this.panel.addEventListener('transitionend', finalize);
         // Fallback: in some environments transitionend does not fire reliably.
-        setTimeout(() => handleTransitionEnd(), 320);
+        this.closeTransitionTimer = setTimeout(() => this.finalizeClose(), 320);
+    }
+
+    finalizeClose() {
+        if (this.closeTransitionHandler) {
+            this.panel.removeEventListener('transitionend', this.closeTransitionHandler);
+            this.closeTransitionHandler = null;
+        }
+        if (this.closeTransitionTimer) {
+            clearTimeout(this.closeTransitionTimer);
+            this.closeTransitionTimer = null;
+        }
+        if (this.modal.classList.contains('hidden')) return;
+        this.modal.classList.add('hidden');
+        this.modal.classList.remove('flex');
+        if (this.previouslyFocusedElement && typeof this.previouslyFocusedElement.focus === 'function') {
+            this.previouslyFocusedElement.focus();
+        }
+    }
+
+    clearPendingCloseTransition() {
+        if (this.closeTransitionHandler) {
+            this.panel.removeEventListener('transitionend', this.closeTransitionHandler);
+            this.closeTransitionHandler = null;
+        }
+        if (this.closeTransitionTimer) {
+            clearTimeout(this.closeTransitionTimer);
+            this.closeTransitionTimer = null;
+        }
     }
 
 

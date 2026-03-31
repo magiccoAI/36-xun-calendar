@@ -1,4 +1,4 @@
-const DRAFT_KEY = 'moneyObservationDraft';
+const BASE_DRAFT_KEY = 'moneyObservationDraft';
 
 const STEP1_OPTIONS = [
     { value: '花掉的一笔', label: '花掉的一笔', desc: '买咖啡、午餐、零食、外卖' },
@@ -62,9 +62,11 @@ const willingMap = {
 export class MoneyAwarenessModule {
     constructor(modalInstance) {
         this.modal = modalInstance;
+        this.currentDate = null;
         this.step = 1;
         this.data = this.createDefaultData();
         this.toastTimer = null;
+        this.cleanupOldDraft(); // 清理旧格式草稿
         this.initElements();
         this.bindEvents();
         this.render();
@@ -91,9 +93,9 @@ export class MoneyAwarenessModule {
         return {
             step1: [],
             step2: {
-                lifeSupport: ['让生活正常运转'],
-                selfState: '在维持生活的我',
-                breathFeeling: '平稳的'
+                lifeSupport: [],
+                selfState: '',
+                breathFeeling: ''
             },
             step3: '',
             customText: '',
@@ -119,9 +121,24 @@ export class MoneyAwarenessModule {
         };
     }
 
-    loadDraft() {
+    getDraftKey(date = null) {
+        const targetDate = date || this.currentDate;
+        if (!targetDate) return BASE_DRAFT_KEY;
+        return `${BASE_DRAFT_KEY}_${targetDate}`;
+    }
+
+    loadDraft(date = null) {
         try {
-            const draft = localStorage.getItem(DRAFT_KEY);
+            this.currentDate = date || this.currentDate;
+            if (!this.currentDate) {
+                this.data = this.createDefaultData();
+                this.step = 1;
+                this.render();
+                this.syncToModal();
+                return;
+            }
+
+            const draft = localStorage.getItem(this.getDraftKey());
             if (!draft) {
                 this.data = this.createDefaultData();
                 this.step = 1;
@@ -143,21 +160,49 @@ export class MoneyAwarenessModule {
 
     saveDraft() {
         try {
-            localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...this.data, step: this.step }));
+            if (!this.currentDate) return;
+            const draftData = { 
+                ...this.data, 
+                step: this.step,
+                timestamp: Date.now()
+            };
+            localStorage.setItem(this.getDraftKey(), JSON.stringify(draftData));
         } catch (error) {
             console.warn('Failed to save money observation draft:', error);
         }
     }
 
-    clearDraft() {
+    clearDraft(date = null) {
         try {
-            localStorage.removeItem(DRAFT_KEY);
+            const targetDate = date || this.currentDate;
+            if (!targetDate) return;
+            localStorage.removeItem(this.getDraftKey(targetDate));
         } catch (error) {
             console.warn('Failed to clear money observation draft:', error);
         }
     }
 
-    setData(data = {}) {
+    hasDraftForDate(date) {
+        if (!date) return false;
+        return !!localStorage.getItem(this.getDraftKey(date));
+    }
+
+    // 清理旧格式的草稿数据，实现向后兼容
+    cleanupOldDraft() {
+        try {
+            const oldDraft = localStorage.getItem(BASE_DRAFT_KEY);
+            if (oldDraft) {
+                // 如果有旧格式草稿，可以迁移到当前日期，或者直接清理
+                localStorage.removeItem(BASE_DRAFT_KEY);
+                console.log('Cleaned up old money observation draft format');
+            }
+        } catch (error) {
+            console.warn('Failed to cleanup old money observation draft:', error);
+        }
+    }
+
+    setData(data = {}, date = null) {
+        this.currentDate = date || this.currentDate;
         this.data = this.normalizeData(data);
         this.data.summary = this.buildSummary();
         this.step = this.getRecommendedStep();
@@ -213,7 +258,9 @@ export class MoneyAwarenessModule {
         }
 
         this.data.summary = this.buildSummary();
-        this.persistAndRender();
+        this.saveDraft(); // 实时保存
+        this.syncToModal();
+        this.render();
     }
 
     onContentInput(event) {
@@ -238,7 +285,16 @@ export class MoneyAwarenessModule {
 
         if (action === 'prev' && this.step > 1) {
             this.step -= 1;
+            this.saveDraft(); // 步骤切换时保存
             this.render();
+            
+            // 平滑滚动到内容顶部
+            setTimeout(() => {
+                this.elements.content.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
             return;
         }
 
@@ -255,8 +311,7 @@ export class MoneyAwarenessModule {
     toggleStep1(value) {
         if (this.isNoSpecialFlow()) {
             this.data.step1 = [];
-            this.data.step2.lifeSupport = ['让生活正常运转'];
-            this.data.step2.selfState = '在维持生活的我';
+            // 不再重置为默认值，保持空白状态
         }
 
         const current = this.data.step1;
@@ -310,7 +365,16 @@ export class MoneyAwarenessModule {
 
         if (this.step < 3) {
             this.step += 1;
+            this.saveDraft(); // 步骤切换时保存
             this.render();
+            
+            // 平滑滚动到内容顶部
+            setTimeout(() => {
+                this.elements.content.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 100);
         }
     }
 
@@ -329,10 +393,22 @@ export class MoneyAwarenessModule {
 
         this.clearDraft();
         this.showToast('已记录今日金钱观察');
+    }
 
-        if (typeof this.modal?.close === 'function') {
-            this.modal.close();
-        }
+    jumpToStep(targetStep) {
+        if (targetStep < 1 || targetStep > 3) return;
+        if (targetStep === this.step) return;
+        
+        this.step = targetStep;
+        this.saveDraft();
+        this.render();
+        
+        setTimeout(() => {
+            this.elements.content.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 100);
     }
 
     buildSummary() {
@@ -403,6 +479,19 @@ export class MoneyAwarenessModule {
 
     render() {
         if (!this.elements.module || !this.elements.content || !this.elements.footer || !this.elements.progress) return;
+        
+        // Show loading state briefly for better UX
+        if (!this._initialized) {
+            this.elements.content.innerHTML = this.renderLoadingState();
+            this._initialized = true;
+            setTimeout(() => {
+                this.renderProgress();
+                this.renderStepContent();
+                this.renderFooter();
+            }, 100);
+            return;
+        }
+        
         this.renderProgress();
         this.renderStepContent();
         this.renderFooter();
@@ -411,10 +500,61 @@ export class MoneyAwarenessModule {
     renderProgress() {
         const bars = [1, 2, 3].map((n) => {
             const active = n <= this.step;
-            return `<div class="h-2 flex-1 rounded-full ${active ? 'bg-amber-400' : 'bg-white border border-amber-100'}"></div>`;
+            const current = n === this.step;
+            return `
+                <div class="relative flex-1">
+                    <div class="h-1.5 flex-1 rounded-full transition-all duration-300 ease-out ${
+                        active 
+                            ? 'bg-gradient-to-r from-amber-400 to-amber-500 shadow-sm' 
+                            : 'bg-gray-200'
+                    } ${current ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-amber-50 rounded-full' : ''}"></div>
+                    ${current ? '<div class="absolute -top-1 left-0 w-3 h-3 bg-amber-500 rounded-full shadow-md animate-pulse"></div>' : ''}
+                </div>
+            `;
         }).join('');
 
-        this.elements.progress.innerHTML = `<div class="flex items-center gap-2">${bars}</div><p class="text-[12px] text-gray-500 mt-2">第 ${this.step}/3 步</p>`;
+        this.elements.progress.innerHTML = `
+            <div class="space-y-3">
+                <div class="flex items-center gap-2">${bars}</div>
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-gray-700">第 ${this.step}/3 步</p>
+                    <div class="flex gap-1">
+                        ${[1, 2, 3].map(n => `
+                            <div class="w-1.5 h-1.5 rounded-full transition-colors duration-200 ${
+                                n <= this.step ? 'bg-amber-500' : 'bg-gray-300'
+                            }"></div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // 更新步骤按钮状态
+        this.updateStepButtons();
+    }
+
+    updateStepButtons() {
+        document.querySelectorAll('.step-nav-btn').forEach(btn => {
+            const step = parseInt(btn.dataset.step);
+            const isActive = step === this.step;
+            const isCompleted = step < this.step;
+            
+            // 移除所有状态类
+            btn.classList.remove('active', 'completed', 'bg-amber-500', 'text-gray-800', 'border-amber-500', 'bg-amber-100', 'border-amber-300');
+            btn.classList.add('bg-white/90', 'border-amber-200');
+            
+            if (isActive) {
+                // 激活状态
+                btn.classList.add('active', 'bg-amber-500', 'text-gray-800', 'border-amber-500');
+                btn.classList.remove('bg-white/90', 'border-amber-200');
+            } else if (isCompleted) {
+                // 完成状态
+                btn.classList.add('completed', 'bg-amber-100', 'border-amber-300');
+            }
+            
+            // 更新可访问性属性
+            btn.setAttribute('aria-current', isActive ? 'step' : 'false');
+        });
     }
 
     renderStepContent() {
@@ -433,42 +573,113 @@ export class MoneyAwarenessModule {
         if (this.step === 1) {
             this.elements.footer.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <button type="button" data-action="save-draft" class="h-11 min-w-[44px] px-3 rounded-xl border border-amber-200 bg-white text-sm text-gray-600 hover:bg-amber-50 transition duration-200 ease-out">先保存草稿</button>
-                    <button type="button" data-action="next" ${primaryDisabled ? 'disabled' : ''} class="h-11 min-w-[44px] flex-1 rounded-xl text-sm text-white ${primaryDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600'} transition duration-200 ease-out">下一步</button>
+                    <button 
+                        type="button" 
+                        data-action="save-draft" 
+                        class="group relative h-12 min-w-[44px] px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 transition-all duration-200 ease-out overflow-hidden"
+                        aria-label="保存当前填写的内容为草稿，稍后可继续编辑"
+                    >
+                        <span class="relative z-10 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2"></path>
+                            </svg>
+                            <span>保存草稿</span>
+                        </span>
+                        <div class="absolute inset-0 bg-gradient-to-r from-amber-50 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    </button>
+                    <button 
+                        type="button" 
+                        data-action="next" 
+                        ${primaryDisabled ? 'disabled' : ''} 
+                        class="group relative h-12 min-w-[44px] flex-1 rounded-xl text-sm font-medium text-gray-800 transition-all duration-200 ease-out overflow-hidden ${
+                            primaryDisabled 
+                                ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
+                                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 shadow-sm hover:shadow-md'
+                        }" 
+                        ${primaryDisabled ? 'aria-disabled="true"' : ''} 
+                        aria-label="进入下一步，继续金钱觉察记录"
+                    >
+                        <span class="relative z-10 flex items-center justify-center gap-2">
+                            <span>下一步</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </span>
+                        ${!primaryDisabled ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>' : ''}
+                    </button>
                 </div>`;
             return;
         }
 
         this.elements.footer.innerHTML = `
             <div class="flex items-center gap-3">
-                <button type="button" data-action="prev" class="h-11 min-w-[44px] px-4 rounded-xl border border-amber-200 bg-white text-sm text-gray-600 hover:bg-amber-50 transition duration-200 ease-out">上一步</button>
-                <button type="button" data-action="${this.step === 3 ? 'complete' : 'next'}" ${primaryDisabled ? 'disabled' : ''} class="h-11 min-w-[44px] flex-1 rounded-xl text-sm text-white ${primaryDisabled ? 'bg-gray-300 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600'} transition duration-200 ease-out">${this.step === 3 ? '完成记录' : '下一步'}</button>
+                <button 
+                    type="button" 
+                    data-action="prev" 
+                    class="group relative h-12 min-w-[44px] px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-200 ease-out overflow-hidden"
+                    aria-label="返回上一步，重新填写金钱觉察记录"
+                >
+                    <span class="relative z-10 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
+                        </svg>
+                        <span>上一步</span>
+                    </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-gray-50 to-gray-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </button>
+                <button 
+                    type="button" 
+                    data-action="${this.step === 3 ? 'complete' : 'next'}" 
+                    ${primaryDisabled ? 'disabled' : ''} 
+                    class="group relative h-12 min-w-[44px] flex-1 rounded-xl text-sm font-medium text-gray-800 transition-all duration-200 ease-out overflow-hidden ${
+                        primaryDisabled 
+                            ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
+                            : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 shadow-sm hover:shadow-md'
+                    }" 
+                    ${primaryDisabled ? 'aria-disabled="true"' : ''} 
+                    aria-label="${this.step === 3 ? '完成金钱觉察记录并保存' : '进入下一步，继续金钱觉察记录'}"
+                >
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                        <span>${this.step === 3 ? '完成记录' : '下一步'}</span>
+                        ${this.step === 3 
+                            ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                            : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>'
+                        }
+                    </span>
+                    ${!primaryDisabled ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>' : ''}
+                </button>
             </div>`;
     }
 
     renderStep1() {
         return `
-            <section class="space-y-4">
-                <div>
-                    <h5 class="text-[15px] font-semibold text-gray-800">STEP 1 看见一笔钱</h5>
-                    <p class="text-sm text-gray-500 mt-1">今天最值得记的一笔钱，是怎么动的？（最多选2项）</p>
+            <section class="space-y-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm">1</div>
+                        <h5 class="text-lg font-semibold text-gray-900">看见一笔钱</h5>
+                    </div>
+                    <p class="text-sm text-gray-600 pl-10">今天最值得记的一笔钱，是怎么动的？</p>
+                    <p class="text-xs text-gray-500 pl-10">最多选择2项</p>
                 </div>
                 <div class="space-y-3">
-                    ${STEP1_OPTIONS.map((item) => this.renderChip({
+                    ${STEP1_OPTIONS.map((item, index) => this.renderChip({
                         group: 'step1',
                         value: item.value,
                         label: item.label,
                         desc: item.desc,
-                        selected: this.data.step1.includes(item.value)
+                        selected: this.data.step1.includes(item.value),
+                        index: index + 1
                     })).join('')}
                 </div>
-                <div class="pt-1">
+                <div class="pt-4 border-t border-gray-100">
                     ${this.renderChip({
                         group: 'step1-none',
                         value: '无特别一笔',
                         label: '今天没有特别的一笔',
                         desc: '将直接进入下一步并简化分析问题',
-                        selected: this.isNoSpecialFlow()
+                        selected: this.isNoSpecialFlow(),
+                        isSpecial: true
                     })}
                 </div>
             </section>
@@ -479,50 +690,73 @@ export class MoneyAwarenessModule {
         const disabled = this.isNoSpecialFlow();
 
         return `
-            <section class="space-y-4">
-                <div>
-                    <h5 class="text-[15px] font-semibold text-gray-800">STEP 2 看懂它去了哪里</h5>
-                    <p class="text-sm text-gray-500 mt-1">回顾刚才记录的那笔钱，它到底支持了什么生活，帮了哪种状态的你？</p>
-                </div>
-
-                <div class="space-y-3">
-                    <h6 class="text-sm font-medium text-gray-700">钱支持的生活用途（多选）</h6>
-                    <div class="space-y-3 mt-1">
-                        ${STEP2_LIFE_SUPPORT_OPTIONS.map((item) => this.renderChip({
-                            group: 'step2-life',
-                            value: item.value,
-                            label: item.label,
-                            desc: item.desc,
-                            selected: this.data.step2.lifeSupport.includes(item.value),
-                            disabled
-                        })).join('')}
+            <section class="space-y-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm">2</div>
+                        <h5 class="text-lg font-semibold text-gray-900">看懂它去了哪里</h5>
                     </div>
+                    <p class="text-sm text-gray-600 pl-10">回顾刚才记录的那笔钱，它到底支持了什么生活，帮了哪种状态的你？</p>
                 </div>
 
-                <div class="space-y-3">
-                    <h6 class="text-sm font-medium text-gray-700">今天这笔钱，更像在帮哪个状态的我？</h6>
-                    <div class="space-y-3 mt-1">
-                        ${STEP2_SELF_STATE_OPTIONS.map((item) => this.renderChip({
-                            group: 'step2-state',
-                            value: item.value,
-                            label: item.label,
-                            desc: item.desc,
-                            selected: this.data.step2.selfState === item.value,
-                            disabled
-                        })).join('')}
+                <div class="space-y-4">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-medium">A</div>
+                            <h6 class="text-base font-medium text-gray-800">钱支持的生活用途</h6>
+                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">多选</span>
+                        </div>
+                        <div class="pl-8 space-y-2">
+                            ${STEP2_LIFE_SUPPORT_OPTIONS.map((item, index) => this.renderChip({
+                                group: 'step2-life',
+                                value: item.value,
+                                label: item.label,
+                                desc: item.desc,
+                                selected: this.data.step2.lifeSupport.includes(item.value),
+                                disabled,
+                                index: index + 1,
+                                variant: 'life'
+                            })).join('')}
+                        </div>
                     </div>
-                </div>
 
-                <div class="space-y-3">
-                    <h6 class="text-sm font-medium text-gray-700">今天我和钱的关系，呼吸感是——</h6>
-                    <div class="space-y-3 mt-1">
-                        ${STEP2_BREATH_OPTIONS.map((item) => this.renderChip({
-                            group: 'step2-breath',
-                            value: item.value,
-                            label: item.label,
-                            desc: item.desc,
-                            selected: this.data.step2.breathFeeling === item.value
-                        })).join('')}
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xs font-medium">B</div>
+                            <h6 class="text-base font-medium text-gray-800">今天这笔钱，更像在帮哪个状态的我？</h6>
+                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">单选</span>
+                        </div>
+                        <div class="pl-8 space-y-2">
+                            ${STEP2_SELF_STATE_OPTIONS.map((item, index) => this.renderChip({
+                                group: 'step2-state',
+                                value: item.value,
+                                label: item.label,
+                                desc: item.desc,
+                                selected: this.data.step2.selfState === item.value,
+                                disabled,
+                                index: index + 1,
+                                variant: 'state'
+                            })).join('')}
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xs font-medium">C</div>
+                            <h6 class="text-base font-medium text-gray-800">今天我和钱的关系，呼吸感是——</h6>
+                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">单选</span>
+                        </div>
+                        <div class="pl-8 space-y-2">
+                            ${STEP2_BREATH_OPTIONS.map((item, index) => this.renderChip({
+                                group: 'step2-breath',
+                                value: item.value,
+                                label: item.label,
+                                desc: item.desc,
+                                selected: this.data.step2.breathFeeling === item.value,
+                                index: index + 1,
+                                variant: 'breath'
+                            })).join('')}
+                        </div>
                     </div>
                 </div>
             </section>
@@ -531,27 +765,64 @@ export class MoneyAwarenessModule {
 
     renderStep3() {
         return `
-            <section class="space-y-4">
-                <div>
-                    <h5 class="text-[15px] font-semibold text-gray-800">STEP 3 看清它改变了什么</h5>
-                    <p class="text-sm text-gray-500 mt-1">如果这种用钱方式变成常态，我愿意继续吗？</p>
+            <section class="space-y-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-white text-sm font-semibold shadow-sm">3</div>
+                        <h5 class="text-lg font-semibold text-gray-900">看清它改变了什么</h5>
+                    </div>
+                    <p class="text-sm text-gray-600 pl-10">如果这种用钱方式变成常态，我愿意继续吗？</p>
                 </div>
 
                 <div class="space-y-3">
-                    ${STEP3_OPTIONS.map((item) => this.renderChip({
+                    ${STEP3_OPTIONS.map((item, index) => this.renderChip({
                         group: 'step3-willing',
                         value: item.value,
                         label: item.label,
                         desc: '',
-                        selected: this.data.step3 === item.value
+                        selected: this.data.step3 === item.value,
+                        index: index + 1,
+                        variant: 'willing'
                     })).join('')}
                 </div>
 
-                ${this.data.summary ? `<div class="rounded-xl border border-amber-200 bg-white px-3 py-3 text-sm text-gray-700">${this.data.summary}</div>` : ''}
+                ${this.data.summary ? `
+                    <div class="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900 mb-1">今日觉察总结</p>
+                                <p class="text-sm text-gray-700 leading-relaxed">${this.escapeHtml(this.data.summary)}</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
 
-                <div>
-                    <textarea id="money-custom-text" maxlength="80" rows="2" class="w-full rounded-xl border border-amber-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200 resize-none" placeholder="今天的钱，更像在帮我……">${this.escapeHtml(this.data.customText)}</textarea>
-                    <p id="money-custom-count" class="text-xs text-gray-500 mt-1 text-right">0/80</p>
+                <div class="space-y-2">
+                    <label for="money-custom-text" class="block text-sm font-medium text-gray-700">
+                        补充说明 <span class="text-xs text-gray-500 font-normal">(可选)</span>
+                    </label>
+                    <textarea 
+                        id="money-custom-text" 
+                        maxlength="80" 
+                        rows="3" 
+                        class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-amber-400 resize-none transition-all duration-200" 
+                        placeholder="今天的钱，更像在帮我……"
+                        aria-describedby="money-custom-count"
+                    >${this.escapeHtml(this.data.customText)}</textarea>
+                    <div class="flex items-center justify-between">
+                        <p id="money-custom-count" class="text-xs text-gray-500">0/80</p>
+                        <div class="flex gap-1">
+                            ${Array.from({length: 4}, (_, i) => i < Math.ceil(this.data.customText.length / 20) 
+                                ? '<div class="w-1 h-1 bg-amber-400 rounded-full"></div>' 
+                                : '<div class="w-1 h-1 bg-gray-300 rounded-full"></div>'
+                            ).join('')}
+                        </div>
+                    </div>
                 </div>
             </section>
         `;
@@ -564,13 +835,62 @@ export class MoneyAwarenessModule {
         counter.textContent = `${input.value.length}/80`;
     }
 
-    renderChip({ group, value, label, desc, selected, disabled = false }) {
-        const baseClass = 'w-full min-h-[44px] rounded-xl border text-left px-3 py-2 transition duration-200 ease-out';
+    renderChip({ group, value, label, desc, selected, disabled = false, index = null, variant = 'default', isSpecial = false }) {
+        const baseClass = 'w-full min-h-[48px] rounded-xl border text-left px-4 py-3 transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2';
+        
+        // Variant-specific styling
+        const variantStyles = {
+            life: {
+                selected: 'border-amber-400 bg-gradient-to-r from-amber-50 to-amber-100 text-gray-800 shadow-sm',
+                hover: 'border-amber-300 bg-amber-50 text-gray-700 hover:shadow-md',
+                default: 'border-gray-200 bg-white text-gray-700 hover:border-amber-200 hover:bg-gray-50'
+            },
+            state: {
+                selected: 'border-blue-400 bg-gradient-to-r from-blue-50 to-blue-100 text-gray-800 shadow-sm',
+                hover: 'border-blue-300 bg-blue-50 text-gray-700 hover:shadow-md',
+                default: 'border-gray-200 bg-white text-gray-700 hover:border-blue-200 hover:bg-gray-50'
+            },
+            breath: {
+                selected: 'border-green-400 bg-gradient-to-r from-green-50 to-green-100 text-gray-800 shadow-sm',
+                hover: 'border-green-300 bg-green-50 text-gray-700 hover:shadow-md',
+                default: 'border-gray-200 bg-white text-gray-700 hover:border-green-200 hover:bg-gray-50'
+            },
+            willing: {
+                selected: 'border-purple-400 bg-gradient-to-r from-purple-50 to-purple-100 text-gray-800 shadow-sm',
+                hover: 'border-purple-300 bg-purple-50 text-gray-700 hover:shadow-md',
+                default: 'border-gray-200 bg-white text-gray-700 hover:border-purple-200 hover:bg-gray-50'
+            },
+            default: {
+                selected: 'border-amber-400 bg-gradient-to-r from-amber-50 to-amber-100 text-gray-800 shadow-sm',
+                hover: 'border-amber-300 bg-amber-50 text-gray-700 hover:shadow-md',
+                default: 'border-gray-200 bg-white text-gray-700 hover:border-amber-200 hover:bg-gray-50'
+            }
+        };
+
+        const style = variantStyles[variant] || variantStyles.default;
+        
         const stateClass = disabled
             ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
             : (selected
-                ? 'border-amber-400 bg-amber-50 text-gray-800 shadow-sm'
-                : 'border-amber-100 bg-white text-gray-700 hover:bg-amber-50 hover:border-amber-200');
+                ? style.selected
+                : style.default);
+
+        const focusClass = disabled ? '' : 'focus:ring-amber-400';
+        
+        // Icon for different variants
+        const getIcon = () => {
+            if (isSpecial) {
+                return selected 
+                    ? '<svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>'
+                    : '<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle></svg>';
+            }
+            if (variant === 'breath' && label.includes('😌')) {
+                return '<span class="text-lg">' + label.split(' ')[0] + '</span>';
+            }
+            return selected 
+                ? '<svg class="w-5 h-5 text-current" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'
+                : '<div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>';
+        };
 
         return `
             <button
@@ -578,15 +898,54 @@ export class MoneyAwarenessModule {
                 data-chip-group="${group}"
                 data-chip-value="${value}"
                 ${disabled ? 'disabled' : ''}
-                class="${baseClass} ${stateClass}">
+                class="${baseClass} ${stateClass} ${focusClass} group relative overflow-hidden"
+                aria-pressed="${selected}"
+                aria-label="${label}${desc ? ': ' + desc : ''}"
+            >
                 <span class="flex items-start justify-between gap-3">
-                    <span>
-                        <span class="block text-sm font-medium">${label}</span>
-                        ${desc ? `<span class="block text-xs mt-1 ${disabled ? 'text-gray-400' : 'text-gray-500'}">${desc}</span>` : ''}
+                    <span class="flex-1 min-w-0">
+                        <span class="block text-sm font-medium leading-5">${label}</span>
+                        ${desc ? '<span class="block text-xs mt-1 ' + (disabled ? 'text-gray-400' : 'text-gray-500') + ' leading-4">' + desc + '</span>' : ''}
                     </span>
-                    <span class="text-sm ${selected ? 'opacity-100' : 'opacity-0'}" aria-hidden="true">✓</span>
+                    <span class="flex-shrink-0 mt-0.5 transition-all duration-200 ${
+                        selected ? 'opacity-100 scale-100' : 'opacity-40 scale-90 group-hover:opacity-60'
+                    }" aria-hidden="true">
+                        ${getIcon()}
+                    </span>
                 </span>
+                ${selected && !disabled ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>' : ''}
             </button>
+        `;
+    }
+
+    renderLoadingState() {
+        return `
+            <div class="flex flex-col items-center justify-center py-12 space-y-4">
+                <div class="relative">
+                    <div class="w-12 h-12 rounded-full border-4 border-amber-200 border-t-amber-500 animate-spin"></div>
+                    <div class="absolute inset-0 w-12 h-12 rounded-full border-4 border-transparent border-t-amber-400 animate-pulse"></div>
+                </div>
+                <div class="text-center space-y-2">
+                    <p class="text-sm font-medium text-gray-700">正在加载金钱觉察模块</p>
+                    <p class="text-xs text-gray-500">请稍候...</p>
+                </div>
+            </div>
+        `;
+    }
+
+    renderEmptyState() {
+        return `
+            <div class="flex flex-col items-center justify-center py-12 space-y-4">
+                <div class="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center">
+                    <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="text-center space-y-2">
+                    <p class="text-sm font-medium text-gray-700">开始今日金钱觉察</p>
+                    <p class="text-xs text-gray-500">记录今天的金钱流动，看见生活的支持</p>
+                </div>
+            </div>
         `;
     }
 

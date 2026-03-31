@@ -298,7 +298,7 @@ export class Modal {
         
         this.initSleepSelector(data.sleepData || {});
         this.initBodyStateSelector(data.body_state || null);
-        this.initMoneyAwarenessModule(data.money_awareness || null);
+        this.initMoneyAwarenessModule(data.money_awareness || null, this.currentDateStr);
         this.setBodyCondition(data.body_condition || null);
 
         // Good Things
@@ -504,18 +504,21 @@ export class Modal {
         }
     }
 
-    initMoneyAwarenessModule(savedMoneyData = null) {
+    initMoneyAwarenessModule(savedMoneyData = null, date = null) {
         if (!document.getElementById('money-awareness-module')) return;
 
         if (!this.moneyAwarenessModule) {
             this.moneyAwarenessModule = new MoneyAwarenessModule(this);
+            // 暴露到全局以便进度指示器可以访问
+            window.moneyAwarenessModule = this.moneyAwarenessModule;
         }
 
         if (savedMoneyData) {
-            this.moneyAwarenessModule.setData(savedMoneyData);
+            // 有正式数据，优先加载正式数据
+            this.moneyAwarenessModule.setData(savedMoneyData, date);
         } else {
-            // 尝试加载草稿
-            this.moneyAwarenessModule.loadDraft();
+            // 尝试加载对应日期的草稿
+            this.moneyAwarenessModule.loadDraft(date);
         }
     }
 
@@ -1319,11 +1322,23 @@ export class Modal {
         
         this.refreshCalendar();
         this.refreshSummary();
+        
+        // 更新页面状态指示器
+        this.updateTabStatusIndicators();
 
-        if (options.closeAfterSave || options.closeAfterSave === undefined) {
+        // 根据当前页面状态决定是否关闭弹窗
+        // 在「今日状态」页面始终不关闭弹窗，在「今日记录」页面才关闭
+        const shouldCloseModal = this.currentTab === 'record';
+        
+        if (shouldCloseModal) {
             this.closeModal();
         } else {
+            // 在「今日状态」页面保存后，显示提示但不关闭弹窗
             this.saveFeedbackTimer = setTimeout(() => this.resetSaveFeedback(), 1800);
+            // 如果是「今日状态」页面且有数据，显示软过渡提示
+            if (this.currentTab === 'checkin' && this.hasCheckinData) {
+                this.showSoftTransitionPrompt();
+            }
         }
         this.elements.saveBtn.disabled = false;
         this.elements.saveBtn.classList.remove('opacity-70', 'cursor-not-allowed');

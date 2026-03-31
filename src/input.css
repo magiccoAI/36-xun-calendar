@@ -118,4 +118,30 @@
     .pb-safe {
         padding-bottom: env(safe-area-inset-bottom, 20px);
     }
+    
+    /* 金钱观察模块步骤按钮样式 */
+    .step-nav-btn {
+        transition: all 0.2s ease;
+    }
+    
+    .step-nav-btn:hover:not(.active) {
+        background-color: rgb(254 240 138 / 0.5);
+        border-color: rgb(252 211 77 / 0.5);
+        transform: translateY(-1px);
+    }
+    
+    .step-nav-btn.active {
+        transform: scale(1.05);
+        box-shadow: 0 4px 6px -1px rgb(251 191 36 / 0.3);
+    }
+    
+    .step-nav-btn.completed {
+        opacity: 0.8;
+    }
+    
+    /* 未激活状态的默认样式 - 通过HTML类设置 */
+    .step-nav-btn:not(.active):not(.completed) {
+        border-color: rgb(209 213 219); /* 更深的边框颜色 */
+        color: rgb(75 85 99); /* 更深的文字颜色 */
+    }
 }

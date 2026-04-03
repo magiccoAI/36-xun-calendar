@@ -1183,17 +1183,24 @@ export class MoneyObservationSummaryComponent {
   }
 
   render() {
+    console.log(`🔍 MoneyObservationSummaryComponent.render() called for period: ${this.xunPeriod}`);
+    
     // 获取聚合数据
     this.currentData = this.dataAggregator.getSummaryData();
     
+    console.log('📊 Money summary data:', this.currentData);
+    
     if (!this.currentData) {
+      console.log('❌ No current data found, returning loading state');
       return '<div class="text-center py-8">加载中...</div>';
     }
 
     const { recordedDays } = this.currentData.overview;
+    console.log(`📈 Recorded days: ${recordedDays}`);
     
     // 根据记录天数决定显示哪些区块
     const showDetailedBlocks = recordedDays >= 3;
+    console.log(`📊 Show detailed blocks: ${showDetailedBlocks}`);
     
     const html = `
       <div class="space-y-8">

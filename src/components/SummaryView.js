@@ -3,6 +3,7 @@ import { store } from '../core/State.js';
 import { renderSleepTrendChart } from './XunSleepTrendChart.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
+import { MoneyObservationSummaryComponent } from './MoneyObservationSummary.js';
 
 const emotionWordCloud = (emotionFrequency) => {
     const entries = Object.entries(emotionFrequency).sort((a, b) => b[1] - a[1]);
@@ -292,11 +293,19 @@ export class SummaryView {
                         ${emotionWordCloud(summary.emotionFrequency)}
                     </section>
 
+                    <!-- 金钱观察总结模块 -->
+                    <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2">
+                        <h3 class="mb-4 text-base font-medium text-gray-700">4. 金钱观察总结</h3>
+                        <div id="money-observation-summary-container">
+                            ${this.renderMoneySummary()}
+                        </div>
+                    </section>
+
                     <!-- 三件好事汇总模块 -->
                     ${generateGoodThingsSection(summary)}
 
                     <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
-                        <h3 class="mb-4 text-base font-medium text-gray-700">4. 高精力日</h3>
+                        <h3 class="mb-4 text-base font-medium text-gray-700">5. 高精力日</h3>
                         <div class="space-y-2 text-sm text-gray-700">
                             <p>精力值 ≥ 7 的天数：<strong>${summary.highEnergyDaysCount}</strong> 天</p>
                             <p>高精力日平均睡眠：<strong>${summary.highEnergyAverageSleep}</strong> 小时</p>
@@ -311,7 +320,7 @@ export class SummaryView {
                     </section>
 
                     <section class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:col-span-2">
-                        <h3 class="mb-4 text-base font-medium text-gray-700">6. 智能洞察</h3>
+                        <h3 class="mb-4 text-base font-medium text-gray-700">7. 智能洞察</h3>
                         <ul class="list-disc space-y-2 pl-5 text-sm text-gray-700">
                             ${summary.insights.map((insight) => `<li>${insight}</li>`).join('')}
                         </ul>
@@ -336,6 +345,62 @@ export class SummaryView {
         };
         const xunData = dataService.getRecordsByCurrentXun();
         renderSleepTrendChart(xunData.records || []);
+        
+        // 渲染金钱观察总结
+        this.renderMoneySummaryContent();
+    }
+
+    renderMoneySummary() {
+        // 返回加载中的占位内容
+        return '<div class="text-center py-4 text-gray-500"><p>正在加载金钱观察数据...</p></div>';
+    }
+
+    renderMoneySummaryContent() {
+        const container = document.getElementById('money-observation-summary-container');
+        if (!container) {
+            console.warn('❌ Money observation summary container not found');
+            return;
+        }
+
+        try {
+            console.log('🔍 Starting money summary render...');
+            
+            // 使用与主summary相同的逻辑获取当前查看的旬期
+            const state = store.getState();
+            const xunPeriods = Calendar.getXunPeriods(CONFIG.YEAR);
+            const targetPeriod = xunPeriods.find(p => p.index === state.viewedXunIndex);
+            
+            if (!targetPeriod) {
+                console.warn('❌ Unable to get target xun information');
+                container.innerHTML = '<div class="text-center py-4 text-gray-500"><p>无法获取目标旬期信息</p></div>';
+                return;
+            }
+            
+            // 计算quarter和xun属性
+            const quarter = Math.ceil(targetPeriod.index / 3);
+            const xun = ((targetPeriod.index - 1) % 3) + 1;
+            const xunPeriod = `${CONFIG.YEAR}-Q${quarter}-X${xun}`;
+            
+            console.log('🎯 Money Summary Debug:');
+            console.log('Current viewedXunIndex:', state.viewedXunIndex);
+            console.log('Target period:', targetPeriod);
+            console.log('Xun period string:', xunPeriod);
+            
+            // 创建金钱观察总结组件实例
+            const moneySummary = new MoneyObservationSummaryComponent(xunPeriod);
+            
+            // 渲染金钱观察总结
+            const renderedContent = moneySummary.render();
+            container.innerHTML = renderedContent;
+            
+            console.log('✅ Money observation summary rendered successfully for period:', xunPeriod);
+            console.log('📊 Rendered content length:', renderedContent.length);
+            console.log('📊 Rendered content preview:', renderedContent.substring(0, 200) + '...');
+            
+        } catch (error) {
+            console.error('❌ Failed to render money observation summary:', error);
+            container.innerHTML = '<div class="text-center py-4 text-gray-500"><p>金钱观察数据加载失败</p></div>';
+        }
     }
 
     afterModalSave() {

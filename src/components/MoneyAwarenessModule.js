@@ -25,11 +25,11 @@ const STEP2_SELF_STATE_OPTIONS = [
 ];
 
 const STEP2_BREATH_OPTIONS = [
-    { value: '舒展的', label: '😌 舒展的', desc: '花钱不紧张，还有余裕' },
-    { value: '平稳的', label: '😊 平稳的', desc: '按计划来，没什么波动' },
-    { value: '留神的', label: '😐 留神的', desc: '开始注意每一笔了' },
-    { value: '收紧的', label: '😟 收紧的', desc: '得省着花，有点压力' },
-    { value: '憋闷的', label: '😣 憋闷的', desc: '喘不过来，很想逃避' }
+    { value: '舒展的', label: '舒展的', desc: '花钱不紧张，还有余裕' },
+    { value: '平稳的', label: '平稳的', desc: '按计划来，没什么波动' },
+    { value: '留神的', label: '留神的', desc: '开始注意每一笔了' },
+    { value: '收紧的', label: '收紧的', desc: '得省着花，有点压力' },
+    { value: '憋闷的', label: '憋闷的', desc: '喘不过来，很想逃避' }
 ];
 
 const STEP3_OPTIONS = [
@@ -283,28 +283,9 @@ export class MoneyAwarenessModule {
             return;
         }
 
-        if (action === 'prev' && this.step > 1) {
-            this.step -= 1;
-            this.saveDraft(); // 步骤切换时保存
-            this.render();
-            
-            // 平滑滚动到内容顶部
-            setTimeout(() => {
-                this.elements.content.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }, 100);
-            return;
-        }
-
         if (action === 'next') {
             this.goNext();
             return;
-        }
-
-        if (action === 'complete') {
-            this.completeRecord();
         }
     }
 
@@ -335,6 +316,11 @@ export class MoneyAwarenessModule {
         if (idx >= 0) {
             list.splice(idx, 1);
         } else {
+            // 检查是否已达到最大选择数量
+            if (list.length >= 2) {
+                this.showToast('最多只能选择2项');
+                return;
+            }
             list.push(value);
         }
     }
@@ -378,22 +364,8 @@ export class MoneyAwarenessModule {
         }
     }
 
-    completeRecord() {
-        if (!this.canGoNext()) {
-            this.showToast('请先完成记录');
-            return;
-        }
-
-        this.data.summary = this.buildSummary();
-        this.syncToModal();
-
-        if (typeof this.modal?.onSubmit === 'function') {
-            this.modal.onSubmit(this.getData());
-        }
-
-        this.clearDraft();
-        this.showToast('已记录今日金钱观察');
-    }
+    // 统一保存流程：移除completeRecord方法
+    // 数据现在由Modal的handleSaveDailyRecord统一处理
 
     jumpToStep(targetStep) {
         if (targetStep < 1 || targetStep > 3) return;
@@ -433,11 +405,7 @@ export class MoneyAwarenessModule {
         if (event.shiftKey) return false;
 
         event.preventDefault();
-        if (this.step === 3) {
-            this.completeRecord();
-        } else {
-            this.goNext();
-        }
+        // 统一保存流程：Enter键不再完成记录，用户需要点击Modal的保存按钮
         return true;
     }
 
@@ -570,84 +538,53 @@ export class MoneyAwarenessModule {
 
     renderFooter() {
         const primaryDisabled = !this.canGoNext();
-        if (this.step === 1) {
-            this.elements.footer.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <button 
-                        type="button" 
-                        data-action="save-draft" 
-                        class="group relative h-12 min-w-[44px] px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 transition-all duration-200 ease-out overflow-hidden"
-                        aria-label="保存当前填写的内容为草稿，稍后可继续编辑"
-                    >
-                        <span class="relative z-10 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2"></path>
-                            </svg>
-                            <span>保存草稿</span>
-                        </span>
-                        <div class="absolute inset-0 bg-gradient-to-r from-amber-50 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                    </button>
+        const isLastStep = this.step === 3;
+        
+        this.elements.footer.innerHTML = `
+            <div class="flex items-center gap-3">
+                <button 
+                    type="button" 
+                    data-action="save-draft" 
+                    class="group relative h-12 min-w-[44px] px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 transition-all duration-200 ease-out overflow-hidden"
+                    aria-label="保存当前填写的内容为草稿，稍后可继续编辑"
+                >
+                    <span class="relative z-10 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2"></path>
+                        </svg>
+                        <span>保存草稿</span>
+                    </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-amber-50 to-amber-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </button>
+                
+                ${!isLastStep ? `
                     <button 
                         type="button" 
                         data-action="next" 
-                        ${primaryDisabled ? 'disabled' : ''} 
-                        class="group relative h-12 min-w-[44px] flex-1 rounded-xl text-sm font-medium text-gray-800 transition-all duration-200 ease-out overflow-hidden ${
-                            primaryDisabled 
-                                ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
-                                : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 shadow-sm hover:shadow-md'
-                        }" 
-                        ${primaryDisabled ? 'aria-disabled="true"' : ''} 
-                        aria-label="进入下一步，继续金钱觉察记录"
+                        class="group relative h-12 min-w-[44px] px-6 rounded-xl border-2 border-amber-400 bg-gradient-to-r from-amber-400 to-amber-500 text-sm font-semibold text-white shadow-lg hover:from-amber-500 hover:to-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 transition-all duration-200 ease-out overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:from-gray-300 disabled:to-gray-400 disabled:border-gray-300"
+                        ${primaryDisabled ? 'disabled' : ''}
+                        aria-label="进入下一步"
                     >
-                        <span class="relative z-10 flex items-center justify-center gap-2">
+                        <span class="relative z-10 flex items-center gap-2">
                             <span>下一步</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                             </svg>
                         </span>
-                        ${!primaryDisabled ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>' : ''}
+                        <div class="absolute inset-0 bg-gradient-to-r from-amber-300 to-amber-400 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${primaryDisabled ? 'hidden' : ''}"></div>
                     </button>
-                </div>`;
-            return;
-        }
-
-        this.elements.footer.innerHTML = `
-            <div class="flex items-center gap-3">
-                <button 
-                    type="button" 
-                    data-action="prev" 
-                    class="group relative h-12 min-w-[44px] px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition-all duration-200 ease-out overflow-hidden"
-                    aria-label="返回上一步，重新填写金钱觉察记录"
-                >
-                    <span class="relative z-10 flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
-                        </svg>
-                        <span>上一步</span>
-                    </span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-gray-50 to-gray-100 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                </button>
-                <button 
-                    type="button" 
-                    data-action="${this.step === 3 ? 'complete' : 'next'}" 
-                    ${primaryDisabled ? 'disabled' : ''} 
-                    class="group relative h-12 min-w-[44px] flex-1 rounded-xl text-sm font-medium text-gray-800 transition-all duration-200 ease-out overflow-hidden ${
-                        primaryDisabled 
-                            ? 'bg-gray-300 cursor-not-allowed text-gray-500' 
-                            : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 shadow-sm hover:shadow-md'
-                    }" 
-                    ${primaryDisabled ? 'aria-disabled="true"' : ''} 
-                    aria-label="${this.step === 3 ? '完成金钱觉察记录并保存' : '进入下一步，继续金钱觉察记录'}"
-                >
-                    <span class="relative z-10 flex items-center justify-center gap-2">
-                        <span>${this.step === 3 ? '完成记录' : '下一步'}</span>
-                        ${this.step === 3 
-                            ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
-                            : '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>'
-                        }
-                    </span>
-                    ${!primaryDisabled ? '<div class="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>' : ''}
-                </button>
+                ` : ''}
+                
+                ${isLastStep ? `
+                    <div class="flex-1 text-center">
+                        <p class="text-sm text-gray-500">
+                            ${primaryDisabled 
+                                ? '请完成当前步骤' 
+                                : '已完成所有步骤，请保存记录'
+                            }
+                        </p>
+                    </div>
+                ` : ''}
             </div>`;
     }
 
@@ -704,7 +641,7 @@ export class MoneyAwarenessModule {
                         <div class="flex items-center gap-2">
                             <div class="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 text-xs font-medium">A</div>
                             <h6 class="text-base font-medium text-gray-800">钱支持的生活用途</h6>
-                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">多选</span>
+                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">（最多选择 2 项，请选出今天最有代表性的投入方向）</span>
                         </div>
                         <div class="pl-8 space-y-2">
                             ${STEP2_LIFE_SUPPORT_OPTIONS.map((item, index) => this.renderChip({
@@ -838,12 +775,18 @@ export class MoneyAwarenessModule {
     renderChip({ group, value, label, desc, selected, disabled = false, index = null, variant = 'default', isSpecial = false }) {
         const baseClass = 'w-full min-h-[48px] rounded-xl border text-left px-4 py-3 transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2';
         
+        // 检查是否为生活用途选项且已达到最大选择数量
+        const isLifeSupport = group === 'step2-life';
+        const hasReachedMax = isLifeSupport && this.data.step2.lifeSupport.length >= 2;
+        const isDisabledByLimit = isLifeSupport && hasReachedMax && !selected;
+        
         // Variant-specific styling
         const variantStyles = {
             life: {
                 selected: 'border-amber-400 bg-gradient-to-r from-amber-50 to-amber-100 text-gray-800 shadow-sm',
                 hover: 'border-amber-300 bg-amber-50 text-gray-700 hover:shadow-md',
-                default: 'border-gray-200 bg-white text-gray-700 hover:border-amber-200 hover:bg-gray-50'
+                default: 'border-gray-200 bg-white text-gray-700 hover:border-amber-200 hover:bg-gray-50',
+                disabled: 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-60'
             },
             state: {
                 selected: 'border-blue-400 bg-gradient-to-r from-blue-50 to-blue-100 text-gray-800 shadow-sm',
@@ -869,13 +812,15 @@ export class MoneyAwarenessModule {
 
         const style = variantStyles[variant] || variantStyles.default;
         
-        const stateClass = disabled
-            ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+        const isActuallyDisabled = disabled || isDisabledByLimit;
+        
+        const stateClass = isActuallyDisabled
+            ? (variantStyles[variant]?.disabled || 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-60')
             : (selected
                 ? style.selected
                 : style.default);
 
-        const focusClass = disabled ? '' : 'focus:ring-amber-400';
+        const focusClass = isActuallyDisabled ? '' : 'focus:ring-amber-400';
         
         // Icon for different variants
         const getIcon = () => {
@@ -884,8 +829,11 @@ export class MoneyAwarenessModule {
                     ? '<svg class="w-4 h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>'
                     : '<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle></svg>';
             }
-            if (variant === 'breath' && label.includes('😌')) {
-                return '<span class="text-lg">' + label.split(' ')[0] + '</span>';
+            // 所有呼吸感选项都使用统一的圆形边框样式
+            if (variant === 'breath') {
+                return selected 
+                    ? '<svg class="w-5 h-5 text-current" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'
+                    : '<div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>';
             }
             return selected 
                 ? '<svg class="w-5 h-5 text-current" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>'
@@ -897,7 +845,7 @@ export class MoneyAwarenessModule {
                 type="button"
                 data-chip-group="${group}"
                 data-chip-value="${value}"
-                ${disabled ? 'disabled' : ''}
+                ${isActuallyDisabled ? 'disabled' : ''}
                 class="${baseClass} ${stateClass} ${focusClass} group relative overflow-hidden"
                 aria-pressed="${selected}"
                 aria-label="${label}${desc ? ': ' + desc : ''}"

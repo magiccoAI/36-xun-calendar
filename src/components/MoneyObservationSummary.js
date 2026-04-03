@@ -316,24 +316,45 @@ class MoneyObservationSummary {
     const tags = [];
     const { flowMap, selfStateAnalysis } = aggregated;
 
-    // 基于缺失的流动类型推荐
+    // 基于缺失的流动类型推荐观察方向
     if (flowMap.flowTypes['赚到的一笔'] === 0) {
-      tags.push('多留意赚到的部分');
+      tags.push('观察钱是否支持未来');
     }
     if (flowMap.flowTypes['留下来的一笔'] === 0) {
-      tags.push('关注存钱的机会');
+      tags.push('观察钱是否维持关系');
     }
-    if (flowMap.flowTypes['投出去的一笔'] === 0) {
-      tags.push('探索投资的可能性');
+    if (flowMap.flowTypes['换时间的一笔'] === 0) {
+      tags.push('观察钱是否换回时间');
+    }
+    
+    // 基于生活用途推荐观察方向
+    const hasFuturePurpose = flowMap.lifePurposes['往长远处走'] > 0;
+    const hasSkillPurpose = flowMap.lifePurposes['维系重要关系'] > 0;
+    
+    if (!hasFuturePurpose) {
+      tags.push('观察钱是否提升能力');
+    }
+    if (!hasSkillPurpose) {
+      tags.push('观察钱是否扩大选择');
     }
 
-    // 基于自我状态推荐
-    const totalStates = Object.values(selfStateAnalysis.selfStates).reduce((sum, count) => sum + count, 0);
-    if (totalStates > 0 && selfStateAnalysis.selfStates['在推进未来的我'] / totalStates < 0.2) {
-      tags.push('给未来更多投资');
-    }
+    // 确保返回所有6个观察方向，如果数量不够则补充其他方向
+    const allObservationTags = [
+      '观察钱是否支持未来',
+      '观察钱是否提升能力', 
+      '观察钱是否扩大选择',
+      '观察钱是否维持关系',
+      '观察钱是否换回时间'
+    ];
+    
+    // 添加已有的标签
+    allObservationTags.forEach(tag => {
+      if (!tags.includes(tag)) {
+        tags.push(tag);
+      }
+    });
 
-    return tags.slice(0, 3);
+    return tags.slice(0, 5); // 返回前5个
   }
 
   // 获取金钱观察记录
@@ -428,31 +449,47 @@ class OverviewSection {
             <p class="text-sm text-gray-600">每一笔记录，都是与自己的对话</p>
           </div>
           
-          <!-- 10个圆点指示器 - 更温暖的设计 -->
-          <div class="flex justify-center gap-3">
-            ${Array.from({length: totalDays}, (_, i) => `
-              <div class="relative group">
-                <div class="w-4 h-4 rounded-full transition-all duration-500 transform hover:scale-110 ${
-                  i < recordedDays 
-                    ? 'bg-gradient-to-br from-amber-400 to-orange-400 shadow-md' 
-                    : 'bg-gray-100 border-2 border-gray-300'
-                }" 
-                title="第${i + 1}天${i < recordedDays ? ' - 已记录' : ' - 未记录'}">
-                  ${i < recordedDays ? '<div class="absolute inset-0 rounded-full bg-amber-300 animate-pulse opacity-50"></div>' : ''}
-                </div>
-                <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                  ${i + 1}
-                </div>
+          <!-- 渐进式生长进度条 - 10个小元宝 -->
+          <div class="flex justify-center items-center gap-2 mb-6">
+            <div class="relative w-full max-w-sm">
+              <!-- 背景轨道 -->
+              <div class="h-3 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-full shadow-inner overflow-hidden">
+                <!-- 进度填充 -->
+                <div class="h-full bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-400 rounded-full transition-all duration-700 ease-out shadow-sm"
+                     style="width: ${(recordedDays / totalDays) * 100}%"></div>
               </div>
-            `).join('')}
+              
+              <!-- 10个小元宝指示器 -->
+              <div class="absolute inset-0 flex justify-between items-center px-1">
+                ${Array.from({length: totalDays}, (_, i) => `
+                  <div class="relative group">
+                    <div class="w-5 h-5 rounded-full transition-all duration-500 transform hover:scale-110 ${
+                      i < recordedDays 
+                        ? 'bg-gradient-to-br from-amber-400 to-orange-400 shadow-md border-2 border-amber-300' 
+                        : 'bg-gray-100 border-2 border-gray-300'
+                    }" 
+                    title="第${i + 1}天${i < recordedDays ? ' - 已记录' : ' - 未记录'}">
+                      ${i < recordedDays ? `
+                        <div class="absolute inset-0 flex items-center justify-center">
+                          <div class="w-2 h-2 bg-amber-200 rounded-full"></div>
+                        </div>
+                      ` : ''}
+                    </div>
+                    <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      ${i + 1}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
           </div>
           
           <div class="space-y-3">
             <div class="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-              ${recordedDays}/${totalDays}
+              记录天数 ${recordedDays}/${totalDays}
             </div>
             <p class="text-sm text-gray-700 leading-relaxed max-w-xs mx-auto">
-              ${this.generateWarmDescription(recordedDays, totalDays)}
+              ${this.generateProgressDescription(recordedDays, totalDays)}
             </p>
           </div>
         </div>
@@ -460,13 +497,12 @@ class OverviewSection {
     `;
   }
 
-  generateWarmDescription(recordedDays, totalDays) {
-    const rate = recordedDays / totalDays;
-    if (rate === 1) return '真好！你记录了这一旬的每一天，每一笔都是与自己的对话';
-    if (rate >= 0.8) return '很棒！你几乎记录了这一旬的大部分时光，看见了自己与钱的关系';
-    if (rate >= 0.5) return '不错！你记录了这一旬的一半以上，每一次记录都是觉察的开始';
-    if (rate >= 0.3) return '继续加油，多记录会看见更多关于自己的模式';
-    return '刚开始记录，每一笔都是了解自己的机会';
+  generateProgressDescription(recordedDays, totalDays) {
+    if (recordedDays < 5) {
+      return `你已经和自己对话了${recordedDays}次，觉察正在发生`;
+    } else {
+      return `习惯正在养成，你对金钱的感知在变得细腻`;
+    }
   }
 }
 
@@ -506,7 +542,7 @@ class FlowMapSection {
             钱的流动类型
           </h4>
           <div class="space-y-4">
-            ${Object.entries(flowTypes).map(([type, count]) => `
+            ${Object.entries(flowTypes).filter(([type, count]) => count > 0).map(([type, count]) => `
               <div class="flex items-center gap-4">
                 <span class="text-sm text-gray-600 min-w-[90px] font-medium">${type}</span>
                 <div class="flex-1 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-full h-3 relative overflow-hidden shadow-inner">
@@ -528,11 +564,11 @@ class FlowMapSection {
             支持的生活领域
           </h4>
           <div class="flex flex-wrap gap-4 justify-center items-center min-h-[140px]">
-            ${Object.entries(lifePurposes).map(([purpose, count]) => `
+            ${Object.entries(lifePurposes).filter(([purpose, count]) => count > 0).map(([purpose, count]) => `
               <div class="relative group cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-lg">
                 <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-6 border-0 flex items-center justify-center shadow-sm"
-                     style="width: ${this.calculateBubbleSize(count, recordedDays)}px; 
-                            height: ${this.calculateBubbleSize(count, recordedDays)}px">
+                     style="width: ${this.calculateBubbleSize(count, recordedDays, Math.max(...Object.values(lifePurposes)))}px; 
+                            height: ${this.calculateBubbleSize(count, recordedDays, Math.max(...Object.values(lifePurposes)))}px">
                   <div class="text-center">
                     <span class="text-xs font-semibold text-gray-700 block mb-1">${this.shortenPurpose(purpose)}</span>
                     <div class="w-6 h-6 rounded-full bg-gradient-to-br from-blue-200 to-indigo-200 flex items-center justify-center mx-auto">
@@ -565,11 +601,11 @@ class FlowMapSection {
     return total > 0 ? Math.round((count / total) * 100) : 0;
   }
 
-  calculateBubbleSize(count, total) {
-    if (total === 0) return 60;
-    const ratio = count / total;
-    const minSize = 60;
-    const maxSize = 120;
+  calculateBubbleSize(count, total, maxCount) {
+    if (total === 0 || maxCount === 0) return 80;
+    const ratio = count / maxCount;
+    const minSize = 80;
+    const maxSize = 120; // 最大为最小的1.5倍
     return minSize + (maxSize - minSize) * ratio;
   }
 
@@ -586,15 +622,17 @@ class FlowMapSection {
   }
 
   generatePurposeDescription(purpose) {
-    const descriptions = {
-      '往长远处走': '看见你的钱主要在为未来投资，支持着长远的发展',
-      '让生活正常运转': '看见你的钱主要在支持生活的基本运转，维持日常的安定',
-      '维系重要关系': '看见你的钱主要在维系重要的人际关系，滋养着情感连接',
-      '去看看世界': '看见你的钱主要在支持探索世界的愿望，扩展生命的边界',
-      '给自己一点空间': '看见你的钱主要在为自己创造空间，支持身心的疗愈',
-      '帮我省出时间': '看见你的钱主要在换取时间，提升生活的自由度'
+    const categoryMeaning = {
+      '往长远处走': '为未来的自己投资，构建长远的发展基础',
+      '让生活正常运转': '维系生活的基本运转，保持日常的安定感',
+      '维系重要关系': '滋养重要的人际关系，守护情感的连接',
+      '去看看世界': '扩展生命的边界，支持探索世界的愿望',
+      '给自己一点空间': '创造身心的疗愈空间，关照内在的自己',
+      '帮我省出时间': '换取宝贵的时间与自由，提升生活的品质'
     };
-    return descriptions[purpose] || '看见你的钱在支持着生活的某个重要方面';
+    
+    const meaning = categoryMeaning[purpose] || '支持着生活的某个重要方面';
+    return `这一旬，你把资源投入到了${purpose}，这说明你正在${meaning}`;
   }
 }
 
@@ -627,25 +665,8 @@ class BreathingCurveSection {
           呼吸感曲线
         </h3>
         
-        <!-- 简化的曲线图 -->
-        <div class="mb-8">
-          <div class="relative h-40 bg-gradient-to-b from-green-50 via-emerald-50 to-white rounded-2xl p-6 shadow-inner">
-            <div class="flex items-end justify-between h-full gap-2">
-              ${dailyValues.map((point, index) => `
-                <div class="flex-1 flex flex-col items-center justify-end group">
-                  <div class="w-full bg-gradient-to-t from-green-300 via-emerald-300 to-green-200 rounded-t-lg transition-all duration-500 hover:shadow-lg relative"
-                       style="height: ${(point.value / 5) * 100}%">
-                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      ${point.label}
-                    </div>
-                  </div>
-                  <div class="w-4 h-4 rounded-full bg-gradient-to-br from-green-200 to-emerald-200 mt-2 shadow-sm"></div>
-                  <span class="text-xs text-gray-500 mt-1 font-medium">${index + 1}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
+        <!-- 条件显示：数据点≤3时显示卡片，否则显示曲线图 -->
+        ${dailyValues.length <= 3 ? this.renderCardView(dailyValues) : this.renderChartView(dailyValues)}
 
         <!-- 分布统计 -->
         <div class="space-y-4">
@@ -653,9 +674,11 @@ class BreathingCurveSection {
             <span class="w-2 h-2 bg-green-400 rounded-full"></span>
             呼吸感分布
           </h4>
-          <div class="grid grid-cols-5 gap-3">
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
             ${Object.entries(distribution).map(([feeling, count]) => `
-              <div class="text-center p-3 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border-0 transition-all duration-300 hover:shadow-md hover:scale-105">
+              <div class="text-center p-3 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border-0 transition-all duration-300 hover:shadow-md hover:scale-105 ${
+                count === 0 ? 'opacity-30 scale-95' : ''
+              }">
                 <div class="text-2xl mb-2">${this.getEmojiByFeeling(feeling)}</div>
                 <div class="text-xs text-gray-600 font-medium mb-1">${this.shortenFeeling(feeling)}</div>
                 <div class="w-6 h-6 rounded-full bg-gradient-to-br from-green-200 to-emerald-200 flex items-center justify-center mx-auto shadow-sm">
@@ -667,13 +690,60 @@ class BreathingCurveSection {
           
           <div class="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-0 shadow-sm">
             <p class="text-sm text-gray-700 leading-relaxed">
-              <span class="text-green-600 font-semibold">💫 平均状态：</span>
-              ${this.getBreathingDescription(averageScore)}
+              <span class="text-green-600 font-semibold">🌱 行动建议：</span>
+              ${this.generateActionSuggestion(distribution, recordedDays)}
             </p>
           </div>
         </div>
       </section>
     `;
+  }
+
+  renderCardView(dailyValues) {
+    return `
+      <div class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          ${dailyValues.map((point, index) => `
+            <div class="bg-gradient-to-br from-green-50 via-emerald-50 to-white rounded-2xl p-6 border-0 shadow-sm hover:shadow-md transition-all duration-300">
+              <div class="text-center space-y-3">
+                <div class="text-xs text-gray-500 font-medium">第${index + 1}天</div>
+                <div class="text-3xl">${this.getEmojiByFeeling(point.label)}</div>
+                <div class="text-sm text-gray-700 font-semibold">${point.label}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  renderChartView(dailyValues) {
+    return `
+      <div class="mb-8">
+        <div class="relative h-40 bg-gradient-to-b from-green-50 via-emerald-50 to-white rounded-2xl p-6 shadow-inner">
+          <div class="flex items-end justify-between h-full gap-2">
+            ${dailyValues.map((point, index) => `
+              <div class="flex-1 flex flex-col items-center justify-end group">
+                <div class="w-full bg-gradient-to-t from-green-300 via-emerald-300 to-green-200 rounded-t-lg transition-all duration-500 hover:shadow-lg relative"
+                     style="height: ${(point.value / 5) * 100}%">
+                  <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                    ${point.label}
+                  </div>
+                </div>
+                <div class="w-4 h-4 rounded-full bg-gradient-to-br from-green-200 to-emerald-200 mt-2 shadow-sm"></div>
+                <span class="text-xs text-gray-500 mt-1 font-medium">${index + 1}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  generateActionSuggestion(distribution, total) {
+    const mindfulCount = distribution['留神的'] || 0;
+    const tightCount = distribution['收紧的'] || 0;
+    return `${total}次记录中，${mindfulCount}次'留神'，${tightCount}次'收紧'。下次消费前，试试先深呼吸3秒？`;
   }
 
   getEmojiByFeeling(feeling) {
@@ -723,33 +793,15 @@ class SelfStateSection {
     
     return `
       <section class="bg-white rounded-3xl p-8 shadow-lg border border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-900 mb-8 flex items-center gap-2">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
           <span class="text-xl">🪞</span>
           三个版本的我
         </h3>
+        <p class="text-sm text-gray-500 mb-8 text-center">当下的我(满足此刻) · 生活的我(维持日常) · 未来的我(投资成长)</p>
         
-        <!-- 自我状态进度条 -->
-        <div class="space-y-6 mb-10">
-          <h4 class="text-sm font-medium text-gray-700 flex items-center gap-2">
-            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>
-            自我状态分布
-          </h4>
-          <div class="space-y-4">
-            ${Object.entries(selfStates).map(([state, count]) => `
-              <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-700 font-medium">${this.shortenState(state)}</span>
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center shadow-sm">
-                    <span class="text-xs font-bold text-purple-700">${count}</span>
-                  </div>
-                </div>
-                <div class="w-full bg-gradient-to-r from-purple-50 to-indigo-50 rounded-full h-3 shadow-inner">
-                  <div class="bg-gradient-to-r from-purple-300 via-indigo-300 to-purple-400 h-3 rounded-full transition-all duration-700 shadow-sm"
-                       style="width: ${this.calculatePercentage(count, recordedDays)}%"></div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
+        <!-- 三角形关系图 -->
+        <div class="mb-10">
+          ${this.renderTriangleChart(selfStates, recordedDays)}
         </div>
 
         <!-- 继续意愿分布 -->
@@ -810,11 +862,146 @@ class SelfStateSection {
     return mapping[state] || state;
   }
 
+  renderTriangleChart(selfStates, recordedDays) {
+    const states = {
+      '在照顾当下的我': { label: '当下的我', value: selfStates['在照顾当下的我'] || 0, color: 'from-blue-400 to-blue-600' },
+      '在维持生活的我': { label: '生活的我', value: selfStates['在维持生活的我'] || 0, color: 'from-purple-400 to-purple-600' },
+      '在推进未来的我': { label: '未来的我', value: selfStates['在推进未来的我'] || 0, color: 'from-pink-400 to-pink-600' }
+    };
+
+    const total = Object.values(states).reduce((sum, state) => sum + state.value, 0);
+    
+    if (total === 0) {
+      return `
+        <div class="text-center py-12 text-gray-500">
+          <div class="text-4xl mb-4">🌟</div>
+          <p class="text-sm font-medium text-gray-700 mb-2">还没有自我状态记录</p>
+          <p class="text-xs text-gray-500 max-w-xs mx-auto">开始记录后，这里会显示你在不同时刻的状态分布</p>
+        </div>
+      `;
+    }
+
+    // 计算三角形坐标
+    const centerX = 150;
+    const centerY = 130;
+    const radius = 80;
+    
+    // 三个顶点坐标（等边三角形）
+    const positions = {
+      '在照顾当下的我': { x: centerX, y: centerY - radius }, // 顶部
+      '在维持生活的我': { x: centerX - radius * Math.cos(Math.PI / 6), y: centerY + radius * Math.sin(Math.PI / 6) }, // 左下
+      '在推进未来的我': { x: centerX + radius * Math.cos(Math.PI / 6), y: centerY + radius * Math.sin(Math.PI / 6) }  // 右下
+    };
+
+    // 计算重心位置（根据数据权重）
+    const weightedX = Object.entries(states).reduce((sum, [key, state]) => {
+      return sum + (positions[key].x * state.value);
+    }, 0) / total;
+    
+    const weightedY = Object.entries(states).reduce((sum, [key, state]) => {
+      return sum + (positions[key].y * state.value);
+    }, 0) / total;
+
+    return `
+      <div class="relative mx-auto" style="width: 300px; height: 260px;">
+        <!-- SVG 三角形 -->
+        <svg class="absolute inset-0 w-full h-full" viewBox="0 0 300 260">
+          <!-- 三角形背景 -->
+          <polygon 
+            points="${positions['在照顾当下的我'].x},${positions['在照顾当下的我'].y} ${positions['在维持生活的我'].x},${positions['在维持生活的我'].y} ${positions['在推进未来的我'].x},${positions['在推进未来的我'].y}"
+            fill="none" 
+            stroke="url(#gradient)" 
+            stroke-width="2"
+            stroke-dasharray="5,5"
+            opacity="0.3"
+          />
+          
+          <!-- 渐变定义 -->
+          <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#9333ea;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="在照顾当下的我" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="在维持生活的我" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#a78bfa;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+            </linearGradient>
+            <linearGradient id="在推进未来的我" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#f472b6;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#db2777;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          
+          <!-- 顶点圆圈和标签 -->
+          ${Object.entries(states).map(([key, state]) => `
+            <g>
+              <circle 
+                cx="${positions[key].x}" 
+                cy="${positions[key].y}" 
+                r="8" 
+                fill="url(#${key.replace(/[^a-zA-Z0-9]/g, '')})"
+                class="transition-all duration-300 hover:r-10"
+              />
+              <text 
+                x="${positions[key].x}" 
+                y="${key === '在照顾当下的我' ? positions[key].y - 20 : positions[key].y + 25}" 
+                text-anchor="middle" 
+                class="text-xs font-medium fill-gray-700"
+              >
+                ${state.label}
+              </text>
+              <text 
+                x="${positions[key].x}" 
+                y="${key === '在照顾当下的我' ? positions[key].y - 8 : positions[key].y + 37}" 
+                text-anchor="middle" 
+                class="text-xs fill-gray-500"
+              >
+                ${state.value}次
+              </text>
+            </g>
+          `).join('')}
+          
+          <!-- 数据点 -->
+          <circle 
+            cx="${weightedX}" 
+            cy="${weightedY}" 
+            r="12" 
+            fill="#fbbf24" 
+            stroke="#f59e0b" 
+            stroke-width="2"
+            class="animate-pulse"
+          >
+            <animate 
+              attributeName="r" 
+              values="12;15;12" 
+              dur="2s" 
+              repeatCount="indefinite" 
+            />
+          </circle>
+        </svg>
+        
+        <!-- 图例 -->
+        <div class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 flex gap-4 text-xs">
+          ${Object.entries(states).map(([key, state]) => `
+            <div class="flex items-center gap-1">
+              <div class="w-3 h-3 rounded-full bg-gradient-to-r ${state.color}"></div>
+              <span class="text-gray-600">${state.label}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   shortenWilling(willing) {
     const mapping = {
       '我愿意继续': '愿意',
-      '我希望调整一点': '调整',
-      '我不希望继续': '不愿意'
+      '我希望调整一点': '探索中',
+      '我不希望继续': '觉察到新的可能性'
     };
     return mapping[willing] || willing;
   }
@@ -826,9 +1013,17 @@ class SelfStateSection {
 
 // 区块E：觉察沉淀
 class ReflectionSection {
+  constructor() {
+    this.selectedTags = [];
+    this.userSummary = '';
+  }
+
   render(data) {
     const { autoSummary, recommendedTags } = data.reflection;
     const recordedDays = data.overview.recordedDays;
+    
+    // 初始化用户总结为AI总结
+    this.userSummary = this.userSummary || autoSummary;
     
     return `
       <section class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 rounded-3xl p-8 shadow-lg border-0">
@@ -837,13 +1032,19 @@ class ReflectionSection {
           觉察沉淀
         </h3>
         
-        <!-- 自动总结 -->
+        <!-- 可编辑的AI总结 -->
         <div class="mb-8 p-6 bg-white rounded-2xl border-0 shadow-sm">
           <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
             <span class="w-2 h-2 bg-indigo-400 rounded-full"></span>
             这一旬的看见
           </h4>
-          <p class="text-sm text-gray-700 leading-relaxed">${autoSummary}</p>
+          <textarea 
+            id="user-summary"
+            class="w-full rounded-2xl border-0 bg-white px-5 py-4 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 resize-none transition-all duration-200 shadow-sm"
+            rows="4"
+            maxlength="200"
+            placeholder="记录你对这一旬金钱观察的看见..."
+            onchange="window.reflectionSection?.onSummaryChange(this.value)">${this.userSummary}</textarea>
         </div>
 
         <!-- 下一旬意图 -->
@@ -868,8 +1069,10 @@ class ReflectionSection {
                 ${recommendedTags.map(tag => `
                   <button type="button" 
                           class="intention-tag px-4 py-2 text-sm bg-white border-0 text-indigo-700 rounded-full hover:bg-indigo-50 hover:border-indigo-300 transition-all duration-200 shadow-sm hover:shadow-md"
-                          data-tag="${tag}">
-                    ${tag}
+                          data-tag="${tag}"
+                          onclick="window.reflectionSection?.onTagClick('${tag}')">
+                    <span class="tag-content">${tag}</span>
+                    <span class="tag-check hidden ml-2">✓</span>
                   </button>
                 `).join('')}
               </div>
@@ -881,41 +1084,89 @@ class ReflectionSection {
         <div class="mt-8 flex justify-end">
           <button 
             id="complete-money-summary-btn"
-            class="px-8 py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-2xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+            class="px-8 py-4 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-2xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            onclick="window.reflectionSection?.onComplete()"
+            disabled
           >
-            完成金钱小结
+            <span class="flex items-center gap-2">
+              <span>🌱</span>
+              <span>把这份觉察，带到下一旬</span>
+            </span>
           </button>
         </div>
       </section>
     `;
   }
 
-  bindEvents(callback) {
-    // 推荐标签点击事件
-    document.querySelectorAll('.intention-tag').forEach(tag => {
-      tag.addEventListener('click', (e) => {
-        const textarea = document.getElementById('next-xun-intention');
-        const tagText = e.target.dataset.tag;
-        const currentText = textarea.value.trim();
-        
-        if (currentText && !currentText.includes(tagText)) {
-          textarea.value = currentText + '，' + tagText;
-        } else if (!currentText) {
-          textarea.value = tagText;
-        }
-        
-        textarea.focus();
-      });
-    });
+  onSummaryChange(value) {
+    this.userSummary = value;
+    this.validateForm();
+  }
 
-    // 完成按钮事件
+  onTagClick(tag) {
+    const tagButton = document.querySelector(`[data-tag="${tag}"]`);
+    const tagContent = tagButton.querySelector('.tag-content');
+    const tagCheck = tagButton.querySelector('.tag-check');
+    
+    if (this.selectedTags.includes(tag)) {
+      // 取消选择
+      this.selectedTags = this.selectedTags.filter(t => t !== tag);
+      tagButton.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-300');
+      tagButton.classList.add('bg-white', 'text-indigo-700');
+      tagCheck.classList.add('hidden');
+    } else {
+      // 选择标签
+      this.selectedTags.push(tag);
+      tagButton.classList.remove('bg-white', 'text-indigo-700');
+      tagButton.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-300');
+      tagCheck.classList.remove('hidden');
+      
+      // 添加到文本框
+      const textarea = document.getElementById('next-xun-intention');
+      const currentText = textarea.value.trim();
+      if (currentText && !currentText.includes(tag)) {
+        textarea.value = currentText + '，' + tag;
+      } else if (!currentText) {
+        textarea.value = tag;
+      }
+    }
+    
+    this.validateForm();
+  }
+
+  validateForm() {
+    const summaryTextarea = document.getElementById('user-summary');
     const completeBtn = document.getElementById('complete-money-summary-btn');
-    if (completeBtn) {
-      completeBtn.addEventListener('click', () => {
-        const intention = document.getElementById('next-xun-intention').value.trim();
-        callback(intention);
+    
+    if (summaryTextarea && completeBtn) {
+      const isValid = summaryTextarea.value.trim().length > 0;
+      completeBtn.disabled = !isValid;
+    }
+  }
+
+  onComplete() {
+    const intention = document.getElementById('next-xun-intention').value.trim();
+    const summary = document.getElementById('user-summary').value.trim();
+    
+    if (this.onCompleteCallback) {
+      this.onCompleteCallback({
+        userSummary: summary,
+        userIntentions: intention,
+        selectedTags: this.selectedTags
       });
     }
+  }
+
+  bindEvents(callback) {
+    this.onCompleteCallback = callback;
+    
+    // 设置全局引用
+    window.reflectionSection = this;
+    
+    // 初始验证
+    setTimeout(() => {
+      this.validateForm();
+    }, 100);
   }
 }
 
@@ -1019,7 +1270,12 @@ export class MoneyObservationSummaryComponent {
     }
   }
 
-  handleComplete(intention) {
+  handleComplete(data) {
+    // 处理新的数据结构（可能是字符串或对象）
+    const intention = typeof data === 'string' ? data : (data?.userIntentions || '');
+    const userSummary = typeof data === 'string' ? '' : (data?.userSummary || '');
+    const selectedTags = typeof data === 'string' ? [] : (data?.selectedTags || []);
+    
     // 保存用户意图
     this.userIntentions = intention;
     MoneyDataRepository.saveUserIntentions(this.xunPeriod, intention);
@@ -1027,7 +1283,9 @@ export class MoneyObservationSummaryComponent {
     // 保存总结数据
     MoneyDataRepository.saveXunSummary(this.xunPeriod, {
       ...this.currentData,
+      userSummary: userSummary,
       userIntentions: intention,
+      selectedTags: selectedTags,
       completedAt: Date.now()
     });
 

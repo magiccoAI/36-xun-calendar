@@ -71,8 +71,7 @@ export const Calendar = {
                      const diffTime = Math.abs(yearEnd - startDate);
                      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
                      daysInXun = Math.max(diffDays + 1, CONFIG.LAST_XUN_DAYS || 15); // 确保至少15天
-                     console.log(`Last xun (${i}): ${diffDays + 1} days calculated, using ${daysInXun} days`);
-                }
+                                     }
 
                 // 计算结束日期
                 const endDate = new Date(startDate);
@@ -148,20 +147,14 @@ export const Calendar = {
             const now = new Date();
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0); // 设置为中午12点，避免时区边界问题
             
-            console.log('=== getCurrentXun Debug ===');
-            console.log('Now (local):', now.toString());
-            console.log('Today (normalized):', today.toString());
-            console.log('Today ISO:', today.toISOString());
-            console.log('Year check:', today.getFullYear(), 'vs', CONFIG.YEAR);
-            
+                        
             if (isNaN(today.getTime())) {
                 console.error('Calendar.getCurrentXun: invalid current time');
                 return null;
             }
             
             if (today.getFullYear() !== CONFIG.YEAR) {
-                console.log('Year mismatch, returning null');
-                return null;
+                                return null;
             }
             
             const currentXun = periods.find(p => {
@@ -170,17 +163,10 @@ export const Calendar = {
                 const xunEnd = new Date(p.endDate.getFullYear(), p.endDate.getMonth(), p.endDate.getDate(), 12, 0, 0, 0);
                 
                 const result = today >= xunStart && today <= xunEnd;
-                if (p.index >= 6 && p.index <= 10) {
-                    console.log(`Xun ${p.index}: ${p.startDate.toISOString().split('T')[0]} ~ ${p.endDate.toISOString().split('T')[0]} = ${result}`);
-                    console.log(`  Today >= start: ${today >= xunStart} (${today.toISOString()} >= ${xunStart.toISOString()})`);
-                    console.log(`  Today <= end: ${today <= xunEnd} (${today.toISOString()} <= ${xunEnd.toISOString()})`);
-                }
-                return result;
+                                return result;
             }) || null;
             
-            console.log('Current Xun result:', currentXun ? `Xun ${currentXun.index}` : 'None');
-            console.log('=== End Debug ===');
-            return currentXun;
+                        return currentXun;
         } catch (error) {
             console.error('Calendar.getCurrentXun error:', error);
             return null;

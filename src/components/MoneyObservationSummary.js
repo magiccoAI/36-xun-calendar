@@ -1202,10 +1202,34 @@ export class MoneyObservationSummaryComponent {
     const showDetailedBlocks = recordedDays >= 3;
     console.log(`📊 Show detailed blocks: ${showDetailedBlocks}`);
     
+    // 生成数据不足提示（如果需要）
+    const getDataInsufficientNotice = () => {
+      if (showDetailedBlocks) return '';
+      return `
+        <div class="mb-6 p-4 bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 rounded-2xl border-0 shadow-sm">
+          <div class="flex items-start gap-3">
+            <div class="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <span class="text-xs text-amber-700">💡</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm text-amber-800 leading-relaxed">
+                <span class="font-medium">数据收集中</span>
+                <br>
+                已记录${recordedDays}天，再记录${3 - recordedDays}天将解锁完整的金钱观察分析模块，包括呼吸感曲线、自我状态图谱等深度洞察。
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+    
     const html = `
       <div class="space-y-8">
         <!-- 区块A：始终显示 -->
         ${new OverviewSection().render(this.currentData)}
+        
+        <!-- 数据不足提示 -->
+        ${getDataInsufficientNotice()}
         
         <!-- 区块B-E：根据记录天数决定是否显示 -->
         ${showDetailedBlocks ? `

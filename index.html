@@ -1296,6 +1296,30 @@
             </div>
             
             <div class="space-y-6">
+                <!-- Cloud Sync (GitHub Gist) -->
+                <div class="border-b border-gray-100 pb-6">
+                    <h4 class="font-medium text-gray-700 mb-2 flex items-center justify-between">
+                        云端同步 (GitHub Gist)
+                        <span id="sync-status" class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500">未连接</span>
+                    </h4>
+                    <p class="text-sm text-gray-500 mb-3">使用 GitHub Gist 保持多端数据同步（完全控制数据隐私）。</p>
+                    <div class="space-y-3">
+                        <input type="password" id="gist-token" placeholder="GitHub Personal Access Token" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" id="gist-id" placeholder="Gist ID (可选，留空将自动创建)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <div class="flex gap-2">
+                            <button id="btn-sync-up" class="flex-1 bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900 transition-colors text-sm flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                备份到云端
+                            </button>
+                            <button id="btn-sync-down" class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                从云端恢复
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-gray-400">需要具有 <code class="bg-gray-100 px-1 rounded">gist</code> 权限的 GitHub Token。</p>
+                    </div>
+                </div>
+
                 <!-- Export -->
                 <div class="border-b border-gray-100 pb-6">
                     <h4 class="font-medium text-gray-700 mb-2">导出数据 (Export)</h4>

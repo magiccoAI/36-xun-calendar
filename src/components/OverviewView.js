@@ -117,7 +117,8 @@ export class OverviewView {
             const xunIndex = xun ? xun.index : 0;
             
             const el = document.createElement('div');
-            el.className = 'w-3 h-3 md:w-4 md:h-4 rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-125 relative group';
+            el.className = 'w-3 h-3 md:w-4 md:h-4 rounded-[1px] cursor-pointer transition-all duration-200 hover:scale-125 relative group day-cell';
+            el.dataset.date = dateStr;
             
             const hue = (xunIndex * 10) % 360;
             

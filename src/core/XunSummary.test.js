@@ -121,7 +121,7 @@ describe('buildXunSummary - Energy Refactor', () => {
         const summary = buildXunSummary(new Date('2026-03-06'));
         
         // 应该显示无精力记录的提示
-        expect(summary.insights).toContain('本旬暂无精力状态记录，请在每日记录中选择身心状态。');
+        expect(summary.insights).toContain('本旬暂无精力状态记录，请在每日记录中选择身心状态以获得更准确的分析。');
         expect(summary.avgEnergy).toBe(0);
     });
 

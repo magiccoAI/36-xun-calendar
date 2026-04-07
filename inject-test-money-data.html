@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inject Test Money Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .success { color: green; font-weight: bold; }
+        .data { background: #f0f8ff; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #005a87; }
+    </style>
+</head>
+<body>
+    <h1>金钱观察测试数据注入</h1>
+    <p>此页面将创建最近5天的测试金钱观察数据</p>
+    
+    <button onclick="injectTestData()">注入测试数据</button>
+    <button onclick="checkData()">检查数据</button>
+    <button onclick="clearData()">清除数据</button>
+    
+    <div id="output"></div>
+
+    <script>
+        function injectTestData() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h3>正在注入测试数据...</h3>';
+            
+            const testData = [
+  {
+    "date": "2026-04-01",
+    "data": {
+      "step1": [
+        "花掉的一笔"
+      ],
+      "step2": {
+        "lifeSupport": [
+          "让生活正常运转"
+        ],
+        "selfState": "在维持生活的我",
+        "breathFeeling": "舒展的"
+      },
+      "step3": "我愿意继续",
+      "customText": "测试数据 1",
+      "summary": "今天的钱主要在支持生活，在帮「当下的我」。如果成为常态，我愿意让它继续。",
+      "step": 3,
+      "timestamp": 1775028215038
+    }
+  },
+  {
+    "date": "2026-03-31",
+    "data": {
+      "step1": [
+        "赚到的一笔"
+      ],
+      "step2": {
+        "lifeSupport": [
+          "让生活正常运转",
+          "往长远处走"
+        ],
+        "selfState": "在推进未来的我",
+        "breathFeeling": "平稳的"
+      },
+      "step3": "我希望调整一点",
+      "customText": "测试数据 2",
+      "summary": "今天的钱主要在支持生活，在帮「当下的我」。如果成为常态，我想稍微调整一下。",
+      "step": 3,
+      "timestamp": 1774941815039
+    }
+  },
+  {
+    "date": "2026-03-30",
+    "data": {
+      "step1": [
+        "花掉的一笔"
+      ],
+      "step2": {
+        "lifeSupport": [
+          "让生活正常运转"
+        ],
+        "selfState": "在照顾当下的我",
+        "breathFeeling": "留神的"
+      },
+      "step3": "我愿意继续",
+      "customText": "测试数据 3",
+      "summary": "今天的钱主要在支持生活，在帮「当下的我」。如果成为常态，我愿意让它继续。",
+      "step": 3,
+      "timestamp": 1774855415039
+    }
+  },
+  {
+    "date": "2026-03-29",
+    "data": {
+      "step1": [
+        "赚到的一笔"
+      ],
+      "step2": {
+        "lifeSupport": [
+          "让生活正常运转",
+          "往长远处走"
+        ],
+        "selfState": "在维持生活的我",
+        "breathFeeling": "收紧的"
+      },
+      "step3": "我希望调整一点",
+      "customText": "测试数据 4",
+      "summary": "今天的钱主要在支持生活，在帮「当下的我」。如果成为常态，我想稍微调整一下。",
+      "step": 3,
+      "timestamp": 1774769015039
+    }
+  },
+  {
+    "date": "2026-03-28",
+    "data": {
+      "step1": [
+        "花掉的一笔"
+      ],
+      "step2": {
+        "lifeSupport": [
+          "让生活正常运转"
+        ],
+        "selfState": "在推进未来的我",
+        "breathFeeling": "舒展的"
+      },
+      "step3": "我愿意继续",
+      "customText": "测试数据 5",
+      "summary": "今天的钱主要在支持生活，在帮「当下的我」。如果成为常态，我愿意让它继续。",
+      "step": 3,
+      "timestamp": 1774682615039
+    }
+  }
+];
+            
+            testData.forEach(item => {
+                const key = `moneyObservationDraft_${item.date}`;
+                localStorage.setItem(key, JSON.stringify(item.data));
+                output.innerHTML += `<div class="data">已为 ${item.date} 创建数据</div>`;
+            });
+            
+            output.innerHTML += '<div class="success">✅ 测试数据注入完成！</div>';
+        }
+        
+        function checkData() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<h3>检查金钱观察数据:</h3>';
+            
+            const keys = Object.keys(localStorage).filter(key => key.includes('money'));
+            
+            if (keys.length === 0) {
+                output.innerHTML += '<p>没有找到金钱观察数据</p>';
+                return;
+            }
+            
+            keys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        output.innerHTML += `
+                            <div class="data">
+                                <strong>${key}:</strong><br>
+                                <pre>${JSON.stringify(parsed, null, 2)}</pre>
+                            </div>
+                        `;
+                    } catch (e) {
+                        output.innerHTML += `<div class="data"><strong>${key}:</strong> 无效JSON</div>`;
+                    }
+                }
+            });
+        }
+        
+        function clearData() {
+            if (confirm('确定要清除所有金钱观察数据吗？')) {
+                const keys = Object.keys(localStorage).filter(key => key.includes('money'));
+                keys.forEach(key => localStorage.removeItem(key));
+                document.getElementById('output').innerHTML = '<div class="success">✅ 所有金钱观察数据已清除！</div>';
+            }
+        }
+    </script>
+</body>
+</html>

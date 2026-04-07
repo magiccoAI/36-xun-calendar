@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建测试数据</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">创建当前旬期测试数据</h1>
+        
+        <div class="bg-white rounded-lg p-6 shadow-sm">
+            <button id="createData" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mb-4">
+                为当前旬期创建4条测试数据
+            </button>
+            <div id="result" class="text-sm text-gray-600"></div>
+        </div>
+
+        <div class="mt-6 bg-white rounded-lg p-6 shadow-sm">
+            <h2 class="text-lg font-semibold mb-4">检查已创建的数据</h2>
+            <button id="checkData" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
+                检查 localStorage 中的数据
+            </button>
+            <div id="dataCheck" class="text-sm text-gray-600"></div>
+        </div>
+    </div>
+
+    <script src="create-test-data.js"></script>
+    <script>
+        document.getElementById('createData').addEventListener('click', () => {
+            try {
+                createTestDataForCurrentXun();
+                document.getElementById('result').innerHTML = '<p class="text-green-600">✅ 测试数据创建成功！</p>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<p class="text-red-600">❌ 创建失败: ${error.message}</p>`;
+            }
+        });
+
+        document.getElementById('checkData').addEventListener('click', () => {
+            const result = document.getElementById('dataCheck');
+            let moneyKeys = [];
+            let moneyData = {};
+            
+            // 遍历所有 localStorage 键
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('moneyObservationDraft_')) {
+                    moneyKeys.push(key);
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        moneyData[key] = data;
+                    } catch (error) {
+                        moneyData[key] = 'Parse Error: ' + error.message;
+                    }
+                }
+            }
+            
+            if (moneyKeys.length === 0) {
+                result.innerHTML = '<p class="text-red-600">❌ 没有找到金钱观察数据</p>';
+            } else {
+                result.innerHTML = `
+                    <p class="text-green-600">✅ 找到 ${moneyKeys.length} 条金钱观察数据</p>
+                    <pre class="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">${JSON.stringify(moneyData, null, 2)}</pre>
+                `;
+            }
+        });
+
+        // 页面加载时自动检查数据
+        document.getElementById('checkData').click();
+    </script>
+</body>
+</html>

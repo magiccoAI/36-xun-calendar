@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旬期检查</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">当前旬期检查</h1>
+        
+        <div class="bg-white rounded-lg p-6 shadow-sm">
+            <button id="checkCurrentXun" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">
+                检查当前旬期
+            </button>
+            <div id="currentXunResult" class="text-sm text-gray-600"></div>
+        </div>
+
+        <div class="mt-6 bg-white rounded-lg p-6 shadow-sm">
+            <h2 class="text-lg font-semibold mb-4">最近10天日期</h2>
+            <div id="recentDates" class="text-sm text-gray-600"></div>
+        </div>
+    </div>
+
+    <script>
+        // 模拟 Calendar 类
+        const CONFIG = { YEAR: 2026 };
+
+        const Calendar = {
+            getXunPeriods: (year) => {
+                const periods = [];
+                let periodIndex = 1;
+                
+                for (let quarter = 1; quarter <= 4; quarter++) {
+                    for (let xun = 1; xun <= 9; xun++) {
+                        const startMonth = (quarter - 1) * 3 + 1;
+                        const startDay = (xun - 1) * 10 + 1;
+                        const startDate = new Date(year, startMonth - 1, startDay);
+                        const endDate = new Date(startDate);
+                        endDate.setDate(startDate.getDate() + 9);
+                        
+                        periods.push({
+                            index: periodIndex++,
+                            year,
+                            quarter,
+                            xun,
+                            startDate,
+                            endDate,
+                            label: `Q${quarter}-X${xun}`
+                        });
+                    }
+                }
+                
+                return periods;
+            },
+
+            getCurrentXun: (periods) => {
+                if (!periods || !Array.isArray(periods)) {
+                    console.warn('Calendar.getCurrentXun: invalid periods data');
+                    return null;
+                }
+                
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
+                
+                console.log('Current date:', today);
+                
+                for (const period of periods) {
+                    if (today >= period.startDate && today <= period.endDate) {
+                        console.log('Found current period:', period);
+                        return period;
+                    }
+                }
+                
+                return null;
+            }
+        };
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function checkCurrentXun() {
+            const result = document.getElementById('currentXunResult');
+            const datesDiv = document.getElementById('recentDates');
+            
+            try {
+                const periods = Calendar.getXunPeriods(CONFIG.YEAR);
+                const currentXun = Calendar.getCurrentXun(periods);
+                
+                if (currentXun) {
+                    const xunPeriod = `${currentXun.year}-Q${currentXun.quarter}-X${currentXun.xun}`;
+                    result.innerHTML = `
+                        <div class="text-green-600">
+                            <p><strong>当前旬期:</strong> ${xunPeriod}</p>
+                            <p><strong>开始日期:</strong> ${formatDate(currentXun.startDate)}</p>
+                            <p><strong>结束日期:</strong> ${formatDate(currentXun.endDate)}</p>
+                            <p><strong>旬期索引:</strong> ${currentXun.index}</p>
+                        </div>
+                    `;
+                    
+                    // 显示这个旬期的日期
+                    const dates = [];
+                    for (let i = 0; i < 10; i++) {
+                        const date = new Date(currentXun.startDate);
+                        date.setDate(currentXun.startDate.getDate() + i);
+                        dates.push(formatDate(date));
+                    }
+                    
+                    datesDiv.innerHTML = `
+                        <div class="grid grid-cols-5 gap-2">
+                            ${dates.map(date => `<div class="p-2 bg-gray-100 rounded text-center">${date}</div>`).join('')}
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = '<div class="text-red-600">无法确定当前旬期</div>';
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="text-red-600">错误: ${error.message}</div>`;
+            }
+        }
+
+        // 绑定事件
+        document.getElementById('checkCurrentXun').addEventListener('click', checkCurrentXun);
+        
+        // 页面加载时自动检查
+        checkCurrentXun();
+    </script>
+</body>
+</html>

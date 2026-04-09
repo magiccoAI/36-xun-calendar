@@ -1,6 +1,30 @@
 import { CONFIG } from '../config.js';
 
 export const Calendar = {
+    getStartOfToday() {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    },
+
+    getTodayString() {
+        return this.formatLocalDate(this.getStartOfToday());
+    },
+
+    isFutureDate(dateInput) {
+        const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        if (Number.isNaN(date.getTime())) return false;
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0) > this.getStartOfToday();
+    },
+
+    daysBetween(dateA, dateB) {
+        const first = dateA instanceof Date ? dateA : new Date(dateA);
+        const second = dateB instanceof Date ? dateB : new Date(dateB);
+        if (Number.isNaN(first.getTime()) || Number.isNaN(second.getTime())) return 0;
+        const start = new Date(first.getFullYear(), first.getMonth(), first.getDate(), 0, 0, 0, 0);
+        const end = new Date(second.getFullYear(), second.getMonth(), second.getDate(), 0, 0, 0, 0);
+        return Math.round((end - start) / (1000 * 60 * 60 * 24));
+    },
+
     parseDateStrToLocalDate(dateStr, hour = 12) {
         try {
             if (!dateStr || typeof dateStr !== 'string') {

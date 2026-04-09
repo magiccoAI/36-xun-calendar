@@ -47,6 +47,14 @@ export const CONFIG = {
     XUN_COUNT: 36,
     XUN_DAYS: 10,
     LAST_XUN_DAYS: 15, // 最后一旬15天作为年末总结期
+    visual: {
+        xunHueStep: 10
+    },
+    macroView: {
+        zoomLevel: 'xun',
+        heatmapEnabled: true,
+        streakEnabled: true
+    },
     STORAGE_KEYS: {
         USER_DATA: 'xun_calendar_data_v2',
         MACRO_GOALS: 'xun_macro_goals',

@@ -1,176 +1,211 @@
-
 import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
-import './web-components/XunRow.js'; // Import the Web Component
+import './web-components/XunRow.js';
+
+const DEFAULT_GOAL_DATA = {
+    title: '',
+    domain: '',
+    horizon: '',
+    difficulty: '',
+    energyCost: '',
+    identityTag: '',
+    notes: ''
+};
 
 export class MacroView {
     constructor(containerId, onViewChange) {
         this.container = document.getElementById(containerId);
         this.onViewChange = onViewChange;
+        this.selectionState = {
+            anchorDate: null,
+            rangeActive: false
+        };
         this.initEventListeners();
     }
 
     initEventListeners() {
-        // Listen to custom events emitted by the Web Component
         this.container.addEventListener('update-goal', (e) => {
-            this.handleUpdateMacroGoal(e.detail.index, e.detail.value);
+            this.handleMacroGoalUpdate(e.detail.index, e.detail.value);
         });
 
         this.container.addEventListener('update-remarks', (e) => {
-            this.handleUpdateMacroRemarks(e.detail.index, e.detail.value);
+            this.handleRemarksUpdate(e.detail.index, e.detail.value);
         });
 
         this.container.addEventListener('toggle-checkin', (e) => {
-            this.handleToggleGoalCheckin(e.detail.date, e.detail.index);
+            this.handleCheckinToggle(e.detail.date, e.detail.index, e.detail.shiftKey);
         });
 
-        // Click on the web component to navigate to detail view
-        this.container.addEventListener('click', (e) => {
-            const xunRow = e.target.closest('xun-row');
-            // Check if user clicked on inputs or checkboxes inside the shadow DOM
-            // This is handled by event bubbling. We can check the composed path
-            const path = e.composedPath();
-            const clickedInput = path.find(el => el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || (el.dataset && el.dataset.action === 'toggle-checkin'));
-            
-            if (xunRow && !clickedInput) {
-                const index = parseInt(xunRow.getAttribute('period-index'));
-                if (this.onViewChange) this.onViewChange('overview', index);
-            }
+        this.container.addEventListener('navigate-xun', (e) => {
+            this.handleNavigationRequest(e.detail.index);
         });
     }
 
-    handleToggleGoalCheckin(dateStr, xunIndex) {
+    normalizeGoalData(goalEntry = {}) {
+        const normalized = {
+            ...DEFAULT_GOAL_DATA,
+            ...goalEntry
+        };
+
+        if (!normalized.title && goalEntry.goal) {
+            normalized.title = goalEntry.goal;
+        }
+        if (!normalized.notes && goalEntry.remarks) {
+            normalized.notes = goalEntry.remarks;
+        }
+
+        // Legacy compatibility fields
+        normalized.goal = normalized.title;
+        normalized.remarks = normalized.notes;
+
+        return normalized;
+    }
+
+    handleCheckinToggle(dateStr) {
         const state = store.getState();
-        const userData = { ...state.userData };
+        const userData = structuredClone(state.userData || {});
         const currentData = userData[dateStr] || {};
-        
-        // Toggle
+
         currentData.goal_checkin = !currentData.goal_checkin;
         userData[dateStr] = currentData;
-        
+
+        this.selectionState.anchorDate = dateStr;
+        this.selectionState.rangeActive = false;
+
         store.setState({ userData });
     }
 
-    handleUpdateMacroGoal(index, value) {
+    handleMacroGoalUpdate(index, value) {
         const state = store.getState();
-        const macroGoals = { ...state.macroGoals };
-        
-        if (!macroGoals[index]) macroGoals[index] = {};
-        macroGoals[index].goal = value;
-        
+        const macroGoals = structuredClone(state.macroGoals || {});
+        const nextGoal = this.normalizeGoalData(macroGoals[index]);
+
+        nextGoal.title = value;
+        nextGoal.goal = value;
+
+        macroGoals[index] = nextGoal;
         store.setState({ macroGoals });
     }
 
-    handleUpdateMacroRemarks(index, value) {
+    handleRemarksUpdate(index, value) {
         const state = store.getState();
-        const macroGoals = { ...state.macroGoals };
-        
-        if (!macroGoals[index]) macroGoals[index] = {};
-        macroGoals[index].remarks = value;
-        
+        const macroGoals = structuredClone(state.macroGoals || {});
+        const nextGoal = this.normalizeGoalData(macroGoals[index]);
+
+        nextGoal.notes = value;
+        nextGoal.remarks = value;
+
+        macroGoals[index] = nextGoal;
         store.setState({ macroGoals });
+    }
+
+    handleNavigationRequest(index) {
+        if (this.onViewChange) this.onViewChange('overview', index);
+    }
+
+    calculateXunStats(progressData) {
+        const eligibleDays = progressData.days.filter(day => !day.isFuture);
+        const checkedDays = eligibleDays.filter(day => day.intensityLevel === 2);
+        const completionRate = eligibleDays.length > 0
+            ? Math.round((checkedDays.length / eligibleDays.length) * 100)
+            : 0;
+
+        let longestStreak = 0;
+        let rollingStreak = 0;
+        eligibleDays.forEach(day => {
+            if (day.intensityLevel === 2) {
+                rollingStreak += 1;
+                longestStreak = Math.max(longestStreak, rollingStreak);
+            } else {
+                rollingStreak = 0;
+            }
+        });
+
+        let currentStreak = 0;
+        for (let i = eligibleDays.length - 1; i >= 0; i -= 1) {
+            if (eligibleDays[i].intensityLevel === 2) {
+                currentStreak += 1;
+            } else {
+                break;
+            }
+        }
+
+        return {
+            completionRate,
+            currentStreak,
+            longestStreak
+        };
+    }
+
+    getTimeStatus(period) {
+        const today = Calendar.getStartOfToday();
+        if (today > period.endDate) return 'past';
+        if (today < period.startDate) return 'future';
+        return 'current';
+    }
+
+    buildProgressData(period, userData) {
+        const days = Calendar.getDatesInRange(period.startDate, period.endDate).map((dateObj) => {
+            const date = Calendar.formatLocalDate(dateObj);
+            const dayRecord = userData[date] || {};
+            const isChecked = dayRecord.goal_checkin === true;
+            const isToday = date === Calendar.getTodayString();
+            const isFuture = Calendar.isFutureDate(dateObj);
+            const hasAnyRecord = Object.keys(dayRecord).length > 0;
+            const intensityLevel = isChecked ? 2 : (hasAnyRecord ? 1 : 0);
+
+            return {
+                date,
+                isChecked,
+                isToday,
+                isFuture,
+                intensityLevel
+            };
+        });
+
+        const checkedCount = days.filter(day => day.isChecked).length;
+
+        return {
+            days,
+            checkedCount,
+            totalDays: days.length
+        };
+    }
+
+    buildXunViewModel(period, state, currentXun) {
+        const hue = (period.index * CONFIG.visual.xunHueStep) % 360;
+        const progressData = this.buildProgressData(period, state.userData || {});
+        const goalData = this.normalizeGoalData((state.macroGoals || {})[period.index]);
+        const stats = this.calculateXunStats(progressData);
+        const timeStatus = this.getTimeStatus(period);
+
+        return {
+            index: period.index,
+            startDate: period.startDate,
+            endDate: period.endDate,
+            hue,
+            progressData,
+            stats,
+            goalData,
+            timeStatus,
+            isCurrent: Boolean(currentXun && currentXun.index === period.index)
+        };
     }
 
     render(xunPeriods, currentXun) {
-        this.container.innerHTML = '';
         const state = store.getState();
-        const { userData, macroGoals } = state;
+        const viewModels = xunPeriods.map(period => this.buildXunViewModel(period, state, currentXun));
 
-        const todayStr = Calendar.formatLocalDate(new Date());
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
-        const tomorrowStart = new Date(todayStart);
-        tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-
-        xunPeriods.forEach((period, index) => {
+        const fragment = document.createDocumentFragment();
+        viewModels.forEach((viewModel) => {
             const row = document.createElement('xun-row');
-            const hue = (period.index * 10) % 360;
-            const isCurrent = currentXun && currentXun.index === period.index;
-            
-            // Format Date
-            const startStr = `${String(period.startDate.getMonth()+1).padStart(2, '0')}.${String(period.startDate.getDate()).padStart(2, '0')}`;
-            const endStr = `${String(period.endDate.getMonth()+1).padStart(2, '0')}.${String(period.endDate.getDate()).padStart(2, '0')}`;
-            
-            // Xun Progress Calculation
-            const periodTotalDays = Math.round((period.endDate - period.startDate) / (1000 * 60 * 60 * 24)) + 1;
-            let daysPassed = 0;
-            if (todayStart > period.endDate) {
-                daysPassed = periodTotalDays;
-            } else if (todayStart >= period.startDate) {
-                daysPassed = Math.round((todayStart - period.startDate) / (1000 * 60 * 60 * 24)) + 1;
-            }
-            daysPassed = Math.min(daysPassed, periodTotalDays);
-
-            // Goal & Remarks
-            const goal = macroGoals[period.index]?.goal || '';
-            const remarks = macroGoals[period.index]?.remarks || '';
-            
-            // Progress (Checkboxes) - We still generate the inner HTML for the progress area, 
-            // but it is injected into the component.
-            let checkedCount = 0;
-            let progressHtml = '<div class="flex items-center justify-center h-full space-x-[2px]">';
-            let tempDate = new Date(period.startDate);
-            
-            while (tempDate <= period.endDate) {
-                const dStr = Calendar.formatLocalDate(tempDate);
-                const data = userData[dStr] || {};
-                const isChecked = data.goal_checkin === true;
-                if (isChecked) checkedCount++;
-                const isFuture = tempDate >= tomorrowStart;
-                const isToday = dStr === todayStr;
-                
-                let bgClass = isChecked ? '' : 'bg-white';
-                let borderClass = isChecked ? '' : 'border-gray-300';
-                let opacityClass = isFuture ? 'opacity-40 cursor-not-allowed' : 'opacity-100 cursor-pointer hover:scale-110';
-                let additionalClass = '';
-                
-                const xunColor = `hsl(${hue}, 80%, 60%)`;
-                let style = isChecked 
-                    ? `background-color: ${xunColor}; border-color: ${xunColor};` 
-                    : `border-color: #d1d5db;`;
-                
-                if (isToday) {
-                     borderClass = 'border-2 border-blue-500 z-10';
-                     additionalClass = 'ring-2 ring-blue-200 shadow-md animate-pulse';
-                     style = isChecked 
-                        ? `background-color: ${xunColor}; border-color: #3b82f6;` 
-                        : `border-color: #3b82f6;`;
-                }
-                
-                const tip = isFuture 
-                    ? `${dStr} (尚未到来)` 
-                    : (isChecked ? `${dStr}: 已打卡 - ${goal || '完成目标'}` : `${dStr}: 点击打卡 - ${goal || '记录今日成果'}`);
-
-                const actionAttr = isFuture ? '' : `data-action="toggle-checkin" data-date="${dStr}" data-index="${period.index}"`;
-
-                progressHtml += `<div class="w-12 h-12 flex items-center justify-center shrink-0 md:w-auto md:h-auto md:block" ${actionAttr}>
-                    <div class="w-5 h-5 md:w-2.5 md:h-2.5 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} transition-all duration-200" 
-                    style="${style}" 
-                    title="${tip}"></div>
-                </div>`;
-                    
-                tempDate.setDate(tempDate.getDate() + 1);
-            }
-            progressHtml += `<span class="ml-2 text-[10px] text-gray-400 font-mono self-center hidden md:inline-block">${checkedCount}/10</span>`;
-            progressHtml += '</div>';
-
-            // Set attributes on the Web Component
-            row.setAttribute('period-index', period.index);
-            row.setAttribute('start-date', startStr);
-            row.setAttribute('end-date', endStr);
-            row.setAttribute('hue', hue);
-            row.setAttribute('is-current', isCurrent);
-            row.setAttribute('goal', goal);
-            row.setAttribute('remarks', remarks);
-            row.setAttribute('days-passed', daysPassed);
-            row.setAttribute('total-days', periodTotalDays);
-            
-            // For complex HTML we can set it via property or attribute, but property is safer for HTML strings
-            // However, the attribute works fine if escaped properly, or we can just pass it as a property
-            row.setAttribute('progress-html', progressHtml);
-
-            this.container.appendChild(row);
+            row.viewModel = viewModel;
+            row.progressData = viewModel.progressData;
+            row.timeStatus = viewModel.timeStatus;
+            fragment.appendChild(row);
         });
+
+        this.container.replaceChildren(fragment);
     }
 }

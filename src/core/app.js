@@ -349,8 +349,10 @@ class App {
             // 2026 CNY is Feb 17. We enable it for Feb and late Jan.
             const isSpringFestival = (now.getMonth() === 1) || (now.getMonth() === 0 && now.getDate() > 20);
             const isMarch = now.getMonth() === 2; // March is month 2
+            const isApril = now.getMonth() === 3; // April is month 3
             const header = document.querySelector('header');
             const flower = document.querySelector('.flower-path');
+            const kite = document.querySelector('.kite-path');
 
             if (header) {
                 if (isSpringFestival) {
@@ -364,6 +366,35 @@ class App {
                     flower.classList.remove('hidden');
                 } else {
                     flower.classList.add('hidden');
+                }
+            }
+            if (kite) {
+                if (isApril) {
+                    kite.classList.remove('hidden');
+                    
+                    // Inject enhanced illustration-style SVG structure
+                    if (!kite.innerHTML || kite.dataset.styled !== 'true') {
+                        kite.innerHTML = `
+                            <svg viewBox="0 0 200 200" class="kite-illustration">
+                                <path class="kite-string" d="M 20,180 Q 60,80 120,60 T 180,20" />
+                                <g class="kite-body">
+                                    <!-- Enhanced swallow kite shape -->
+                                    <path class="kite-shape" d="M 170,30 L 180,20 L 190,30 L 180,45 Z" fill="rgba(16, 185, 129, 0.8)" />
+                                    <!-- Swallow wings -->
+                                    <path d="M 175,25 Q 165,20 160,25 Q 165,28 175,25" fill="rgba(125, 211, 252, 0.6)" />
+                                    <path d="M 185,25 Q 195,20 200,25 Q 195,28 185,25" fill="rgba(125, 211, 252, 0.6)" />
+                                    <!-- Tail ribbon -->
+                                    <path class="kite-ribbon" d="M 180,45 Q 185,55 180,65" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="1" />
+                                    <!-- Eye detail -->
+                                    <circle cx="172" cy="28" r="2" fill="white" opacity="0.8"/>
+                                    <circle cx="172" cy="28" r="1" fill="black"/>
+                                </g>
+                            </svg>
+                        `;
+                        kite.dataset.styled = 'true';
+                    }
+                } else {
+                    kite.classList.add('hidden');
                 }
             }
         };

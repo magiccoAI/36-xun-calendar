@@ -1,6 +1,33 @@
 import { CONFIG } from '../config.js';
 
 export const Calendar = {
+    startOfDay(dateInput) {
+        const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+        if (Number.isNaN(date.getTime())) return null;
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+    },
+
+    getStartOfToday() {
+        return this.startOfDay(new Date());
+    },
+
+    getTodayString() {
+        return this.formatLocalDate(this.getStartOfToday());
+    },
+
+    isFutureDate(dateInput) {
+        const date = this.startOfDay(dateInput);
+        if (!date || Number.isNaN(date.getTime())) return false;
+        return date > this.getStartOfToday();
+    },
+
+    daysBetween(dateA, dateB) {
+        const first = this.startOfDay(dateA);
+        const second = this.startOfDay(dateB);
+        if (!first || !second || Number.isNaN(first.getTime()) || Number.isNaN(second.getTime())) return 0;
+        return Math.round((second - first) / (1000 * 60 * 60 * 24));
+    },
+
     parseDateStrToLocalDate(dateStr, hour = 12) {
         try {
             if (!dateStr || typeof dateStr !== 'string') {
@@ -60,7 +87,7 @@ export const Calendar = {
             for (let i = 1; i <= CONFIG.XUN_COUNT; i++) {
                 // 计算每个旬的起始日期（基于固定的年初开始日期）
                 const daysFromStart = (i - 1) * CONFIG.XUN_DAYS;
-                const startDate = new Date(yearStart);
+                const startDate = this.startOfDay(new Date(yearStart));
                 startDate.setDate(yearStart.getDate() + daysFromStart);
                 
                 let daysInXun = CONFIG.XUN_DAYS;
@@ -74,7 +101,7 @@ export const Calendar = {
                                      }
 
                 // 计算结束日期
-                const endDate = new Date(startDate);
+                const endDate = this.startOfDay(new Date(startDate));
                 endDate.setDate(startDate.getDate() + daysInXun - 1);
                 
                 // 验证生成的日期有效性
@@ -219,19 +246,19 @@ export const Calendar = {
             }
             
             const dates = [];
-            let current = new Date(startDate);
+            let current = this.startOfDay(startDate);
             
             if (isNaN(current.getTime())) {
                 throw new Error(`Invalid start date: ${startDate}`);
             }
             
-            const end = new Date(endDate);
+            const end = this.startOfDay(endDate);
             if (isNaN(end.getTime())) {
                 throw new Error(`Invalid end date: ${endDate}`);
             }
             
             while (current <= end) {
-                dates.push(new Date(current));
+                dates.push(this.startOfDay(new Date(current)));
                 current.setDate(current.getDate() + 1);
             }
             

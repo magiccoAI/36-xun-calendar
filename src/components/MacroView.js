@@ -19,38 +19,84 @@ export class MacroView {
         this.onViewChange = onViewChange;
         this.xunPeriods = [];
         this.currentXun = null;
-        this.unsubscribe = store.subscribe(() => {
-            if (this.xunPeriods.length > 0) {
-                this.render(this.xunPeriods, this.currentXun);
-            }
-        });
+        this.handleStoreChange = this.handleStoreChange.bind(this);
+        this.unsubscribe = store.subscribe(this.handleStoreChange);
         this.selectionState = {
             anchorDate: null,
             rangeActive: false
         };
+        this.onGoalUpdate = null;
+        this.onRemarksUpdate = null;
+        this.onCheckinToggle = null;
+        this.onBatchCheckin = null;
+        this.onNavigateXun = null;
         this.initEventListeners();
     }
 
+    handleStoreChange() {
+        if (this.xunPeriods.length > 0) {
+            this.render(this.xunPeriods, this.currentXun);
+        }
+    }
+
     initEventListeners() {
-        this.container.addEventListener('update-goal', (e) => {
+        if (!this.container) return;
+
+        this.onGoalUpdate = (e) => {
             this.handleMacroGoalUpdate(e.detail.index, e.detail.value);
-        });
+        };
 
-        this.container.addEventListener('update-remarks', (e) => {
+        this.onRemarksUpdate = (e) => {
             this.handleRemarksUpdate(e.detail.index, e.detail.value);
-        });
+        };
 
-        this.container.addEventListener('xun-checkin-toggle', (e) => {
+        this.onCheckinToggle = (e) => {
             this.handleCheckinToggle(e.detail.date, e.detail.index, e.detail.shiftKey);
-        });
+        };
 
-        this.container.addEventListener('xun-checkin-batch', (e) => {
+        this.onBatchCheckin = (e) => {
             this.handleBatchCheckin(e.detail.index, e.detail.mode);
-        });
+        };
 
-        this.container.addEventListener('navigate-xun', (e) => {
+        this.onNavigateXun = (e) => {
             this.handleNavigationRequest(e.detail.index);
-        });
+        };
+
+        this.container.addEventListener('update-goal', this.onGoalUpdate);
+        this.container.addEventListener('update-remarks', this.onRemarksUpdate);
+        this.container.addEventListener('xun-checkin-toggle', this.onCheckinToggle);
+        this.container.addEventListener('xun-checkin-batch', this.onBatchCheckin);
+        this.container.addEventListener('navigate-xun', this.onNavigateXun);
+    }
+
+    destroy() {
+        if (this.unsubscribe) {
+            this.unsubscribe();
+            this.unsubscribe = null;
+        }
+
+        if (!this.container) return;
+        if (this.onGoalUpdate) this.container.removeEventListener('update-goal', this.onGoalUpdate);
+        if (this.onRemarksUpdate) this.container.removeEventListener('update-remarks', this.onRemarksUpdate);
+        if (this.onCheckinToggle) this.container.removeEventListener('xun-checkin-toggle', this.onCheckinToggle);
+        if (this.onBatchCheckin) this.container.removeEventListener('xun-checkin-batch', this.onBatchCheckin);
+        if (this.onNavigateXun) this.container.removeEventListener('navigate-xun', this.onNavigateXun);
+
+        this.onGoalUpdate = null;
+        this.onRemarksUpdate = null;
+        this.onCheckinToggle = null;
+        this.onBatchCheckin = null;
+        this.onNavigateXun = null;
+    }
+
+    updateUserData(updater) {
+        const state = store.getState();
+        const currentUserData = state?.userData || {};
+        const nextUserData = updater(structuredClone(currentUserData));
+
+        if (nextUserData && typeof nextUserData === 'object') {
+            store.setState({ userData: nextUserData });
+        }
     }
 
     normalizeGoalData(goalEntry = {}) {
@@ -91,39 +137,60 @@ export class MacroView {
         };
     }
 
-    handleCheckinToggle(dateStr) {
-        const state = store.getState();
-        const userData = structuredClone(state.userData || {});
-        const currentData = this.normalizeDayData(userData[dateStr] || {});
+    handleCheckinToggle(dateStr, _index, shiftKey = false) {
+        if (!dateStr) return;
 
-        currentData.goalCheckin = !currentData.goalCheckin;
-        currentData.goal_checkin = currentData.goalCheckin;
-        userData[dateStr] = currentData;
+        this.updateUserData((userData) => {
+            if (shiftKey && this.selectionState.anchorDate) {
+                const start = Math.min(
+                    new Date(dateStr).getTime(),
+                    new Date(this.selectionState.anchorDate).getTime()
+                );
+                const end = Math.max(
+                    new Date(dateStr).getTime(),
+                    new Date(this.selectionState.anchorDate).getTime()
+                );
 
-        this.selectionState.anchorDate = dateStr;
-        this.selectionState.rangeActive = false;
+                const dates = Calendar.getDatesInRange(new Date(start), new Date(end));
+                dates.forEach((dateObj) => {
+                    if (Calendar.isFutureDate(dateObj)) return;
+                    const dateKey = Calendar.formatLocalDate(dateObj);
+                    const data = this.normalizeDayData(userData[dateKey] || {});
+                    data.goalCheckin = true;
+                    data.goal_checkin = true;
+                    userData[dateKey] = data;
+                });
 
-        store.setState({ userData });
+                this.selectionState.rangeActive = true;
+            } else {
+                const currentData = this.normalizeDayData(userData[dateStr] || {});
+                currentData.goalCheckin = !currentData.goalCheckin;
+                currentData.goal_checkin = currentData.goalCheckin;
+                userData[dateStr] = currentData;
+                this.selectionState.rangeActive = false;
+            }
+
+            this.selectionState.anchorDate = dateStr;
+            return userData;
+        });
     }
 
     handleBatchCheckin(index, mode = 'complete-all') {
-        const state = store.getState();
         const period = this.xunPeriods.find(item => item.index === index);
         if (!period) return;
 
-        const userData = structuredClone(state.userData || {});
-        const days = Calendar.getDatesInRange(period.startDate, period.endDate);
-
-        days.forEach((dateObj) => {
-            if (Calendar.isFutureDate(dateObj)) return;
-            const dateStr = Calendar.formatLocalDate(dateObj);
-            const currentData = this.normalizeDayData(userData[dateStr] || {});
-            currentData.goalCheckin = mode === 'complete-all';
-            currentData.goal_checkin = currentData.goalCheckin;
-            userData[dateStr] = currentData;
+        this.updateUserData((userData) => {
+            const days = Calendar.getDatesInRange(period.startDate, period.endDate);
+            days.forEach((dateObj) => {
+                if (Calendar.isFutureDate(dateObj)) return;
+                const dateStr = Calendar.formatLocalDate(dateObj);
+                const currentData = this.normalizeDayData(userData[dateStr] || {});
+                currentData.goalCheckin = mode === 'complete-all';
+                currentData.goal_checkin = currentData.goalCheckin;
+                userData[dateStr] = currentData;
+            });
+            return userData;
         });
-
-        store.setState({ userData });
     }
 
     handleMacroGoalUpdate(index, value) {
@@ -257,6 +324,8 @@ export class MacroView {
     }
 
     render(xunPeriods, currentXun) {
+        if (!this.container) return;
+
         this.xunPeriods = xunPeriods || this.xunPeriods;
         this.currentXun = currentXun || this.currentXun;
         const state = store.getState();

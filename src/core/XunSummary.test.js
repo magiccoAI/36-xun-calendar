@@ -2,17 +2,23 @@ import { Calendar } from './Calendar.js';
 import { buildXunSummary } from './XunSummary.js';
 import { store } from './State.js';
 
-describe('Calendar.getXunRange', () => {
-    test('returns first xun range', () => {
-        const { startDate, endDate } = Calendar.getXunRange(new Date('2026-03-05'));
-        expect(Calendar.formatLocalDate(startDate)).toBe('2026-03-01');
-        expect(Calendar.formatLocalDate(endDate)).toBe('2026-03-10');
+describe('Calendar.getXunPeriods', () => {
+    test('returns correct period for a date in xun 7 (Mar 2-11)', () => {
+        const periods = Calendar.getXunPeriods(2026);
+        const testDate = Calendar.parseDateStrToLocalDate('2026-03-05');
+        const period = periods.find(p => testDate >= p.startDate && testDate <= p.endDate);
+        expect(period).toBeTruthy();
+        expect(Calendar.formatLocalDate(period.startDate)).toBe('2026-03-02');
+        expect(Calendar.formatLocalDate(period.endDate)).toBe('2026-03-11');
     });
 
-    test('returns last xun range for short month', () => {
-        const { startDate, endDate } = Calendar.getXunRange(new Date('2026-02-24'));
-        expect(Calendar.formatLocalDate(startDate)).toBe('2026-02-21');
-        expect(Calendar.formatLocalDate(endDate)).toBe('2026-02-28');
+    test('returns correct period for Feb 24 (xun 6: Feb 20 - Mar 1)', () => {
+        const periods = Calendar.getXunPeriods(2026);
+        const testDate = Calendar.parseDateStrToLocalDate('2026-02-24');
+        const period = periods.find(p => testDate >= p.startDate && testDate <= p.endDate);
+        expect(period).toBeTruthy();
+        expect(Calendar.formatLocalDate(period.startDate)).toBe('2026-02-20');
+        expect(Calendar.formatLocalDate(period.endDate)).toBe('2026-03-01');
     });
 });
 

@@ -28,12 +28,35 @@ export class MacroView {
         // Click on the web component to navigate to detail view
         this.container.addEventListener('click', (e) => {
             const xunRow = e.target.closest('xun-row');
+            if (!xunRow) return;
+            
             // Check if user clicked on inputs or checkboxes inside the shadow DOM
-            // This is handled by event bubbling. We can check the composed path
             const path = e.composedPath();
             const clickedInput = path.find(el => el.tagName === 'TEXTAREA' || el.tagName === 'INPUT' || (el.dataset && el.dataset.action === 'toggle-checkin'));
             
-            if (xunRow && !clickedInput) {
+            if (clickedInput) return;
+            
+            // Check if clicked on navigation areas
+            const isMobile = window.innerWidth < 768;
+            let shouldNavigate = false;
+            
+            if (isMobile) {
+                // Mobile: check if clicked on 旬 number area (now centered)
+                const clickedIndexArea = path.find(el => {
+                    return el && el.nodeType === Node.ELEMENT_NODE && 
+                           el.getAttribute('aria-label') === '旬编号';
+                });
+                shouldNavigate = !!clickedIndexArea;
+            } else {
+                // Desktop: check if clicked on index column (旬 column)
+                const clickedIndexArea = path.find(el => {
+                    return el && el.nodeType === Node.ELEMENT_NODE && 
+                           el.getAttribute('aria-label') === '旬编号';
+                });
+                shouldNavigate = !!clickedIndexArea;
+            }
+            
+            if (shouldNavigate) {
                 const index = parseInt(xunRow.getAttribute('period-index'));
                 if (this.onViewChange) this.onViewChange('overview', index);
             }
@@ -53,13 +76,20 @@ export class MacroView {
     }
 
     handleUpdateMacroGoal(index, value) {
-        const state = store.getState();
-        const macroGoals = { ...state.macroGoals };
-        
-        if (!macroGoals[index]) macroGoals[index] = {};
-        macroGoals[index].goal = value;
-        
-        store.setState({ macroGoals });
+        try {
+            MacroViewValidator.validateGoal(value);
+            
+            const state = store.getState();
+            const macroGoals = { ...state.macroGoals };
+            
+            if (!macroGoals[index]) macroGoals[index] = {};
+            macroGoals[index].goal = MacroViewValidator.sanitizeInput(value);
+            
+            store.setState({ macroGoals });
+        } catch (error) {
+            console.error('handleUpdateMacroGoal error:', error);
+            // Optionally show user feedback
+        }
     }
 
     handleUpdateMacroRemarks(index, value) {
@@ -106,7 +136,7 @@ export class MacroView {
             const goal = macroGoals[period.index]?.goal || '';
             const remarks = macroGoals[period.index]?.remarks || '';
             
-            // Progress (Checkboxes) - We still generate the inner HTML for the progress area, 
+            // Progress (Checkboxes) - We still generate inner HTML for progress area, 
             // but it is injected into the component.
             let checkedCount = 0;
             let progressHtml = '<div class="flex items-center justify-center h-full space-x-[2px]">';
@@ -167,7 +197,7 @@ export class MacroView {
             row.setAttribute('total-days', periodTotalDays);
             
             // For complex HTML we can set it via property or attribute, but property is safer for HTML strings
-            // However, the attribute works fine if escaped properly, or we can just pass it as a property
+            // However, attribute works fine if escaped properly, or we can just pass it as a property
             row.setAttribute('progress-html', progressHtml);
 
             this.container.appendChild(row);

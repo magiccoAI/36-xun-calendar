@@ -4,11 +4,6 @@ export const DAY_RECORD_SCHEMA = {
     date: "2026-03-22",
     sleepData: { duration: 7, quality: 8 },
     metrics: { exercise: 30, reading: 20, social: "和朋友散步" },
-    money_feeling: ["long_term"],
-    money_saving: "in_rhythm",
-    money_impulse: "balanced",
-    money_note: "今天把钱花在长期有复利的事情上",
-    money_alignment_score: 1,
     money: { feeling: ["long_term"], saving: "in_rhythm", impulse: "balanced", note: "今天把钱花在长期有复利的事情上" },
     emotions: ["快乐", "专注"],
     keywords: ["工作", "学习"],
@@ -61,7 +56,8 @@ export const CONFIG = {
         CUSTOM_EMOTIONS: 'xun_custom_emotions',
         CUSTOM_NOURISHMENTS: 'xun_custom_nourishments',
         SETTINGS: 'xun_settings',
-        LAST_VIEWED_XUN: 'xun_last_viewed_index'
+        LAST_VIEWED_XUN: 'xun_last_viewed_index',
+        MENSTRUAL_DATA: 'menstrual_data'
     },
     DEFAULT_EMOTIONS: [
         { text: '😄 快乐', value: '快乐' },

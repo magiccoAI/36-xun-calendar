@@ -3,6 +3,10 @@ import { CONFIG } from '../config.js';
 import { store } from './State.js';
 import { Calendar } from './Calendar.js';
 import { backgroundLoader } from './BackgroundLoader.js';
+import { ThemeManager } from './ThemeManager.js';
+import { YearProgress } from './YearProgress.js';
+import { NavigationManager } from './NavigationManager.js';
+import { PixelFarm } from './PixelFarm.js';
 import { MacroView } from '../components/MacroView.js';
 import { OverviewView } from '../components/OverviewView.js';
 import { DetailView } from '../components/DetailView.js';
@@ -23,18 +27,19 @@ class App {
         this.initBackup();
         this.menstrualBtn = document.getElementById('menstrual-view-btn');
         this.initSettings();
-        this.initTheme();
-        this.initYearProgress();
-        this.initNavigation();
-        this.initEnergySlider();
-        this.initPixelFarm();
-        this.initPixelFarmToggle();
+        this.themeManager = new ThemeManager();
+        this.yearProgress = new YearProgress(this.xunPeriods);
+        this.navigationManager = new NavigationManager();
+        this.pixelFarm = new PixelFarm();
         QuoteSystem.init();
         this.checkMenstrualPrediction();
         
         // Initialize mobile current xun FAB
         this.initMobileCurrentXunFAB();
-        
+
+        // Register Service Worker for PWA offline support
+        this.registerServiceWorker();
+
         // Subscribe to store
         store.subscribe(this.render.bind(this));
         
@@ -165,34 +170,8 @@ class App {
             });
         });
 
-        this.modal.elements.saveBtn.addEventListener('click', () => {
-            const date = this.modal.elements.dateTitle.textContent;
-            const dayData = store.getDay(date) || {};
-
-            // Combine existing data with new data
-            const newData = {
-                ...dayData,
-                mood: parseInt(selectedMood, 10),
-                crop: selectedMood === '5' ? selectedCrop : dayData.crop, // Keep old crop if mood is no longer superb
-                // ... gather other data from modal inputs ...
-            };
-
-            store.updateDay(date, newData);
-            this.modal.close();
-            this.initPixelFarm(); // Re-render the farm to show the new crop
-        });
-
-        this.modal.elements.deleteBtn.addEventListener('click', () => {
-            const date = this.modal.elements.dateTitle.textContent;
-            const oldData = store.getDay(date);
-            store.deleteDay(date);
-            this.modal.close();
-            this.initPixelFarm(); // Re-render the farm
-            this.showToast('记录已删除', () => {
-                store.updateDay(date, oldData);
-                this.initPixelFarm();
-            });
-        });
+        // NOTE: Save/delete handlers are managed by Modal.js (handleSaveDailyRecord / delete).
+        // Removed duplicate handlers that used stale local selectedMood/selectedCrop.
         
         // Expose openModal to window if needed by inline onclicks (though we should avoid them)
         // Or better, views should handle clicks and call app.openModal
@@ -202,7 +181,7 @@ class App {
         // I'll check DetailView.js later. If it doesn't, I need to fix it.
         // For now, I'll assume DetailView or OverviewView calls window.openModal or similar.
         // I'll expose it just in case.
-        window.openModal = (dateStr) => {
+        this.openModal = (dateStr) => {
              const xun = Calendar.getXunPeriodByDateStr(this.xunPeriods, dateStr);
              this.modal.open(dateStr, xun ? xun.index : 1);
         };
@@ -235,425 +214,7 @@ class App {
         }
     }
 
-    initTheme() {
-        // Initialize background loader
-        backgroundLoader.seasonalPreload();
-        
-        // Expose setTheme to window for legacy onclick
-        window.setTheme = async (themeName) => {
-            // Reset body classes
-            document.body.className = "bg-gray-50 text-gray-800 antialiased overflow-x-hidden";
-            
-            if (themeName !== 'default') {
-                // Use background loader for optimized loading
-                await backgroundLoader.loadTheme(themeName);
-            } else {
-                // Clear theme
-                document.body.classList.remove('theme-spring', 'theme-summer', 'theme-autumn', 'theme-winter');
-            }
-            
-            localStorage.setItem('xun_theme', themeName);
-            
-            // Preload next theme
-            if (themeName !== 'default') {
-                backgroundLoader.preloadNextTheme(themeName);
-            }
-            
-            // Close menu if open
-            const menu = document.getElementById('theme-menu');
-            if (menu) menu.classList.add('hidden');
-        };
-
-        // Load saved theme
-        const savedTheme = localStorage.getItem('xun_theme');
-        if (savedTheme) {
-            window.setTheme(savedTheme);
-        }
-        
-        // Theme toggle button
-        const btn = document.getElementById('theme-btn');
-        const menu = document.getElementById('theme-menu');
-        if (btn && menu) {
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                menu.classList.toggle('hidden');
-            };
-            document.addEventListener('click', () => {
-                if (!menu.classList.contains('hidden')) menu.classList.add('hidden');
-            });
-        }
-    }
-
-    initYearProgress() {
-        const update = () => {
-            const now = new Date();
-            const start = new Date(CONFIG.YEAR, 0, 1);
-            const end = new Date(CONFIG.YEAR, 11, 31, 23, 59, 59);
-            const total = end - start;
-            const current = now - start;
-            let percentage = (current / total) * 100;
-            percentage = Math.max(0, Math.min(100, percentage));
-
-            const bar = document.getElementById('year-progress-bar');
-            const walker = document.getElementById('year-progress-walker');
-            const text = document.getElementById('year-progress-text');
-            const bubble = document.getElementById('walker-bubble');
-            const currentXunInfo = document.getElementById('current-xun-info');
-
-            if (bar) bar.style.width = `${percentage}%`;
-            if (walker) walker.style.left = `${percentage}%`;
-            if (text) {
-                // Mindful Progress Text
-                const passedDays = Math.floor(current / (1000 * 60 * 60 * 24));
-                const totalDays = 365; // Approximate
-                const remainingDays = totalDays - passedDays;
-                text.innerHTML = `
-                    <div class="flex items-center gap-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300">
-                        <div class="flex items-center gap-1.5 group cursor-default" title="已过去的时间">
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-400 group-hover:bg-blue-500 transition-colors"></div>
-                            <span class="text-xs text-gray-500 font-medium">已走过 <span class="font-mono text-gray-700 font-bold text-sm">${passedDays}</span> 天</span>
-                        </div>
-                        <div class="h-4 w-[1px] bg-gray-200"></div>
-                        <div class="flex items-center gap-1 cursor-default" title="当前进度">
-                             <span class="font-mono font-bold text-blue-600 text-lg leading-none">${percentage.toFixed(1)}<span class="text-xs ml-0.5">%</span></span>
-                        </div>
-                        <div class="h-4 w-[1px] bg-gray-200"></div>
-                        <div class="flex items-center gap-1.5 group cursor-default" title="剩余的时间">
-                            <span class="text-xs text-gray-500 font-medium">余 <span class="font-mono text-gray-700 font-bold text-sm">${remainingDays}</span> 天</span>
-                            <div class="w-1.5 h-1.5 rounded-full bg-gray-300 group-hover:bg-green-500 transition-colors"></div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Bubble interaction
-            if (walker && bubble) {
-                walker.onmouseenter = () => {
-                    bubble.textContent = Calendar.formatLocalDate(now);
-                    bubble.classList.remove('opacity-0');
-                };
-                walker.onmouseleave = () => bubble.classList.add('opacity-0');
-            }
-
-            // Current Xun Info
-            const currentXun = Calendar.getCurrentXun(this.xunPeriods);
-            if (currentXunInfo) {
-                if (currentXun) {
-                    currentXunInfo.textContent = `Current: 第 ${currentXun.index} 旬`;
-                } else {
-                    currentXunInfo.textContent = `Welcome to ${CONFIG.YEAR}`;
-                }
-            }
-
-            // Spring Festival Theme Check (Approx. Late Jan to Feb)
-            // 2026 CNY is Feb 17. We enable it for Feb and late Jan.
-            const isSpringFestival = (now.getMonth() === 1) || (now.getMonth() === 0 && now.getDate() > 20);
-            const isMarch = now.getMonth() === 2; // March is month 2
-            const isApril = now.getMonth() === 3; // April is month 3
-            const header = document.querySelector('header');
-            const flower = document.querySelector('.flower-path');
-            const kite = document.querySelector('.kite-path');
-
-            if (header) {
-                if (isSpringFestival) {
-                    header.classList.add('spring-festival-theme');
-                } else {
-                    header.classList.remove('spring-festival-theme');
-                }
-            }
-            if (flower) {
-                if (isMarch) {
-                    flower.classList.remove('hidden');
-                } else {
-                    flower.classList.add('hidden');
-                }
-            }
-            if (kite) {
-                if (isApril) {
-                    kite.classList.remove('hidden');
-                    
-                    // Inject enhanced illustration-style SVG structure
-                    if (!kite.innerHTML || kite.dataset.styled !== 'true') {
-                        kite.innerHTML = `
-                            <svg viewBox="0 0 200 200" class="kite-illustration">
-                                <path class="kite-string" d="M 20,180 Q 60,80 120,60 T 180,20" />
-                                <g class="kite-body">
-                                    <!-- Enhanced swallow kite shape -->
-                                    <path class="kite-shape" d="M 170,30 L 180,20 L 190,30 L 180,45 Z" fill="rgba(16, 185, 129, 0.8)" />
-                                    <!-- Swallow wings -->
-                                    <path d="M 175,25 Q 165,20 160,25 Q 165,28 175,25" fill="rgba(125, 211, 252, 0.6)" />
-                                    <path d="M 185,25 Q 195,20 200,25 Q 195,28 185,25" fill="rgba(125, 211, 252, 0.6)" />
-                                    <!-- Tail ribbon -->
-                                    <path class="kite-ribbon" d="M 180,45 Q 185,55 180,65" fill="none" stroke="rgba(16, 185, 129, 0.4)" stroke-width="1" />
-                                    <!-- Eye detail -->
-                                    <circle cx="172" cy="28" r="2" fill="white" opacity="0.8"/>
-                                    <circle cx="172" cy="28" r="1" fill="black"/>
-                                </g>
-                            </svg>
-                        `;
-                        kite.dataset.styled = 'true';
-                    }
-                } else {
-                    kite.classList.add('hidden');
-                }
-            }
-        };
-        
-        update();
-        setInterval(update, 60000); // Update every minute
-    }
-
-    initNavigation() {
-        const navMacro = document.getElementById('nav-macro');
-        const navOverview = document.getElementById('nav-overview');
-        
-        if (navMacro) navMacro.onclick = () => store.setState({ currentView: 'macro' });
-        if (navOverview) navOverview.onclick = () => store.setState({ currentView: 'overview' });
-
-        // Mobile Navigation
-        const mobNavMacro = document.getElementById('mobile-nav-macro');
-        const mobNavOverview = document.getElementById('mobile-nav-overview');
-
-        if (mobNavMacro) mobNavMacro.onclick = () => store.setState({ currentView: 'macro' });
-        if (mobNavOverview) mobNavOverview.onclick = () => store.setState({ currentView: 'overview' });
-    }
-
-    updateNavigation(currentView) {
-        const macroBtn = document.getElementById('nav-macro');
-        const overviewBtn = document.getElementById('nav-overview');
-
-        if (currentView === 'macro') {
-            macroBtn.className = 'nav-item nav-item-active';
-            overviewBtn.className = 'nav-item nav-item-inactive';
-        } else {
-            macroBtn.className = 'nav-item nav-item-inactive';
-            overviewBtn.className = 'nav-item nav-item-active';
-        }
-
-        // Mobile Navigation Highlight (保持原有的移动端逻辑)
-        const mobNavMacro = document.getElementById('mobile-nav-macro');
-        const mobNavOverview = document.getElementById('mobile-nav-overview');
-
-        if (mobNavMacro && mobNavOverview) {
-            if (currentView === 'macro') {
-                mobNavMacro.classList.add('text-blue-600');
-                mobNavMacro.classList.remove('text-gray-400', 'hover:text-gray-600');
-                mobNavOverview.classList.remove('text-blue-600');
-                mobNavOverview.classList.add('text-gray-400', 'hover:text-gray-600');
-            } else {
-                mobNavOverview.classList.add('text-blue-600');
-                mobNavOverview.classList.remove('text-gray-400', 'hover:text-gray-600');
-                mobNavMacro.classList.remove('text-blue-600');
-                mobNavMacro.classList.add('text-gray-400', 'hover:text-gray-600');
-            }
-        }
-    }
-
-    initEnergySlider() {
-        const slider = document.getElementById('energy-level');
-        if (!slider) return;
-
-        const updateEnergyFeel = () => {
-            const value = slider.value;
-            // 完整区间渐变：左侧偏冷、右侧偏暖，中间过渡
-            const color = 'linear-gradient(90deg, #22c55e 0%, #3b82f6 33%, #a855f7 66%, #f97316 100%)';
-            slider.style.background = color;
-        };
-
-        slider.addEventListener('input', updateEnergyFeel);
-        
-        // Also update when modal opens and sets the value
-        // We can use a MutationObserver on the slider's value attribute
-        const observer = new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
-                    updateEnergyFeel();
-                }
-            });
-        });
-        observer.observe(slider, { attributes: true });
-
-        updateEnergyFeel(); // Initial call
-    }
-
-    initPixelFarm() {
-        const grid = document.getElementById('pixel-farm-grid');
-        if (!grid) return;
-        grid.innerHTML = ''; // Clear grid before redraw
-
-        const year = CONFIG.YEAR;
-        const totalDays = 365;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const allData = store.getAllData();
-
-        for (let i = 0; i < totalDays; i++) {
-            const dayDate = new Date(year, 0, i + 1);
-            const dateStr = Calendar.formatLocalDate(dayDate);
-
-            const plot = document.createElement('div');
-            plot.id = `plot-${dateStr}`;
-            // 基础像素土地块：留出间隔，由容器 gap 控制
-            plot.className = 'w-4 h-4 cursor-pointer hover:ring-2 hover:ring-amber-400 border border-amber-400/50 flex items-center justify-center rounded-sm';
-            plot.dataset.date = dateStr;
-            plot.setAttribute('title', dateStr);
-            plot.setAttribute('aria-label', dateStr);
-            plot.onclick = (e) => {
-                e.stopPropagation();
-                console.log(`Plot clicked: ${dateStr}`, plot);
-                this.showCropSelection(dateStr, plot);
-            };
-
-            const dayData = allData[dateStr];
-            const crop = dayData ? dayData.crop : null;
-
-            // 重置样式，为状态化渲染做准备
-            plot.textContent = ''; // Use textContent instead of innerHTML for emojis
-            plot.style.backgroundImage = '';
-            plot.style.backgroundSize = '';
-            plot.style.backgroundPosition = '';
-            plot.style.backgroundRepeat = '';
-
-            // 默认使用像素土地贴图作为背景
-            plot.style.backgroundImage = "url('src/images/pixel square.png')";
-            plot.style.backgroundSize = 'cover';
-            plot.style.backgroundPosition = 'center';
-            plot.style.backgroundRepeat = 'no-repeat';
-
-            if (crop) {
-                if (crop.includes('/')) { // 作物是图片
-                    plot.style.backgroundImage = `url('${crop}')`;
-                    plot.style.backgroundSize = 'contain';
-                    plot.style.backgroundPosition = 'center';
-                    plot.style.backgroundRepeat = 'no-repeat';
-                } else { // Emoji crop
-                    plot.textContent = crop;
-                }
-                // 为已种植的地块加深背景色
-                plot.classList.add('bg-amber-600', 'border-amber-700/50');
-
-            } else if (dayDate < today) { // 过去的日子，默认显示嫩芽
-                plot.innerHTML = '<div class="w-1 h-1 bg-green-500 rounded-full"></div>';
-                // 为过去未种植的地块也加深背景色
-                plot.classList.add('bg-amber-600', 'border-amber-700/50');
-            } 
-
-            if (dayDate.getTime() === today.getTime()) {
-                plot.classList.add('ring-2', 'ring-blue-500');
-            }
-
-            grid.appendChild(plot);
-        }
-    }
-
-    initPixelFarmToggle() {
-        const toggleBtn = document.getElementById('pixel-farm-toggle');
-        const wrapper = document.getElementById('pixel-farm-grid-wrapper');
-        if (!toggleBtn || !wrapper) return;
-
-        const collapsedKey = 'pixel_farm_collapsed';
-        const applyState = (collapsed) => {
-            if (collapsed) {
-                wrapper.classList.add('hidden');
-                toggleBtn.setAttribute('aria-expanded', 'false');
-                toggleBtn.querySelector('span').textContent = '展开';
-                const icon = toggleBtn.querySelector('svg');
-                if (icon) icon.classList.add('rotate-180');
-            } else {
-                wrapper.classList.remove('hidden');
-                toggleBtn.setAttribute('aria-expanded', 'true');
-                toggleBtn.querySelector('span').textContent = '收起';
-                const icon = toggleBtn.querySelector('svg');
-                if (icon) icon.classList.remove('rotate-180');
-            }
-        };
-
-        const saved = localStorage.getItem(collapsedKey);
-        const initialCollapsed = saved === '1';
-        applyState(initialCollapsed);
-
-        toggleBtn.onclick = () => {
-            const isCollapsed = !wrapper.classList.contains('hidden');
-            const nextCollapsed = isCollapsed;
-            applyState(nextCollapsed);
-            localStorage.setItem(collapsedKey, nextCollapsed ? '1' : '0');
-        };
-    }
-
-    showCropSelection(dateStr, element) {
-        const menu = document.getElementById('crop-selection-menu');
-        if (!menu) {
-            console.error('Crop selection menu not found');
-            return;
-        }
-
-        console.log(`Showing crop selection for: ${dateStr}`, element);
-
-        const rect = element.getBoundingClientRect();
-        const menuWidth = 200; // Approximate menu width based on max-w-xs and content
-        const menuHeight = 100; // Approximate menu height
-        const scrollX = window.scrollX || window.pageXOffset;
-        const scrollY = window.scrollY || window.pageYOffset;
-        
-        // Calculate initial position
-        let left = scrollX + rect.left;
-        let top = scrollY + rect.bottom + 5;
-        
-        console.log(`Initial position: left=${left}, top=${top}, rect=${JSON.stringify(rect)}`);
-        
-        // Adjust horizontal position if menu would go beyond right viewport
-        if (left + menuWidth > window.innerWidth + scrollX) {
-            left = scrollX + rect.right - menuWidth;
-            // Ensure menu doesn't go beyond left viewport either
-            if (left < scrollX) {
-                left = scrollX + 10;
-            }
-        }
-        
-        // Adjust vertical position if menu would go beyond bottom viewport
-        if (top + menuHeight > window.innerHeight + scrollY) {
-            top = scrollY + rect.top - menuHeight - 5;
-            // Ensure menu doesn't go above top viewport
-            if (top < scrollY) {
-                top = scrollY + 10;
-            }
-        }
-        
-        console.log(`Final position: left=${left}, top=${top}`);
-        
-        menu.style.position = 'fixed';
-        menu.style.top = `${top - scrollY}px`;
-        menu.style.left = `${left - scrollX}px`;
-        menu.style.zIndex = '9999';
-        menu.classList.remove('hidden');
-
-        const newMenu = menu.cloneNode(true);
-        menu.parentNode.replaceChild(newMenu, menu);
-
-        newMenu.querySelectorAll('.seed-packet').forEach(packet => {
-            packet.onclick = () => {
-                const crop = packet.dataset.crop;
-                const dayData = store.getAllData()[dateStr] || {};
-                const currentData = store.getAllData();
-                const updatedData = { 
-                    ...currentData, 
-                    [dateStr]: { ...dayData, crop: crop } 
-                };
-                store.setState({ userData: updatedData });
-                newMenu.classList.add('hidden');
-                this.initPixelFarm();
-            };
-        });
-
-        const hideMenu = (e) => {
-            if (!newMenu.contains(e.target)) {
-                newMenu.classList.add('hidden');
-                document.body.removeEventListener('click', hideMenu);
-            }
-        };
-        document.body.addEventListener('click', hideMenu);
-    }
+    // initEnergySlider() removed - #energy-level element doesn't exist in HTML (dead code)
 
     showToast(message, onUndo) {
         const toast = document.getElementById('toast-container');
@@ -906,7 +467,7 @@ class App {
         }
 
         // Navigation State
-        this.updateNavigation(state.currentView);
+        this.navigationManager.update(state.currentView);
 
         // Render Specific View
         if (state.currentView === 'macro') {
@@ -965,6 +526,7 @@ class App {
 
     afterModalSave() {
         this.summaryView?.afterModalSave?.();
+        this.initPixelFarm();
     }
 
     getWeightedPeriodPredictionInfo(cycles) {
@@ -1061,13 +623,21 @@ class App {
 
         closeBtn.onclick = () => banner.classList.add('hidden');
     }
-}
 
-// Helper to expose to window for modules that might not import Calendar directly
-// or for inline HTML usage if any remains
-window.showView = (viewName) => {
-    store.setState({ currentView: viewName });
-};
+    registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then((registration) => {
+                    console.log('[Service Worker] Registered successfully:', registration.scope);
+                })
+                .catch((error) => {
+                    console.error('[Service Worker] Registration failed:', error);
+                });
+        } else {
+            console.log('[Service Worker] Not supported in this browser');
+        }
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new App();

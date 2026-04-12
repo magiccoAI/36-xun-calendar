@@ -1,5 +1,6 @@
 
 import { CONFIG } from '../config.js';
+import { Calendar } from './Calendar.js';
 
 import { BackupManager } from './BackupManager.js';
 
@@ -14,7 +15,7 @@ class Store {
             viewedXunIndex: null,  // Currently viewed xun index
             currentView: 'macro',  // 'macro', 'overview'
             autoBackup: localStorage.getItem('auto_backup_enabled') === 'true', // Load auto backup setting
-            menstrualData: JSON.parse(localStorage.getItem('menstrual_data') || '{"cycles":[], "avgLength": 28, "avgDuration": 5, "nextPrediction": null}'),
+            menstrualData: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.MENSTRUAL_DATA) || '{"cycles":[], "avgLength": 28, "avgDuration": 5, "nextPrediction": null}'),
             settings: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.SETTINGS) || '{"showMenstrualCycle": false}')
         };
         this.listeners = new Set();
@@ -84,7 +85,7 @@ class Store {
             localStorage.setItem(CONFIG.STORAGE_KEYS.CUSTOM_NOURISHMENTS, JSON.stringify(newState.customNourishments));
         }
         if (newState.menstrualData) {
-            localStorage.setItem('menstrual_data', JSON.stringify(newState.menstrualData));
+            localStorage.setItem(CONFIG.STORAGE_KEYS.MENSTRUAL_DATA, JSON.stringify(newState.menstrualData));
         }
         if (newState.settings) {
             localStorage.setItem(CONFIG.STORAGE_KEYS.SETTINGS, JSON.stringify(newState.settings));
@@ -338,16 +339,18 @@ class Store {
         const timezoneOffsetMinutes = new Date().getTimezoneOffset();
         
         // Skip if already correct or empty
-        if (timezoneOffsetMinutes >= 0 || !data || Object.keys(data).length === 0) {
+        // timezoneOffsetMinutes > 0 for UTC- (west), < 0 for UTC+ (east)
+        // China is UTC+8, offset = -480, so we migrate for negative offsets
+        if (timezoneOffsetMinutes > 0 || !data || Object.keys(data).length === 0) {
             localStorage.setItem(migrationKey, '1');
             return;
         }
 
         const addDaysToDateStr = (dateStr, days) => {
-            const d = new Date(`${dateStr}T00:00:00`);
+            const d = Calendar.parseDateStrToLocalDate(dateStr);
+            if (!d) return dateStr;
             d.setDate(d.getDate() + days);
-            const pad2 = (n) => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+            return Calendar.formatLocalDate(d);
         };
 
         const migrated = {};

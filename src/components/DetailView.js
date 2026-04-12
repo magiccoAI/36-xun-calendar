@@ -2,6 +2,7 @@
 import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
+import { Solar, HolidayUtil } from 'lunar-javascript';
 
 export class DetailView {
     constructor(containerId, callbacks) {
@@ -316,21 +317,21 @@ export class DetailView {
                 let jieQi = '', lunarDay = '';
                 let holidayName = '';
                 let isHoliday = false;
-                
-                // Lunar/Solar/Holiday Logic (Global Dependency)
-                if (typeof window.Solar !== 'undefined') {
-                    const solar = window.Solar.fromYmd(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+
+                // Lunar/Solar/Holiday Logic
+                try {
+                    const solar = Solar.fromYmd(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
                     const lunar = solar.getLunar();
                     jieQi = lunar.getJieQi();
                     lunarDay = lunar.getDayInChinese() === '初一' ? lunar.getMonthInChinese() + '月' : lunar.getDayInChinese();
-                    
-                    if (typeof window.HolidayUtil !== 'undefined') {
-                        const h = window.HolidayUtil.getHoliday(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
-                        if (h) {
-                            holidayName = h.getName();
-                            isHoliday = !h.isWork();
-                        }
+
+                    const h = HolidayUtil.getHoliday(currentDate.getFullYear(), currentDate.getMonth() + 1, currentDate.getDate());
+                    if (h) {
+                        holidayName = h.getName();
+                        isHoliday = !h.isWork();
                     }
+                } catch (error) {
+                    console.warn('Lunar calendar calculation failed:', error);
                 }
 
                 const dayEl = document.createElement('div');

@@ -1,3 +1,5 @@
+import { Chart } from 'chart.js';
+
 let sleepTrendChartInstance = null;
 
 const formatDateLabel = (dateStr) => {
@@ -17,11 +19,6 @@ export function renderSleepTrendChart(records = []) {
     }
 
     container.innerHTML = '';
-
-    if (typeof Chart === 'undefined') {
-        container.innerHTML = '<p class="text-sm text-gray-500">图表组件未加载。</p>';
-        return;
-    }
 
     const sortedRecords = [...records]
         .filter((record) => record?.date && Number.isFinite(Number(record?.sleepDuration)))

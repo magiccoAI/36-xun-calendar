@@ -180,9 +180,8 @@ export const Calendar = {
                 return null;
             }
             
-            if (today.getFullYear() !== CONFIG.YEAR) {
-                                return null;
-            }
+            // Removed year check — getCurrentXun now works for any year,
+            // not just CONFIG.YEAR. Callers should still handle null return.
             
             const currentXun = periods.find(p => {
                 // 创建旬的开始和结束日期，也设置为中午避免时区问题
@@ -201,6 +200,9 @@ export const Calendar = {
     },
     
 
+    // DEPRECATED: Use getXunPeriods(year) + find by date instead.
+    // Old implementation used monthly tri-section (1-10/11-20/21-末) which
+    // contradicts the continuous 10-day xun system. Now delegates to getXunPeriods.
     getXunRange(dateInput = new Date()) {
         try {
             const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
@@ -209,24 +211,23 @@ export const Calendar = {
             }
 
             const year = date.getFullYear();
-            const month = date.getMonth();
-            const day = date.getDate();
-            const lastDay = new Date(year, month + 1, 0).getDate();
+            const periods = this.getXunPeriods(year);
+            const target = periods.find(p => {
+                const d = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0, 0);
+                const s = new Date(p.startDate.getFullYear(), p.startDate.getMonth(), p.startDate.getDate(), 12, 0, 0, 0);
+                const e = new Date(p.endDate.getFullYear(), p.endDate.getMonth(), p.endDate.getDate(), 12, 0, 0, 0);
+                return d >= s && d <= e;
+            });
 
-            let startDay = 1;
-            let endDay = 10;
-
-            if (day >= 11 && day <= 20) {
-                startDay = 11;
-                endDay = 20;
-            } else if (day >= 21) {
-                startDay = 21;
-                endDay = lastDay;
+            if (target) {
+                return { startDate: target.startDate, endDate: target.endDate };
             }
 
+            // Fallback for dates outside any period
+            const fallback = new Date();
             return {
-                startDate: new Date(year, month, startDay),
-                endDate: new Date(year, month, endDay)
+                startDate: new Date(fallback.getFullYear(), fallback.getMonth(), 1),
+                endDate: new Date(fallback.getFullYear(), fallback.getMonth(), 10)
             };
         } catch (error) {
             console.error('Calendar.getXunRange error:', error, { dateInput });
@@ -301,8 +302,8 @@ export const Calendar = {
                 throw new Error('Invalid date string');
             }
             
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) {
+            const d = this.parseDateStrToLocalDate(dateStr);
+            if (!d) {
                 throw new Error(`Invalid date: ${dateStr}`);
             }
             
@@ -320,10 +321,10 @@ export const Calendar = {
                 throw new Error('Invalid date strings for diff');
             }
             
-            const d1 = new Date(dateStr1);
-            const d2 = new Date(dateStr2);
+            const d1 = this.parseDateStrToLocalDate(dateStr1);
+            const d2 = this.parseDateStrToLocalDate(dateStr2);
             
-            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+            if (!d1 || !d2) {
                 throw new Error(`Invalid dates: ${dateStr1}, ${dateStr2}`);
             }
             

@@ -240,26 +240,29 @@
                 position: relative;
                 padding-top: 60px; /* 为按钮留出空间 */
             }
-            
-            .absolute.right-36,
-            .absolute.right-24,
-            .absolute.right-0 {
+
+            header > .absolute.right-0 {
                 position: fixed;
+                right: 16px;
+                top: 16px;
                 z-index: 20;
+                background-color: rgba(255, 255, 255, 0.9);
+                backdrop-filter: blur(4px);
+                padding: 8px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
-            
+
             h1.text-3xl {
                 margin-top: 20px;
-                padding: 0 60px; /* 避免与按钮重叠 */
+                padding: 0 16px; /* 避免与按钮重叠 */
                 text-align: center;
                 clear: both;
             }
-            
+
             /* 确保按钮在移动端可见且不重叠 */
-            #backup-btn, #theme-btn, #settings-btn {
-                background-color: rgba(255, 255, 255, 0.9);
-                backdrop-filter: blur(4px);
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            #backup-btn, #theme-btn, #settings-btn, #menstrual-view-btn {
+                background-color: transparent;
             }
         }
 

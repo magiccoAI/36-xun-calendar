@@ -56,6 +56,15 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
 
+    <!-- Import map for native ESM in direct browser usage (without bundler) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "lunar-javascript": "https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/+esm"
+        }
+    }
+    </script>
+
     <!-- 使用绝对路径或确保路径正确 -->
     <link href="src/output.css" rel="stylesheet">
     <style>

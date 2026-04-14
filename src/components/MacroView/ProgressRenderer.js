@@ -2,38 +2,45 @@ export class ProgressRenderer {
     static generateProgressHTML(progressDays, checkedCount, totalCount) {
         try {
             if (!Array.isArray(progressDays)) {
+                console.error('ProgressRenderer.generateProgressHTML: progressDays is not an array', progressDays);
                 throw new Error('Progress days must be an array');
             }
 
-            let progressHtml = '<div class="progress-tracker flex items-center justify-center h-full space-x-[2px] overflow-x-auto pb-2" role="group" aria-label="每日打卡进度">';
-            
-            progressDays.forEach(day => {
+            let progressHtml = '<div class="progress-tracker flex items-center justify-center h-full space-x-[2px] overflow-x-auto pb-2" style="flex-direction: row !important; flex-wrap: nowrap !important; display: flex !important;" role="group" aria-label="每日打卡进度">';
+
+            progressDays.forEach((day, index) => {
+                // Validate day object
+                if (!day || typeof day !== 'object') {
+                    console.error(`ProgressRenderer.generateProgressHTML: Invalid day at index ${index}`, day);
+                    return;
+                }
+
                 const bgClass = day.isChecked ? '' : 'bg-white';
-                const borderClass = day.isChecked ? '' : 'border-gray-300';
+                let borderClass = day.isChecked ? '' : 'border-gray-300';
                 const opacityClass = day.isFuture ? 'opacity-40 cursor-not-allowed' : 'opacity-100 cursor-pointer hover:scale-110 transition-all duration-200';
                 let additionalClass = '';
-                
-                let style = day.isChecked 
-                    ? `background-color: ${day.xunColor}; border-color: ${day.xunColor};` 
+
+                let style = day.isChecked
+                    ? `background-color: ${day.xunColor || '#3b82f6'}; border-color: ${day.xunColor || '#3b82f6'};`
                     : `border-color: #d1d5db;`;
-                
+
                 if (day.isToday) {
                     borderClass = 'border-2 border-blue-500 z-10';
                     additionalClass = 'ring-2 ring-blue-200 shadow-md animate-pulse';
-                    style = day.isChecked 
-                        ? `background-color: ${day.xunColor}; border-color: #3b82f6;` 
+                    style = day.isChecked
+                        ? `background-color: ${day.xunColor || '#3b82f6'}; border-color: #3b82f6;`
                         : `border-color: #3b82f6;`;
                 }
-                
-                const actionAttr = day.canToggle ? `data-action="toggle-checkin" data-date="${day.dateStr}" data-index="${day.dateStr}"` : '';
+
+                const actionAttr = day.canToggle ? `data-action="toggle-checkin" data-date="${day.dateStr || ''}" data-index="${day.dateStr || ''}"` : '';
                 const tabindex = day.canToggle ? '0' : '-1';
-                const ariaLabel = day.tooltip;
+                const ariaLabel = day.tooltip || '打卡';
                 const ariaPressed = day.isChecked ? 'true' : 'false';
-                
-                progressHtml += `<div class="progress-day flex items-center justify-center shrink-0 md:w-auto md:h-auto md:block" ${actionAttr}>
-                    <button 
-                        class="w-5 h-5 md:w-2.5 md:h-2.5 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1" 
-                        style="${style}" 
+
+                progressHtml += `<div class="progress-day flex items-center justify-center shrink-0" ${actionAttr}>
+                    <button
+                        class="w-4 h-4 md:w-3 md:h-3 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1"
+                        style="${style}"
                         title="${ariaLabel}"
                         aria-label="${ariaLabel}"
                         aria-pressed="${ariaPressed}"
@@ -42,13 +49,20 @@ export class ProgressRenderer {
                     ></button>
                 </div>`;
             });
-            
-            progressHtml += `<span class="ml-2 text-[10px] text-gray-400 font-mono self-center hidden md:inline-block" aria-label="进度统计">${checkedCount}/${totalCount}</span>`;
+
+            progressHtml += `<span class="ml-3 text-[9px] text-gray-300 font-mono self-center hidden md:inline-block opacity-60" aria-label="进度统计">${checkedCount}/${totalCount}</span>`;
             progressHtml += '</div>';
-            
+
             return progressHtml;
         } catch (error) {
-            console.error('ProgressRenderer.generateProgressHTML error:', error);
+            console.error('ProgressRenderer.generateProgressHTML error:', {
+                error: error,
+                message: error?.message || String(error),
+                stack: error?.stack,
+                progressDays: Array.isArray(progressDays) ? `[Array with ${progressDays.length} items]` : progressDays,
+                checkedCount,
+                totalCount
+            });
             return '<div class="text-red-500 text-sm">进度显示错误</div>';
         }
     }
@@ -56,38 +70,54 @@ export class ProgressRenderer {
     static generateMobileProgressHTML(progressDays, checkedCount, totalCount) {
         try {
             if (!Array.isArray(progressDays)) {
+                console.error('ProgressRenderer.generateMobileProgressHTML: progressDays is not an array', progressDays);
                 throw new Error('Progress days must be an array');
             }
 
             let progressHtml = '<div class="mobile-progress-tracker flex items-center space-x-2 overflow-x-auto py-3 px-2" role="group" aria-label="每日打卡进度">';
-            
-            progressDays.forEach(day => {
+
+            progressDays.forEach((day, index) => {
+                // Validate day object
+                if (!day || typeof day !== 'object') {
+                    console.error(`ProgressRenderer.generateMobileProgressHTML: Invalid day at index ${index}`, day);
+                    return;
+                }
+
                 const bgClass = day.isChecked ? '' : 'bg-white';
-                const borderClass = day.isChecked ? '' : 'border-gray-300';
+                let borderClass = day.isChecked ? '' : 'border-gray-300';
                 const opacityClass = day.isFuture ? 'opacity-40' : 'opacity-100';
                 let additionalClass = '';
-                
-                let style = day.isChecked 
-                    ? `background-color: ${day.xunColor}; border-color: ${day.xunColor};` 
+
+                let style = day.isChecked
+                    ? `background-color: ${day.xunColor || '#3b82f6'}; border-color: ${day.xunColor || '#3b82f6'};`
                     : `border-color: #d1d5db;`;
-                
+
                 if (day.isToday) {
                     borderClass = 'border-2 border-blue-500';
                     additionalClass = 'ring-2 ring-blue-200 shadow-lg';
-                    style = day.isChecked 
-                        ? `background-color: ${day.xunColor}; border-color: #3b82f6;` 
+                    style = day.isChecked
+                        ? `background-color: ${day.xunColor || '#3b82f6'}; border-color: #3b82f6;`
                         : `border-color: #3b82f6;`;
                 }
-                
-                const actionAttr = day.canToggle ? `data-action="toggle-checkin" data-date="${day.dateStr}" data-index="${day.dateStr}"` : '';
-                const ariaLabel = day.tooltip;
+
+                const actionAttr = day.canToggle ? `data-action="toggle-checkin" data-date="${day.dateStr || ''}" data-index="${day.dateStr || ''}"` : '';
+                const ariaLabel = day.tooltip || '打卡';
                 const ariaPressed = day.isChecked ? 'true' : 'false';
-                const dayNumber = new Date(day.dateStr).getDate();
-                
+
+                // Safely get day number
+                let dayNumber = '?';
+                if (day.dateStr) {
+                    try {
+                        dayNumber = new Date(day.dateStr).getDate();
+                    } catch (e) {
+                        console.error(`ProgressRenderer.generateMobileProgressHTML: Invalid dateStr at index ${index}`, day.dateStr);
+                    }
+                }
+
                 progressHtml += `<div class="mobile-progress-day flex-shrink-0" ${actionAttr}>
-                    <button 
-                        class="w-10 h-10 rounded-xl border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 flex items-center justify-center" 
-                        style="${style}" 
+                    <button
+                        class="w-10 h-10 rounded-xl border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 active:scale-95 flex items-center justify-center"
+                        style="${style}"
                         title="${ariaLabel}"
                         aria-label="${ariaLabel}"
                         aria-pressed="${ariaPressed}"
@@ -100,16 +130,23 @@ export class ProgressRenderer {
                     </button>
                 </div>`;
             });
-            
+
             progressHtml += `<div class="ml-3 flex flex-col flex-shrink-0">
                 <span class="text-xs text-gray-400 font-mono" aria-label="进度统计">${checkedCount}/${totalCount}</span>
                 <span class="text-xs text-gray-400" aria-label="完成率">${Math.round((checkedCount/totalCount) * 100)}%</span>
             </div>`;
             progressHtml += '</div>';
-            
+
             return progressHtml;
         } catch (error) {
-            console.error('ProgressRenderer.generateMobileProgressHTML error:', error);
+            console.error('ProgressRenderer.generateMobileProgressHTML error:', {
+                error: error,
+                message: error?.message || String(error),
+                stack: error?.stack,
+                progressDays: Array.isArray(progressDays) ? `[Array with ${progressDays.length} items]` : progressDays,
+                checkedCount,
+                totalCount
+            });
             return '<div class="text-red-500 text-sm p-2">进度显示错误</div>';
         }
     }

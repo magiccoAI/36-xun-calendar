@@ -235,7 +235,7 @@ export class XunRow extends HTMLElement {
                 .col-date {
                     grid-column: span 2;
                     justify-content: center;
-                    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
                     font-size: 0.8125rem;
                     font-weight: 500;
                     color: #374151; /* WCAG AA compliant contrast */
@@ -245,19 +245,22 @@ export class XunRow extends HTMLElement {
                     line-height: 1.5;
                 }
                 .col-date:hover {
-                    background-color: rgba(59, 130, 246, 0.08);
-                    color: #1d4ed8; /* Better contrast on hover */
+                    /* Removed hover highlight to avoid confusion about click functionality */
                 }
                 .col-date span[aria-label] {
                     color: #1f2937; /* Stronger contrast for date numbers */
                 }
                 .col-goal {
-                    grid-column: span 4;
+                    grid-column: span 3;
                 }
                 .col-progress {
-                    grid-column: span 3;
+                    grid-column: span 4;
                     justify-content: center;
                     padding: 0.5rem;
+                }
+                .progress-tracker {
+                    flex-wrap: nowrap !important;
+                    flex-direction: row !important;
                 }
                 .col-remarks {
                     grid-column: span 2;
@@ -321,6 +324,8 @@ export class XunRow extends HTMLElement {
                     width: 100%;
                     display: flex;
                     justify-content: center;
+                    flex-direction: row;
+                    flex-wrap: nowrap;
                 }
                 /* Mobile specific styles */
                 @media (max-width: 767px) {
@@ -335,10 +340,12 @@ export class XunRow extends HTMLElement {
                         left: 50%;
                         transform: translateX(-50%);
                         z-index: 10;
-                        padding: 0.5rem 1rem;
+                        padding: 1rem 1.5rem;
                         background: transparent;
-                        border-radius: 1.5rem;
+                        border-radius: 2rem;
                         justify-content: center;
+                        min-width: 5rem;
+                        min-height: 3.5rem;
                     }
                     .col-index .number-container {
                         width: auto;
@@ -381,6 +388,10 @@ export class XunRow extends HTMLElement {
                         background: rgba(0, 0, 0, 0.02);
                         border-radius: 0.5rem;
                         margin: 0.5rem;
+                    }
+                    .col-progress .progress-tracker {
+                        flex-direction: row !important;
+                        flex-wrap: nowrap !important;
                     }
                     .col-remarks { 
                         padding: 0.5rem;

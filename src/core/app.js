@@ -20,7 +20,7 @@ import MenstrualView from '../components/MenstrualView.js';
 
 class App {
     constructor() {
-        this.xunPeriods = Calendar.getXunPeriods(CONFIG.YEAR);
+        this.xunPeriods = Calendar.getXunPeriods(store.getState().currentYear);
         this.pendingDayCellPatch = null;
         this.initViews();
         this.initModal();
@@ -78,7 +78,7 @@ class App {
             console.log('No current xun found, calculating manually...');
             // 手动计算今天应该属于哪一旬
             const now = new Date();
-            const startOfYear = new Date(CONFIG.YEAR, 0, 1);
+            const startOfYear = new Date(store.getState().currentYear, 0, 1);
             const dayOfYear = Math.floor((now - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
             const calculatedXunIndex = Math.ceil(dayOfYear / 10);
             
@@ -138,41 +138,9 @@ class App {
             this.afterModalSave();
         });
 
-        // The logic for the modal's internal elements is being initialized here.
-        // This is a temporary placement to follow the current refactoring step.
-        const moodButtons = document.querySelectorAll('.mood-btn');
-        const seedPacketContainer = document.getElementById('seed-packet-selection');
-        const seedPackets = document.querySelectorAll('.seed-packet');
-        let selectedMood = null;
-        let selectedCrop = null;
+        // Modal internal events are managed by Modal.js
+        // Removed duplicate event bindings that were previously in app.js
 
-        moodButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                selectedMood = button.dataset.mood;
-                moodButtons.forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'ring-green-400'));
-                button.classList.add('ring-2', 'ring-offset-2', 'ring-green-400');
-
-                if (selectedMood === '5' && seedPacketContainer) {
-                    seedPacketContainer.classList.remove('hidden');
-                } else if (seedPacketContainer) {
-                    seedPacketContainer.classList.add('hidden');
-                    selectedCrop = null; // Reset crop if mood changes
-                    seedPackets.forEach(p => p.classList.remove('ring-2', 'ring-yellow-400'));
-                }
-            });
-        });
-
-        seedPackets.forEach(packet => {
-            packet.addEventListener('click', () => {
-                selectedCrop = packet.dataset.crop;
-                seedPackets.forEach(p => p.classList.remove('ring-2', 'ring-yellow-400'));
-                packet.classList.add('ring-2', 'ring-yellow-400');
-            });
-        });
-
-        // NOTE: Save/delete handlers are managed by Modal.js (handleSaveDailyRecord / delete).
-        // Removed duplicate handlers that used stale local selectedMood/selectedCrop.
-        
         // Expose openModal to window if needed by inline onclicks (though we should avoid them)
         // Or better, views should handle clicks and call app.openModal
         // DetailView generates HTML with onclicks? No, DetailView should use event delegation or bind events.
@@ -625,6 +593,9 @@ class App {
     }
 
     registerServiceWorker() {
+        // DISABLED during development to prevent CSS caching issues
+        return;
+        /*
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js')
                 .then((registration) => {
@@ -636,6 +607,7 @@ class App {
         } else {
             console.log('[Service Worker] Not supported in this browser');
         }
+        */
     }
 }
 

@@ -3,6 +3,9 @@ import { store } from '../core/State.js';
 import { Calendar } from '../core/Calendar.js';
 import { CONFIG } from '../config.js';
 import './web-components/XunRow.js'; // Import the Web Component
+import { MacroViewValidator } from './MacroView/Validation.js';
+import { ProgressRenderer } from './MacroView/ProgressRenderer.js';
+import { DesignSystem } from './MacroView/DesignSystem.js';
 
 export class MacroView {
     constructor(containerId, onViewChange) {
@@ -102,8 +105,66 @@ export class MacroView {
         store.setState({ macroGoals });
     }
 
+    renderTableHeader() {
+        const header = document.createElement('div');
+        header.className = 'table-header';
+        header.innerHTML = `
+            <style>
+                .table-header {
+                    display: grid;
+                    grid-template-columns: repeat(12, minmax(0, 1fr));
+                    background-color: #f3f4f6;
+                    border-radius: 0.75rem;
+                    padding: 0.75rem 1rem;
+                    margin-bottom: 0.5rem;
+                    gap: 0.5rem;
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    color: #374151;
+                }
+                .header-col {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                }
+                .header-col-index {
+                    grid-column: span 1;
+                }
+                .header-col-date {
+                    grid-column: span 2;
+                }
+                .header-col-goal {
+                    grid-column: span 3;
+                }
+                .header-col-progress {
+                    grid-column: span 4;
+                }
+                .header-col-remarks {
+                    grid-column: span 2;
+                }
+                /* Mobile responsive */
+                @media (max-width: 767px) {
+                    .table-header {
+                        display: none; /* Hide header on mobile, use inline labels instead */
+                    }
+                }
+            </style>
+            <div class="header-col header-col-index">旬</div>
+            <div class="header-col header-col-date">日期</div>
+            <div class="header-col header-col-goal">核心目标</div>
+            <div class="header-col header-col-progress">每日微行动</div>
+            <div class="header-col header-col-remarks">备注</div>
+        `;
+        this.container.appendChild(header);
+    }
+
     render(xunPeriods, currentXun) {
         this.container.innerHTML = '';
+        
+        // Add table header
+        this.renderTableHeader();
+        
         const state = store.getState();
         const { userData, macroGoals } = state;
 
@@ -136,11 +197,11 @@ export class MacroView {
             const goal = macroGoals[period.index]?.goal || '';
             const remarks = macroGoals[period.index]?.remarks || '';
             
-            // Progress (Checkboxes) - We still generate inner HTML for progress area, 
-            // but it is injected into the component.
+            // Progress (Checkboxes) - Use ProgressRenderer for consistent rendering
+            const progressDays = [];
             let checkedCount = 0;
-            let progressHtml = '<div class="flex items-center justify-center h-full space-x-[2px]">';
             let tempDate = new Date(period.startDate);
+            const xunColor = `hsl(${hue}, 80%, 60%)`;
             
             while (tempDate <= period.endDate) {
                 const dStr = Calendar.formatLocalDate(tempDate);
@@ -150,40 +211,24 @@ export class MacroView {
                 const isFuture = tempDate >= tomorrowStart;
                 const isToday = dStr === todayStr;
                 
-                let bgClass = isChecked ? '' : 'bg-white';
-                let borderClass = isChecked ? '' : 'border-gray-300';
-                let opacityClass = isFuture ? 'opacity-40 cursor-not-allowed' : 'opacity-100 cursor-pointer hover:scale-110';
-                let additionalClass = '';
-                
-                const xunColor = `hsl(${hue}, 80%, 60%)`;
-                let style = isChecked 
-                    ? `background-color: ${xunColor}; border-color: ${xunColor};` 
-                    : `border-color: #d1d5db;`;
-                
-                if (isToday) {
-                     borderClass = 'border-2 border-blue-500 z-10';
-                     additionalClass = 'ring-2 ring-blue-200 shadow-md animate-pulse';
-                     style = isChecked 
-                        ? `background-color: ${xunColor}; border-color: #3b82f6;` 
-                        : `border-color: #3b82f6;`;
-                }
-                
                 const tip = isFuture 
                     ? `${dStr} (尚未到来)` 
                     : (isChecked ? `${dStr}: 已打卡 - ${goal || '完成目标'}` : `${dStr}: 点击打卡 - ${goal || '记录今日成果'}`);
 
-                const actionAttr = isFuture ? '' : `data-action="toggle-checkin" data-date="${dStr}" data-index="${period.index}"`;
-
-                progressHtml += `<div class="w-12 h-12 flex items-center justify-center shrink-0 md:w-auto md:h-auto md:block" ${actionAttr}>
-                    <div class="w-5 h-5 md:w-2.5 md:h-2.5 rounded-[1px] border ${bgClass} ${borderClass} ${opacityClass} ${additionalClass} transition-all duration-200" 
-                    style="${style}" 
-                    title="${tip}"></div>
-                </div>`;
+                progressDays.push({
+                    dateStr: dStr,
+                    isChecked,
+                    isFuture,
+                    isToday,
+                    canToggle: !isFuture,
+                    xunColor,
+                    tooltip: tip
+                });
                     
                 tempDate.setDate(tempDate.getDate() + 1);
             }
-            progressHtml += `<span class="ml-2 text-[10px] text-gray-400 font-mono self-center hidden md:inline-block">${checkedCount}/10</span>`;
-            progressHtml += '</div>';
+            
+            const progressHtml = ProgressRenderer.generateProgressHTML(progressDays, checkedCount, periodTotalDays);
 
             // Set attributes on the Web Component
             row.setAttribute('period-index', period.index);

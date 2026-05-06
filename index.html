@@ -64,7 +64,7 @@
             font-size: 14px;
         }
         /* Desktop root font size */
-        @media (min-width: 1024px) {
+        @media (min-width: var(--breakpoint-md)) {
             html {
                 font-size: 16px;
             }
@@ -89,7 +89,7 @@
         }
 
         /* Responsive grid container fixes */
-        @media (max-width: 768px) {
+        @media (max-width: var(--breakpoint-md)) {
             #overview-grid, #detail-content {
                 max-width: 100vw;
                 overflow-x: hidden;
@@ -147,12 +147,12 @@
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            color: #4e342e; /* A warm, dark brown */
+            color: var(--color-theme-autumn-text);
         }
-        body.theme-autumn .text-gray-800 { color: #4e342e; }
-        body.theme-autumn .text-gray-700 { color: #5d4037; }
-        body.theme-autumn .text-gray-500 { color: #795548; }
-        body.theme-autumn .text-gray-400 { color: #a1887f; }
+        body.theme-autumn .text-gray-800 { color: var(--color-theme-autumn-text); }
+        body.theme-autumn .text-gray-700 { color: var(--color-theme-autumn-text-700); }
+        body.theme-autumn .text-gray-500 { color: var(--color-theme-autumn-text-500); }
+        body.theme-autumn .text-gray-400 { color: var(--color-theme-autumn-text-400); }
         body.theme-autumn .bg-gray-50 { 
             background-color: rgba(255, 248, 225, 0.85); /* A creamy, parchment color */
             border: 1px solid rgba(213, 166, 109, 0.5);
@@ -162,8 +162,8 @@
 
         /* 4. Winter (Quiet Deep) - Background managed by BackgroundLoader */
         body.theme-winter {
-            color: #1d2c3a;
-            background-color: #e0f2f7;
+            color: var(--color-theme-winter-text);
+            background-color: var(--color-theme-winter-bg);
             background-repeat: repeat;
             background-size: 300px 300px;
             position: relative;
@@ -181,10 +181,10 @@
             mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
             -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
         }
-        body.theme-winter .text-gray-800 { color: #1d2c3a; }
-        body.theme-winter .text-gray-700 { color: #2c3e50; }
-        body.theme-winter .text-gray-500 { color: #475569; }
-        body.theme-winter .text-gray-400 { color: #64748b; }
+        body.theme-winter .text-gray-800 { color: var(--color-theme-winter-text); }
+        body.theme-winter .text-gray-700 { color: var(--color-theme-winter-text-700); }
+        body.theme-winter .text-gray-500 { color: var(--color-theme-winter-text-500); }
+        body.theme-winter .text-gray-400 { color: var(--color-theme-winter-text-400); }
         body.theme-winter .bg-gray-50 { 
             background-color: rgba(255, 255, 255, 0.85);
             border: 1px solid rgba(207, 216, 220, 0.4);
@@ -194,21 +194,21 @@
 
         /* 5. Liqiu Theme (Beginning of Autumn) */
         body.theme-liqiu {
-            background-color: #f5e6ab; /* Rice Yellow */
-            color: #5d4037; /* Dark Brown */
+            background-color: var(--color-theme-liqiu-bg); /* Rice Yellow */
+            color: var(--color-theme-liqiu-text); /* Dark Brown */
         }
         body.theme-liqiu .bg-gray-50 {
             background-color: rgba(255, 248, 225, 0.85); /* Lighter Rice Yellow */
             border: 1px solid rgba(200, 76, 35, 0.2);
         }
         body.theme-liqiu #year-progress-bar {
-            background: #c84c23; /* Maple Red */
+            background: var(--color-theme-liqiu-accent); /* Maple Red */
         }
-        body.theme-liqiu .text-gray-700 { color: #4e342e; }
-        body.theme-liqiu .text-gray-500 { color: #795548; }
-        body.theme-liqiu .text-gray-400 { color: #a1887f; }
+        body.theme-liqiu .text-gray-700 { color: var(--color-theme-autumn-text); }
+        body.theme-liqiu .text-gray-500 { color: var(--color-theme-autumn-text-500); }
+        body.theme-liqiu .text-gray-400 { color: var(--color-theme-autumn-text-400); }
         body.theme-liqiu #year-progress-text, body.theme-liqiu #current-xun-info {
-            color: #c84c23;
+            color: var(--color-theme-liqiu-accent);
         }
 
         /* 自定义滚动条 */
@@ -217,14 +217,14 @@
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: var(--color-scrollbar-track);
         }
         ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
+            background: var(--color-scrollbar-thumb);
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+            background: var(--color-scrollbar-thumb-hover);
         }
         
         /* 走路动画 */
@@ -251,9 +251,9 @@
 
         /* Night Mode Adaptation (Reduces glare) */
         @media (prefers-color-scheme: dark) {
-            body.theme-summer { background-color: #dbece4; }
-            body.theme-autumn { background-color: #f5e8c8; }
-            body.theme-winter { background-color: #cfd8dc; }
+            body.theme-summer { background-color: var(--color-theme-summer-dark-bg); }
+            body.theme-autumn { background-color: var(--color-theme-autumn-dark-bg); }
+            body.theme-winter { background-color: var(--color-theme-winter-dark-bg); }
             /* Dim the white containers slightly */
             body[class*="theme-"] .bg-gray-50 {
                 background-color: rgba(255, 255, 255, 0.6);
@@ -261,7 +261,7 @@
         }
 
         /* 移动端响应式优化 */
-        @media (max-width: 768px) {
+        @media (max-width: var(--breakpoint-md)) {
             .header-container {
                 position: relative;
                 padding-top: 60px; /* 为按钮留出空间 */
@@ -290,7 +290,7 @@
         }
 
         /* Modern Navigation Component Classes - Desktop Only */
-        @media (min-width: 768px) {
+        @media (min-width: var(--breakpoint-md)) {
             .nav-container {
                 background: rgba(255, 255, 255, 0.9) !important;
                 backdrop-filter: blur(10px) !important;
@@ -376,7 +376,7 @@
 
         /* Spring Festival Theme - Redesigned */
         .spring-festival-theme #year-progress-bar {
-            background: linear-gradient(90deg, #fde68a 0%, #f59e0b 50%, #fde68a 100%);
+            background: linear-gradient(90deg, var(--color-spring-festival-1) 0%, var(--color-spring-festival-2) 50%, var(--color-spring-festival-1) 100%);
             background-size: 200% 100%;
             animation: spring-glow 3s infinite linear;
             box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
@@ -473,7 +473,7 @@
         }
         
         /* Mobile-specific enhancements */
-        @media (max-width: 768px) {
+        @media (max-width: var(--breakpoint-md)) {
             .current-xun-highlight {
                 background: linear-gradient(135deg, rgba(219, 234, 254, 0.9), rgba(239, 246, 255, 1)) !important;
                 box-shadow: 
@@ -523,7 +523,7 @@
         }
         
         /* Enhanced mobile indicator */
-        @media (max-width: 768px) {
+        @media (max-width: var(--breakpoint-md)) {
             .current-xun-indicator {
                 top: 6px;
                 right: 6px;
@@ -611,7 +611,7 @@
         }
         
         /* Show FAB only on mobile and in macro view */
-        @media (min-width: 769px) {
+        @media (min-width: var(--breakpoint-md)) {
             .mobile-current-xun-fab {
                 display: none !important;
             }
@@ -633,12 +633,12 @@
             width: 100%;
             height: 6px;
             background: linear-gradient(90deg, 
-                #f3f4f6 0%, 
-                #e5e7eb 20%, 
-                #d1d5db 40%, 
-                #9ca3af 60%, 
-                #3b82f6 80%, 
-                #1d4ed8 100%);
+                var(--color-progress-0) 0%, 
+                var(--color-progress-20) 20%, 
+                var(--color-progress-40) 40%, 
+                var(--color-progress-60) 60%, 
+                var(--color-progress-80) 80%, 
+                var(--color-progress-100) 100%);
             border-radius: 3px;
             border: none;
         }
@@ -647,12 +647,12 @@
             width: 100%;
             height: 6px;
             background: linear-gradient(90deg, 
-                #f3f4f6 0%, 
-                #e5e7eb 20%, 
-                #d1d5db 40%, 
-                #9ca3af 60%, 
-                #3b82f6 80%, 
-                #1d4ed8 100%);
+                var(--color-progress-0) 0%, 
+                var(--color-progress-20) 20%, 
+                var(--color-progress-40) 40%, 
+                var(--color-progress-60) 60%, 
+                var(--color-progress-80) 80%, 
+                var(--color-progress-100) 100%);
             border-radius: 3px;
             border: none;
         }
@@ -662,8 +662,8 @@
             appearance: none;
             width: 24px;
             height: 24px;
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 
@@ -694,8 +694,8 @@
         #energy-level::-moz-range-thumb {
             width: 24px;
             height: 24px;
-            background: #ffffff;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: var(--color-background);
+            border: 1px solid var(--color-border);
             border-radius: 50%;
             cursor: pointer;
             box-shadow: 
@@ -753,8 +753,8 @@
 
         #menstrual-view-btn.active {
             animation: menstrual-glow 2s ease-in-out infinite;
-            color: #dc2626 !important;
-            background: rgba(239, 68, 68, 0.1) !important;
+            color: var(--color-error-600) !important;
+            background: rgba(220, 38, 38, 0.1) !important;
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -765,18 +765,18 @@
 
         #menstrual-view-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
-            background: rgba(239, 68, 68, 0.15) !important;
-            color: #dc2626 !important;
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.5);
+            background: rgba(220, 38, 38, 0.15) !important;
+            color: var(--color-error-600) !important;
         }
 
         @keyframes menstrual-glow {
             0%, 100% {
-                box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+                box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
                 transform: scale(1);
             }
             50% {
-                box-shadow: 0 0 20px rgba(239, 68, 68, 0.7);
+                box-shadow: 0 0 20px rgba(220, 38, 38, 0.7);
                 transform: scale(1.05);
             }
         }
@@ -789,7 +789,7 @@
             left: 50%;
             width: 150%;
             height: 150%;
-            background: radial-gradient(circle, rgba(239, 68, 68, 0.25) 0%, rgba(239, 68, 68, 0.1) 40%, transparent 70%);
+            background: radial-gradient(circle, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.1) 40%, transparent 70%);
             transform: translate(-50%, -50%);
             border-radius: 50%;
             z-index: 0;
@@ -821,10 +821,10 @@
             flex-shrink: 0;
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
         }
-        .energy-ring.level-1 { background: #8FA3B0; }
-        .energy-ring.level-2 { background: #6CCB9F; }
-        .energy-ring.level-3 { background: #3ED37A; }
-        .energy-ring.level-4 { background: #F4C542; }
+        .energy-ring.level-1 { background: var(--color-gray-400); }
+        .energy-ring.level-2 { background: var(--color-success-400); }
+        .energy-ring.level-3 { background: var(--color-success-500); }
+        .energy-ring.level-4 { background: var(--color-warning-400); }
 
     </style>
 </head>
@@ -1126,7 +1126,7 @@
 
     <!-- Modal for Rich Data Entry -->
     <div id="modal" class="fixed inset-0 hidden items-start justify-center overflow-y-auto overscroll-contain z-50 px-3 sm:px-4 py-3 md:py-8 bg-slate-900/55 backdrop-blur-sm">
-        <div id="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" class="relative w-full max-w-2xl lg:max-w-3xl my-2 md:my-10 bg-[#F7F7F5] border border-white/60 ring-1 ring-white/40 rounded-3xl shadow-xl shadow-slate-900/10 p-4 sm:p-6 md:p-8 transform transition-transform duration-300 ease-in-out scale-95">
+        <div id="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" class="relative w-full max-w-2xl lg:max-w-3xl my-2 md:my-10 bg-[var(--color-surface)] border border-white/60 ring-1 ring-white/40 rounded-3xl shadow-xl shadow-slate-900/10 p-4 sm:p-6 md:p-8 transform transition-transform duration-300 ease-in-out scale-95">
             <div class="pointer-events-none absolute -top-16 -right-14 h-56 w-56 rounded-full bg-gradient-to-br from-blue-100/30 via-purple-100/20 to-transparent blur-3xl opacity-50"></div>
             <div class="pointer-events-none absolute -bottom-16 -left-10 h-52 w-52 rounded-full bg-gradient-to-br from-indigo-100/30 via-violet-100/20 to-transparent blur-3xl opacity-40"></div>
 

@@ -78,6 +78,42 @@
   --color-xun-progress-checked: var(--color-xun-accent);
   --color-xun-progress-today: var(--color-primary-500);
 
+  /* Theme-specific Colors */
+  --color-theme-autumn-text: #4e342e;
+  --color-theme-autumn-text-700: #5d4037;
+  --color-theme-autumn-text-500: #795548;
+  --color-theme-autumn-text-400: #a1887f;
+  --color-theme-winter-text: #1d2c3a;
+  --color-theme-winter-bg: #e0f2f7;
+  --color-theme-winter-text-700: #2c3e50;
+  --color-theme-winter-text-500: #475569;
+  --color-theme-winter-text-400: #64748b;
+  --color-theme-liqiu-bg: #f5e6ab;
+  --color-theme-liqiu-text: #5d4037;
+  --color-theme-liqiu-accent: #c84c23;
+
+  /* Scrollbar Colors */
+  --color-scrollbar-track: #f1f1f1;
+  --color-scrollbar-thumb: #c1c1c1;
+  --color-scrollbar-thumb-hover: #a8a8a8;
+
+  /* Dark Mode Theme Colors */
+  --color-theme-summer-dark-bg: #dbece4;
+  --color-theme-autumn-dark-bg: #f5e8c8;
+  --color-theme-winter-dark-bg: #cfd8dc;
+
+  /* Spring Festival Gradient Colors */
+  --color-spring-festival-1: #fde68a;
+  --color-spring-festival-2: #f59e0b;
+
+  /* Progress Bar Gradient Colors */
+  --color-progress-0: #f3f4f6;
+  --color-progress-20: #e5e7eb;
+  --color-progress-40: #d1d5db;
+  --color-progress-60: #9ca3af;
+  --color-progress-80: var(--color-primary-500);
+  --color-progress-100: var(--color-primary-700);
+
   /* Spacing System */
   --spacing-xs: 0.25rem;   /* 4px */
   --spacing-sm: 0.5rem;    /* 8px */
@@ -140,7 +176,7 @@
   --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Breakpoints */
-  --breakpoint-sm: 640px;
+  --breakpoint-sm: 600px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;

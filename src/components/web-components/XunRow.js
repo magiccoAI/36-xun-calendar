@@ -169,13 +169,22 @@ export class XunRow extends HTMLElement {
                     font-size: 0.875rem;
                     min-height: 3rem;
                 }
-                @media (min-width: 768px) {
+                @media (min-width: var(--breakpoint-md)) {
                     .row {
-                        grid-template-columns: repeat(12, minmax(0, 1fr));
-                        border-bottom: none;
+                        grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+                        border-bottom: none !important;
+                        position: static !important;
+                        padding-top: 0 !important;
                     }
                     :host {
-                        border-bottom: none;
+                        border-bottom: none !important;
+                    }
+                    .col-index {
+                        position: static !important;
+                        transform: none !important;
+                    }
+                    .col-date {
+                        position: static !important;
                     }
                 }
                 .col {
@@ -328,7 +337,7 @@ export class XunRow extends HTMLElement {
                     flex-wrap: nowrap;
                 }
                 /* Mobile specific styles */
-                @media (max-width: 767px) {
+                @media (max-width: calc(var(--breakpoint-md) - 1px)) {
                     .row {
                         position: relative;
                         padding-top: 3rem;

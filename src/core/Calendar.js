@@ -72,51 +72,55 @@ export const Calendar = {
     getXunPeriods(year) {
         try {
             // 参数验证
-            if (!year || isNaN(year) || year < 2020 || year > 2100) {
+            if (!year || isNaN(year) || year < CONFIG.SUPPORTED_YEAR_START || year > CONFIG.SUPPORTED_YEAR_END) {
                 throw new Error(`Invalid year: ${year}`);
             }
 
             const periods = [];
             const yearStart = new Date(year, 0, 1);
-            
+
             // 验证起始日期有效性
             if (isNaN(yearStart.getTime())) {
                 throw new Error(`Invalid start date for year: ${year}`);
             }
-            
+
+            // 计算该年的总天数（支持闰年）
+            const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+            const daysInYear = isLeapYear ? 366 : 365;
+
             for (let i = 1; i <= CONFIG.XUN_COUNT; i++) {
                 // 计算每个旬的起始日期（基于固定的年初开始日期）
                 const daysFromStart = (i - 1) * CONFIG.XUN_DAYS;
                 const startDate = this.startOfDay(new Date(yearStart));
                 startDate.setDate(yearStart.getDate() + daysFromStart);
-                
+
                 let daysInXun = CONFIG.XUN_DAYS;
-                
-                // Special handling for last period to cover rest of year (15 days for year-end summary)
+
+                // 最后一旬：计算到年末的剩余天数
                 if (i === CONFIG.XUN_COUNT) {
-                     const yearEnd = new Date(year, 11, 31);
-                     const diffTime = Math.abs(yearEnd - startDate);
-                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                     daysInXun = Math.max(diffDays + 1, CONFIG.LAST_XUN_DAYS || 15); // 确保至少15天
-                                     }
+                    const yearEnd = new Date(year, 11, 31);
+                    const diffTime = Math.abs(yearEnd - startDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    daysInXun = diffDays + 1; // 剩余天数（平年15天，闰年16天）
+                }
 
                 // 计算结束日期
                 const endDate = this.startOfDay(new Date(startDate));
                 endDate.setDate(startDate.getDate() + daysInXun - 1);
-                
+
                 // 验证生成的日期有效性
                 if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
                     console.error(`Invalid date range for period ${i}:`, { startDate, endDate });
                     continue; // 跳过无效周期，继续处理下一个
                 }
-                
+
                 periods.push({ index: i, startDate, endDate, days: daysInXun });
             }
-            
+
             if (periods.length === 0) {
                 throw new Error('No valid periods generated');
             }
-            
+
             return periods;
         } catch (error) {
             console.error('Calendar.getXunPeriods error:', error);
@@ -200,14 +204,13 @@ export const Calendar = {
     },
     
 
-    // DEPRECATED: Use getXunPeriods(year) + find by date instead.
-    // Old implementation used monthly tri-section (1-10/11-20/21-末) which
-    // contradicts the continuous 10-day xun system. Now delegates to getXunPeriods.
-    getXunRange(dateInput = new Date()) {
+    // 新增：根据日期获取所在旬
+    getXunPeriodByDate(dateInput) {
         try {
             const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
             if (isNaN(date.getTime())) {
-                throw new Error(`Invalid date: ${dateInput}`);
+                console.warn('Calendar.getXunPeriodByDate: invalid date', dateInput);
+                return null;
             }
 
             const year = date.getFullYear();
@@ -219,22 +222,54 @@ export const Calendar = {
                 return d >= s && d <= e;
             });
 
-            if (target) {
-                return { startDate: target.startDate, endDate: target.endDate };
+            return target || null;
+        } catch (error) {
+            console.error('Calendar.getXunPeriodByDate error:', error, { dateInput });
+            return null;
+        }
+    },
+
+    // 统一接口：使用getXunPeriodByDate
+    getXunRange(dateInput = new Date()) {
+        try {
+            const period = this.getXunPeriodByDate(dateInput);
+            if (period) {
+                return { startDate: period.startDate, endDate: period.endDate };
             }
 
-            // Fallback for dates outside any period
-            const fallback = new Date();
-            return {
-                startDate: new Date(fallback.getFullYear(), fallback.getMonth(), 1),
-                endDate: new Date(fallback.getFullYear(), fallback.getMonth(), 10)
-            };
+            // Fallback: calculate continuous 10-day period from year start
+            const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
+            const yearStart = new Date(date.getFullYear(), 0, 1);
+            const dayOfYear = Math.floor((date - yearStart) / (1000 * 60 * 60 * 24));
+            const xunIndex = Math.floor(dayOfYear / 10) + 1;
+            const daysFromStart = (xunIndex - 1) * 10;
+            
+            const startDate = new Date(yearStart);
+            startDate.setDate(yearStart.getDate() + daysFromStart);
+            
+            let daysInXun = 10;
+            const isLeapYear = (date.getFullYear() % 4 === 0 && date.getFullYear() % 100 !== 0) || (date.getFullYear() % 400 === 0);
+            const daysInYear = isLeapYear ? 366 : 365;
+            
+            // Last xun: calculate remaining days to year end
+            if (xunIndex >= 36) {
+                const yearEnd = new Date(date.getFullYear(), 11, 31);
+                const diffTime = Math.abs(yearEnd - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                daysInXun = diffDays + 1;
+            }
+            
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + daysInXun - 1);
+            
+            return { startDate, endDate };
         } catch (error) {
             console.error('Calendar.getXunRange error:', error, { dateInput });
             const fallback = new Date();
+            const yearStart = new Date(fallback.getFullYear(), 0, 1);
             return {
-                startDate: new Date(fallback.getFullYear(), fallback.getMonth(), 1),
-                endDate: new Date(fallback.getFullYear(), fallback.getMonth(), 10)
+                startDate: yearStart,
+                endDate: new Date(yearStart.getFullYear(), 0, 10)
             };
         }
     },

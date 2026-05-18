@@ -38,10 +38,13 @@ export const DATA_VALIDATION_RULES = {
 };
 
 export const CONFIG = {
-    YEAR: 2026,
+    YEAR: 2026,  // 恢复YEAR定义，确保向后兼容
+    DEFAULT_YEAR: 2026,
+    SUPPORTED_YEAR_START: 2026,
+    SUPPORTED_YEAR_END: 2100,
     XUN_COUNT: 36,
     XUN_DAYS: 10,
-    LAST_XUN_DAYS: 15, // 最后一旬15天作为年末总结期
+    // LAST_XUN_DAYS: 15,  // 移除，改为动态计算最后一旬天数
     visual: {
         xunHueStep: 10
     },

@@ -1,6 +1,8 @@
 
 import { store } from '../core/State.js';
 import { BackupManager } from '../core/BackupManager.js';
+import { CONFIG } from '../config.js';
+import { Calendar } from '../core/Calendar.js';
 
 export class SettingsModal {
     constructor(modalId) {
@@ -11,11 +13,13 @@ export class SettingsModal {
         }
         this.closeBtn = this.modal.querySelector('.close-btn');
         this.menstrualToggle = document.getElementById('toggle-menstrual-cycle');
+        this.yearSelector = document.getElementById('year-selector');
         this.resetRecordsBtn = document.getElementById('reset-records-btn');
         this.fullResetBtn = document.getElementById('full-reset-btn');
-        
+
         this.initListeners();
         this.loadInitialState();
+        this.populateYearOptions();
     }
 
     initListeners() {
@@ -32,6 +36,20 @@ export class SettingsModal {
             // 更新生理记录按钮的显示状态
             this.updateMenstrualButtonVisibility(isEnabled);
         };
+
+        if (this.yearSelector) {
+            this.yearSelector.onchange = (e) => {
+                const newYear = parseInt(e.target.value);
+                if (confirm(`切换到 ${newYear} 年？\n\n这将显示 ${newYear} 年的日历和记录。`)) {
+                    store.setCurrentYear(newYear);
+                    // 页面重新加载以应用新年份
+                    window.location.reload();
+                } else {
+                    // 恢复原来的选择
+                    this.yearSelector.value = store.getState().currentYear;
+                }
+            };
+        }
 
         // 重置按钮事件监听器
         if (this.resetRecordsBtn) {
@@ -70,6 +88,32 @@ export class SettingsModal {
         this.menstrualToggle.checked = state.settings.showMenstrualCycle;
         // 初始化生理记录按钮的显示状态
         this.updateMenstrualButtonVisibility(state.settings.showMenstrualCycle);
+        // 设置当前年份
+        if (this.yearSelector) {
+            this.yearSelector.value = state.currentYear;
+        }
+    }
+
+    populateYearOptions() {
+        if (!this.yearSelector) return;
+
+        const currentYear = store.getState().currentYear;
+        const startYear = CONFIG.SUPPORTED_YEAR_START;
+        const endYear = CONFIG.SUPPORTED_YEAR_END;
+
+        // 清空现有选项
+        this.yearSelector.innerHTML = '';
+
+        // 添加年份选项（从当前年份前5年到后10年）
+        for (let year = Math.max(startYear, currentYear - 5); year <= Math.min(endYear, currentYear + 10); year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = `${year}年`;
+            this.yearSelector.appendChild(option);
+        }
+
+        // 设置当前年份
+        this.yearSelector.value = currentYear;
     }
 
     // 更新生理记录按钮的显示状态

@@ -1,4 +1,5 @@
 
+import '../output.css';
 import { CONFIG } from '../config.js';
 import { store } from './State.js';
 import { Calendar } from './Calendar.js';
@@ -334,7 +335,19 @@ class App {
         
         if (!fab || !xunNumber) return;
         
-        // Update FAB with current xun info
+        // Always bind click event - handle logic inside
+        fab.onclick = () => {
+            const currentXun = Calendar.getCurrentXun(this.xunPeriods);
+            if (currentXun) {
+                this.scrollToXun(currentXun.index);
+                // Haptic feedback on mobile
+                if (navigator.vibrate) {
+                    navigator.vibrate(30);
+                }
+            }
+        };
+        
+        // Update FAB visibility and content
         const updateFAB = () => {
             const currentXun = Calendar.getCurrentXun(this.xunPeriods);
             const state = store.getState();
@@ -343,13 +356,6 @@ class App {
             if (currentXun && isMobile && state.currentView === 'macro') {
                 xunNumber.textContent = currentXun.index;
                 fab.classList.add('show');
-                fab.onclick = () => {
-                    this.scrollToXun(currentXun.index);
-                    // Haptic feedback on mobile
-                    if (navigator.vibrate) {
-                        navigator.vibrate(30);
-                    }
-                };
             } else {
                 fab.classList.remove('show');
             }
@@ -593,9 +599,6 @@ class App {
     }
 
     registerServiceWorker() {
-        // DISABLED during development to prevent CSS caching issues
-        return;
-        /*
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js')
                 .then((registration) => {
@@ -607,7 +610,6 @@ class App {
         } else {
             console.log('[Service Worker] Not supported in this browser');
         }
-        */
     }
 }
 

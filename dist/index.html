@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026年 · 旬 - 36旬视角日历，重新丈量时间</title>
+    
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="重新丈量时间的刻度，在三十六个'十天'里，找回生活的质感。以旬为单位规划宏愿，以日为单位觉察身心。">
+    <meta name="keywords" content="日历,时间管理,正念记录,生活规划,36旬,旬历,2026年,情绪记录,睡眠追踪">
+    <meta name="author" content="magiccoAI">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="zh-CN">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://magiccoai.github.io/36-xun-calendar/">
+    <meta property="og:title" content="2026年 · 旬 - 36旬视角日历，找回生活质感">
+    <meta property="og:description" content="重新丈量时间的刻度，在三十六个'十天'里，找回生活的质感。以旬为单位规划宏愿，以日为单位觉察身心。">
+    <meta property="og:image" content="https://magiccoai.github.io/36-xun-calendar/src/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="36旬日历">
+    <meta property="og:locale" content="zh_CN">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://magiccoai.github.io/36-xun-calendar/">
+    <meta name="twitter:title" content="2026年 · 旬 - 36旬视角日历，找回生活质感">
+    <meta name="twitter:description" content="重新丈量时间的刻度，在三十六个'十天'里，找回生活的质感。以旬为单位规划宏愿，以日为单位觉察身心。">
+    <meta name="twitter:image" content="https://magiccoai.github.io/36-xun-calendar/src/images/og-image.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="./assets/manifest-D8-PiIFf.webmanifest">
+    <meta name="theme-color" content="#3b82f6">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="36旬日历">
+    <meta name="application-name" content="36旬日历">
+    <meta name="msapplication-TileColor" content="#3b82f6">
+    <meta name="msapplication-config" content="data:text/xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPGJyb3dzZXJjb25maWc+CiAgICA8bXNhcHBsaWNhdGlvbj4KICAgICAgICA8dGlsZT4KICAgICAgICAgICAgPHNxdWFyZTcweDcwbG9nbyBzcmM9InNyYy9pbWFnZXMvaWNvbi03MHg3MC5wbmciLz4KICAgICAgICAgICAgPHNxdWFyZTE1MHgxNTBsb2dvIHNyYz0ic3JjL2ltYWdlcy9pY29uLTE1MHgxNTAucG5nIi8+CiAgICAgICAgICAgIDxzcXVhcmUzMTB4MzEwbG9nbyBzcmM9InNyYy9pbWFnZXMvaWNvbi0zMTB4MzEwLnBuZyIvPgogICAgICAgICAgICA8d2lkZTMxMHgxNTBsb2dvIHNyYz0ic3JjL2ltYWdlcy9pY29uLTMxMHgxNTAucG5nIi8+CiAgICAgICAgICAgIDxUaWxlQ29sb3I+IzNiODJmNjwvVGlsZUNvbG9yPgogICAgICAgIDwvdGlsZT4KICAgIDwvbXNhcHBsaWNhdGlvbj4KPC9icm93c2VyY29uZmlnPgo=">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Import map removed - dependencies now bundled via Vite -->
+    <style>
+        /* Mobile-first root font size */
+        html {
+            font-size: 14px;
+        }
+        /* Desktop root font size */
+        @media (min-width: var(--breakpoint-md)) {
+            html {
+                font-size: 16px;
+            }
+        }
+
+        body {
+            background-color: var(--color-background);
+            color: var(--color-text-primary);
+            transition: background 0.5s ease;
+        }
+
+        /* Ensure hidden class always works for view switching */
+        .hidden {
+            display: none !important;
+        }
+
+        /* View container layout - prevent overlapping when multiple views are visible */
+        #macro-view, #overview-view, #detail-view, #summary-view {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Responsive grid container fixes */
+        @media (max-width: var(--breakpoint-md)) {
+            #overview-grid, #detail-content {
+                max-width: 100vw;
+                overflow-x: hidden;
+            }
+        }
+
+        /* --- Theme Textures --- */
+        /* Common overlay for texture noise */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* 1. Spring (Vitality) - Background managed by BackgroundLoader */
+        body.theme-spring {
+            background-size: cover !important;
+            background-position: center bottom !important; /* Adjusted to hide text */
+            background-attachment: fixed !important;
+            background-color: var(--color-primary-50) !important; /* A light sky blue fallback */
+        }
+        body.theme-spring .bg-gray-50 { 
+            background-color: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        /* 2. Summer (Fresh Vitality) - Background managed by BackgroundLoader */
+        body.theme-summer {
+            background-size: cover;
+            background-position: center top; /* Adjusted to hide text */
+            background-attachment: fixed;
+            color: var(--color-primary-900); /* A deep ocean blue */
+        }
+        body.theme-summer .text-gray-800 { color: var(--color-primary-900); }
+        body.theme-summer .text-gray-700 { color: var(--color-primary-800); }
+        body.theme-summer .text-gray-500 { color: var(--color-primary-700); }
+        body.theme-summer .text-gray-400 { color: var(--color-primary-600); }
+        body.theme-summer .bg-gray-50 { 
+            background-color: rgba(255, 255, 255, 0.85); 
+            border: 1px solid rgba(56, 189, 248, 0.4);
+            box-shadow: 0 6px 25px rgba(14, 165, 233, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 3. Autumn (Warm Steady) - Background managed by BackgroundLoader */
+        body.theme-autumn {
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--color-theme-autumn-text);
+        }
+        body.theme-autumn .text-gray-800 { color: var(--color-theme-autumn-text); }
+        body.theme-autumn .text-gray-700 { color: var(--color-theme-autumn-text-700); }
+        body.theme-autumn .text-gray-500 { color: var(--color-theme-autumn-text-500); }
+        body.theme-autumn .text-gray-400 { color: var(--color-theme-autumn-text-400); }
+        body.theme-autumn .bg-gray-50 { 
+            background-color: rgba(255, 248, 225, 0.85); /* A creamy, parchment color */
+            border: 1px solid rgba(213, 166, 109, 0.5);
+            box-shadow: 0 6px 25px rgba(78, 52, 46, 0.1);
+            backdrop-filter: blur(8px);
+        }
+
+        /* 4. Winter (Quiet Deep) - Background managed by BackgroundLoader */
+        body.theme-winter {
+            color: var(--color-theme-winter-text);
+            background-color: var(--color-theme-winter-bg);
+            background-repeat: repeat;
+            background-size: 300px 300px;
+            position: relative;
+        }
+        body.theme-winter::after { /* Using ::after to not conflict with noise overlay */
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 450px; /* Height of the top image area */
+            background-size: cover;
+            background-position: center;
+            z-index: 0;
+            mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        }
+        body.theme-winter .text-gray-800 { color: var(--color-theme-winter-text); }
+        body.theme-winter .text-gray-700 { color: var(--color-theme-winter-text-700); }
+        body.theme-winter .text-gray-500 { color: var(--color-theme-winter-text-500); }
+        body.theme-winter .text-gray-400 { color: var(--color-theme-winter-text-400); }
+        body.theme-winter .bg-gray-50 { 
+            background-color: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(207, 216, 220, 0.4);
+            box-shadow: 0 6px 25px rgba(38, 50, 56, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        /* 5. Liqiu Theme (Beginning of Autumn) */
+        body.theme-liqiu {
+            background-color: var(--color-theme-liqiu-bg); /* Rice Yellow */
+            color: var(--color-theme-liqiu-text); /* Dark Brown */
+        }
+        body.theme-liqiu .bg-gray-50 {
+            background-color: rgba(255, 248, 225, 0.85); /* Lighter Rice Yellow */
+            border: 1px solid rgba(200, 76, 35, 0.2);
+        }
+        body.theme-liqiu #year-progress-bar {
+            background: var(--color-theme-liqiu-accent); /* Maple Red */
+        }
+        body.theme-liqiu .text-gray-700 { color: var(--color-theme-autumn-text); }
+        body.theme-liqiu .text-gray-500 { color: var(--color-theme-autumn-text-500); }
+        body.theme-liqiu .text-gray-400 { color: var(--color-theme-autumn-text-400); }
+        body.theme-liqiu #year-progress-text, body.theme-liqiu #current-xun-info {
+            color: var(--color-theme-liqiu-accent);
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-scrollbar-track);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-scrollbar-thumb);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-scrollbar-thumb-hover);
+        }
+        
+        /* 走路动画 */
+        @keyframes walk {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0); }
+        }
+        .animate-walk {
+            animation: walk 0.6s infinite ease-in-out;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .animate-walk {
+                animation: none;
+            }
+        }
+        
+        /* 进度条纹理 */
+        .progress-stripe {
+            background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+            background-size: 1rem 1rem;
+        }
+
+        /* Night Mode Adaptation (Reduces glare) */
+        @media (prefers-color-scheme: dark) {
+            body.theme-summer { background-color: var(--color-theme-summer-dark-bg); }
+            body.theme-autumn { background-color: var(--color-theme-autumn-dark-bg); }
+            body.theme-winter { background-color: var(--color-theme-winter-dark-bg); }
+            /* Dim the white containers slightly */
+            body[class*="theme-"] .bg-gray-50 {
+                background-color: rgba(255, 255, 255, 0.6);
+            }
+        }
+
+        /* 移动端响应式优化 */
+        @media (max-width: var(--breakpoint-md)) {
+            .header-container {
+                position: relative;
+                padding-top: 60px; /* 为按钮留出空间 */
+            }
+
+            header > .absolute.right-0 {
+                position: fixed;
+                right: 16px;
+                top: 16px;
+                z-index: var(--z-sticky);
+                background: transparent !important;
+            }
+
+            h1.text-3xl {
+                margin-top: 20px;
+                padding: 0 16px; /* 避免与按钮重叠 */
+                text-align: center;
+                clear: both;
+            }
+
+            /* 确保按钮在移动端可见且不重叠 */
+            #backup-btn, #theme-btn, #settings-btn, #menstrual-view-btn {
+                background-color: transparent !important;
+                backdrop-filter: blur(4px);
+            }
+        }
+
+        /* Modern Navigation Component Classes - Desktop Only */
+        @media (min-width: var(--breakpoint-md)) {
+            .nav-container {
+                background: rgba(255, 255, 255, 0.9) !important;
+                backdrop-filter: blur(10px) !important;
+                border: 1px solid rgba(0, 0, 0, 0.1) !important;
+                border-radius: 8px 8px 0 0 !important;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+                padding: 12px 32px !important;
+                margin-bottom: 24px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 16px !important;
+            }
+
+            .nav-item {
+                padding: 8px 20px !important;
+                border-radius: 20px !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+                border: none !important;
+                cursor: pointer !important;
+                transition: all 0.2s ease !important;
+            }
+
+            .nav-item-active {
+                background: white !important;
+                color: var(--color-primary-600) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            .nav-item-inactive {
+                background: rgba(255, 255, 255, 0.6) !important;
+                color: var(--color-gray-500) !important;
+                backdrop-filter: blur(8px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            }
+
+            .nav-item-inactive:hover {
+                background: rgba(255, 255, 255, 0.8) !important;
+                color: var(--color-gray-900) !important;
+                backdrop-filter: blur(12px) !important;
+                border: 1px solid rgba(255, 255, 255, 0.5) !important;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+                transform: translateY(-1px) !important;
+            }
+
+            .nav-item:active {
+                transform: scale(0.95) !important;
+            }
+        }
+
+        /* Apple-style navigation enhancements */
+        .nav-enhanced {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-button-apple {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            letter-spacing: -0.01em;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 1.4;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .nav-button-apple:hover {
+            transform: translateY(-1px);
+        }
+        
+        .nav-divider-apple {
+            background: rgba(0, 0, 0, 0.1);
+            opacity: 0.8;
+        }
+
+        /* Custom border thickness for navigation */
+        .border-b-3 {
+            border-bottom-width: 3px;
+        }
+
+        /* Spring Festival Theme - Redesigned */
+        .spring-festival-theme #year-progress-bar {
+            background: linear-gradient(90deg, var(--color-spring-festival-1) 0%, var(--color-spring-festival-2) 50%, var(--color-spring-festival-1) 100%);
+            background-size: 200% 100%;
+            animation: spring-glow 3s infinite linear;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);
+            border-radius: 4px;
+        }
+
+        @keyframes spring-glow {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .spring-festival-theme #year-progress-bar {
+                animation: none;
+            }
+        }
+
+        /* Keep walker blue, but enhance scarf visibility */
+        .spring-festival-theme .walker-head {
+            fill: var(--color-primary-600) !important; /* Blue head - keep original */
+        }
+        
+        .spring-festival-theme .walker-body {
+            stroke: var(--color-primary-600) !important; /* Blue body - keep original */
+        }
+
+        .spring-festival-theme .scarf-path {
+            display: block !important;
+            animation: scarf-sway 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.6));
+        }
+
+        @keyframes scarf-sway {
+            from { transform: rotate(-5deg); transform-origin: 12px 10px; }
+            to { transform: rotate(5deg); transform-origin: 12px 10px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .spring-festival-theme .scarf-path {
+                animation: none;
+            }
+        }
+
+        /* Enhanced highlight for the current xun */
+        .current-xun-highlight {
+            position: relative;
+            background: linear-gradient(135deg, rgba(219, 234, 254, 0.8), rgba(239, 246, 255, 0.9)) !important; /* blue-100 to blue-50 gradient */
+            box-shadow: 
+                0 0 0 3px rgba(59, 130, 246, 0.3), 
+                0 4px 20px rgba(59, 130, 246, 0.15),
+                0 0 30px rgba(59, 130, 246, 0.1);
+            z-index: var(--z-sticky);
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+        
+        /* Pulse animation for current xun */
+        .current-xun-highlight {
+            animation: currentXunPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes currentXunPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 0 3px rgba(59, 130, 246, 0.3), 
+                    0 4px 20px rgba(59, 130, 246, 0.15),
+                    0 0 30px rgba(59, 130, 246, 0.1);
+            }
+            50% {
+                box-shadow: 
+                    0 0 0 3px rgba(59, 130, 246, 0.5), 
+                    0 4px 25px rgba(59, 130, 246, 0.25),
+                    0 0 40px rgba(59, 130, 246, 0.2);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .current-xun-highlight {
+                animation: none;
+            }
+        }
+        
+        .current-xun-highlight::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            background: linear-gradient(180deg, var(--color-primary-500), var(--color-primary-600)); /* blue-500 to blue-600 gradient */
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        
+        /* Mobile-specific enhancements */
+        @media (max-width: var(--breakpoint-md)) {
+            .current-xun-highlight {
+                background: linear-gradient(135deg, rgba(219, 234, 254, 0.9), rgba(239, 246, 255, 1)) !important;
+                box-shadow: 
+                    0 0 0 2px rgba(59, 130, 246, 0.4), 
+                    0 2px 15px rgba(59, 130, 246, 0.2);
+                transform: scale(1.01);
+            }
+            
+            .current-xun-highlight::before {
+                width: 8px;
+            }
+        }
+        
+        /* Current xun indicator badge */
+        .current-xun-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+            z-index: var(--z-dropdown);
+            animation: indicatorPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes indicatorPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 1;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .current-xun-indicator {
+                animation: none;
+            }
+        }
+        
+        /* Enhanced mobile indicator */
+        @media (max-width: var(--breakpoint-md)) {
+            .current-xun-indicator {
+                top: 6px;
+                right: 6px;
+                padding: 3px 10px;
+                font-size: 11px;
+            }
+        }
+        
+        /* Floating current xun button for mobile */
+        .mobile-current-xun-fab {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+            z-index: var(--z-fixed);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid white;
+        }
+        
+        .mobile-current-xun-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5);
+        }
+        
+        .mobile-current-xun-fab:active {
+            transform: scale(0.95);
+        }
+        
+        .mobile-current-xun-fab.show {
+            display: flex;
+            animation: fabSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes fabSlideIn {
+            from {
+                transform: translateY(100px) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Mobile pulse effect for FAB */
+        .mobile-current-xun-fab::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+            z-index: -1;
+            animation: fabPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes fabPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.3;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .mobile-current-xun-fab::before {
+                animation: none;
+            }
+        }
+        
+        /* Show FAB only on mobile and in macro view */
+        @media (min-width: var(--breakpoint-md)) {
+            .mobile-current-xun-fab {
+                display: none !important;
+            }
+        }
+
+        body.theme-winter #winter-header-image {
+            display: block;
+            background-size: cover;
+            background-position: center;
+            height: 250px; /* Increased height */
+            width: 100%;
+            margin-bottom: 2rem; /* Add space below the header */
+            border-radius: 0 0 20px 20px; /* Rounded bottom corners */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Menstrual button visual effects */
+        #menstrual-view-btn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        #menstrual-view-btn.active {
+            animation: menstrual-glow 2s ease-in-out infinite;
+            color: var(--color-error-600) !important;
+            background: rgba(220, 38, 38, 0.1) !important;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #menstrual-view-btn.active {
+                animation: none;
+            }
+        }
+
+        #menstrual-view-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.5);
+            background: rgba(220, 38, 38, 0.15) !important;
+            color: var(--color-error-600) !important;
+        }
+
+        @keyframes menstrual-glow {
+            0%, 100% {
+                box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(220, 38, 38, 0.7);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Warm hover effect */
+        #menstrual-view-btn:hover::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(220, 38, 38, 0.25) 0%, rgba(220, 38, 38, 0.1) 40%, transparent 70%);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 0;
+            animation: warm-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes warm-pulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(0.9);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 0.9;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #menstrual-view-btn:hover::before {
+                animation: none;
+            }
+        }
+
+        /* Detail day-cell energy signal */
+        .energy-ring {
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            flex-shrink: 0;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+        }
+        .energy-ring.level-1 { background: var(--color-gray-400); }
+        .energy-ring.level-2 { background: var(--color-success-400); }
+        .energy-ring.level-3 { background: var(--color-success-500); }
+        .energy-ring.level-4 { background: var(--color-warning-400); }
+
+    </style>
+  <script type="module" crossorigin src="./assets/index-BDc-u9gO.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-x65I2xEJ.css">
+</head>
+<body class="bg-gray-50 text-gray-800 antialiased overflow-x-hidden">
+    <!-- SVG Sprite Symbols -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-backup" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+        </symbol>
+        <symbol id="icon-theme" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+        </symbol>
+        <symbol id="icon-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </symbol>
+        <symbol id="icon-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </symbol>
+        <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </symbol>
+        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </symbol>
+        <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </symbol>
+        <symbol id="icon-top" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </symbol>
+        <symbol id="icon-bottom" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </symbol>
+        <symbol id="icon-period" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2.5a9.5 9.5 0 1 0 0 19 9.5 9.5 0 0 0 0-19zM12 8v8"/>
+        </symbol>
+        <symbol id="icon-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+        </symbol>
+    </svg>
+
+    <!-- Menstrual Cycle Prediction Banner -->
+    <div id="menstrual-prediction-banner" class="hidden bg-rose-50 border-b border-rose-100 p-3 text-center text-sm text-rose-700 relative">
+        <span id="menstrual-prediction-text"></span>
+        <button id="close-menstrual-banner" class="absolute top-1/2 right-4 -translate-y-1/2 text-rose-400 hover:text-rose-600">&times;</button>
+    </div>
+
+    <div id="app" class="container mx-auto p-4 md:p-8 max-w-4xl relative">
+        <header class="text-center mb-8 relative bg-transparent">
+            <!-- Header Buttons Container -->
+            <div class="absolute right-0 top-0 flex items-center gap-2 bg-transparent">
+                <!-- Backup Button -->
+                <button id="backup-btn" class="p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-full hover:bg-white/30 backdrop-blur-sm" title="数据备份">
+                    <svg class="h-5 w-5"><use href="#icon-backup"></use></svg>
+                </button>
+                <!-- Settings Button -->
+                <button id="settings-btn" class="p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-full hover:bg-white/30 backdrop-blur-sm" title="设置">
+                    <svg class="h-5 w-5"><use href="#icon-settings"></use></svg>
+                </button>
+                <!-- Menstrual Cycle Button -->
+                <button id="menstrual-view-btn" class="menstrual-float-btn p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-full hover:bg-white/30 backdrop-blur-sm" title="经期记录" aria-label="打开经期记录">
+                    <svg class="h-5 w-5"><use href="#icon-heart"></use></svg>
+                </button>
+                <!-- Theme Toggle Button -->
+                <div class="relative">
+                    <button id="theme-btn" class="p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-full hover:bg-white/30 backdrop-blur-sm" title="切换主题">
+                        <svg class="h-5 w-5"><use href="#icon-theme"></use></svg>
+                    </button>
+                    <!-- Theme Menu -->
+                    <div id="theme-menu" class="hidden absolute right-0 mt-2 w-32 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50 text-xs">
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 theme-btn" data-theme="default">
+                        <span class="w-3 h-3 rounded-full bg-gray-100 border border-gray-200"></span> 默认 (Default)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 theme-btn" data-theme="spring">
+                        <span class="w-3 h-3 rounded-full bg-green-100 border border-green-200"></span> 春生 (Spring)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 theme-btn" data-theme="summer">
+                        <span class="w-3 h-3 rounded-full bg-blue-100 border border-blue-200"></span> 夏长 (Summer)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 theme-btn" data-theme="autumn">
+                        <span class="w-3 h-3 rounded-full bg-orange-100 border border-orange-200"></span> 秋收 (Autumn)
+                    </button>
+                    <button class="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 theme-btn" data-theme="winter">
+                        <span class="w-3 h-3 rounded-full bg-gray-200 border border-gray-300"></span> 冬藏 (Winter)
+                    </button>
+                </div>
+                </div>
+            </div>
+
+            <div class="header-container">
+                <h1 class="text-3xl font-light text-gray-700">2026</h1>
+                <p id="current-xun-info" class="text-gray-500 mt-2"></p>
+            </div>
+        </header>
+
+        <section id="year-progress-container" class="mt-6 max-w-2xl mx-auto px-4">
+                <div class="flex items-center gap-3 text-xs text-gray-400 font-mono">
+                    <span class="min-w-[48px] text-left">1月1日</span>
+                    <div class="relative flex-1 h-4 bg-gray-100 rounded-full shadow-inner overflow-visible">
+                        <div id="year-progress-bar" class="absolute left-0 top-0 h-full bg-blue-500 rounded-full transition-all duration-1000 shadow-md progress-stripe overflow-hidden" style="width: 0%"></div>
+                        <div id="year-progress-walker" class="absolute bottom-full translate-y-1 transition-all duration-1000 z-10" style="left: 0%">
+                            <div class="animate-walk -ml-3">
+                                <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-md">
+                                    <circle cx="12" cy="6" r="4" fill="#2563EB" class="walker-head transition-colors duration-300"/>
+                                    <path d="M12 10V20M12 20L8 30M12 20L16 30M12 13L7 16M12 13L17 16" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="walker-body transition-colors duration-300"/>
+                                    <!-- Flower for March -->
+                                    <g class="flower-path hidden" fill="#f43f5e">
+                                        <path d="M17 16 L19 14" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"/>
+                                        <circle cx="19.5" cy="13.5" r="1.5"/>
+                                        <circle cx="18" cy="12" r="1.5"/>
+                                        <circle cx="21" cy="12" r="1.5"/>
+                                        <circle cx="18" cy="15" r="1.5"/>
+                                        <circle cx="21" cy="15" r="1.5"/>
+                                        <circle cx="19.5" cy="13.5" r="0.5" fill="yellow"/>
+                                    </g>
+                                    <!-- Scarf Path (Hidden by default) -->
+                                    <path d="M10 10 Q 12 14 14 10 L 15 11 L 15 18 L 12 18 L 12 12 L 10 12 Z" fill="#EF4444" class="scarf-path hidden"/>
+                                    <path d="M14 11 L 16 20" stroke="#EF4444" stroke-width="2" stroke-linecap="round" class="scarf-path hidden"/>
+                                    <!-- Additional scarf details for visibility -->
+                                    <path d="M10 12 L 12 14 L 14 12" stroke="#DC2626" stroke-width="1.5" stroke-linecap="round" fill="none" class="scarf-path hidden"/>
+                                    <circle cx="11" cy="13" r="0.5" fill="#FECACA" class="scarf-path hidden"/>
+                                    <circle cx="13" cy="13" r="0.5" fill="#FECACA" class="scarf-path hidden"/>
+                                </svg>
+                            </div>
+                            <div id="walker-bubble" class="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded opacity-0 transition-opacity duration-300 whitespace-nowrap pointer-events-none">
+                                Today
+                            </div>
+                        </div>
+                    </div>
+                    <span class="min-w-[48px] text-right">12月31日</span>
+                </div>
+                <div class="mt-2 text-center text-xs font-mono">
+                    <span id="year-progress-text" class="font-bold text-blue-600"></span>
+                </div>
+        </section>
+
+        <!-- 年度像素总览 (Tetris/Pixel Grid) - Optional/Hidden -->
+        <section id="year-pixel-grid-container" class="mt-8 max-w-4xl mx-auto px-4 hidden">
+             <!-- Keep hidden for now or implement in future components -->
+        </section>
+
+        <!-- Annual Pixel Farm -->
+        <section id="pixel-farm-container" class="mt-8 mb-4 mx-auto p-2 bg-white rounded-2xl shadow-lg border border-brown-200/50 relative max-w-full overflow-hidden">
+            <div class="flex items-center justify-between px-1 mb-1">
+                <span class="text-xs text-gray-500">年度像素花园</span>
+                <button id="pixel-farm-toggle" class="text-[11px] text-gray-400 hover:text-gray-600 flex items-center gap-1" aria-expanded="true">
+                    <span>收起</span>
+                    <svg class="w-3 h-3 transform rotate-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            <div id="pixel-farm-grid-wrapper" class="overflow-x-auto">
+                <div id="pixel-farm-grid" class="grid grid-cols-37 gap-[3px] p-2 justify-center max-w-[1200px] mx-auto min-w-[600px]" role="grid" aria-label="年度像素花园">
+                    <!-- 370 plots will be generated by JS -->
+                </div>
+            </div>
+        </section>
+        <!-- Global Components -->
+        <div id="crop-selection-menu" class="hidden absolute z-50 bg-stone-700/90 p-2 rounded-lg shadow-xl flex flex-wrap gap-2 max-w-xs">
+            <button data-crop="src/images/flower-sun.png" class="seed-packet"><img src="./assets/flower-sun-DxA0ck_S.png" class="w-8 h-8"/></button>
+            <button data-crop="src/images/pixel-flower-red.png" class="seed-packet"><img src="data:image/png;base64,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" class="w-8 h-8"/></button>
+            <button data-crop="src/images/pixel-tree (1).png" class="seed-packet"><img src="./assets/pixel-tree%20(1)-CdAXiQ80.png" class="w-8 h-8"/></button>
+            <button data-crop="src/images/pixel-srpout.png" class="seed-packet"><img src="data:image/png;base64,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" class="w-8 h-8"/></button>
+
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="hidden md:flex nav-container mb-6">
+            <button id="nav-macro" class="nav-item nav-item-active">
+                36旬
+            </button>
+            <div class="w-px h-8 bg-gray-200 mx-4 self-center"></div>
+            <button id="nav-overview" class="nav-item nav-item-inactive">
+                全景
+            </button>
+        </div>
+
+        <!-- View Container -->
+        <div class="relative w-full">
+            <!-- View M: Macro Planning View -->
+            <div id="macro-view" class="w-full relative">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="hidden md:grid grid-cols-12 gap-0 text-sm font-medium text-gray-500 bg-gray-50 border-b border-gray-200 p-3">
+                        <div class="col-span-1 text-center">旬</div>
+                        <div class="col-span-2 text-center">日期</div>
+                        <div class="col-span-4 pl-2">核心目标</div>
+                        <div class="col-span-3 text-center">每日打卡</div>
+                        <div class="col-span-2 text-center">备注</div>
+                    </div>
+                    <div id="macro-list" class="divide-y divide-gray-100">
+                        <!-- JS Generated Rows -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- View A: Overview View -->
+            <div id="overview-view" class="w-full hidden">
+                <div class="mb-8">
+                    <div id="overview-grid" class="grid-container">
+                        <!-- Xun blocks will be generated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- View B: Detail View -->
+            <div id="detail-view" class="w-full hidden">
+                 <div id="detail-content" class="bg-gray-50 min-h-[600px] rounded-xl border border-gray-100 overflow-hidden relative">
+                    <!-- Detail content generated by JS -->
+                 </div>
+            </div>
+            
+            <!-- View C: Summary View -->
+            <div id="summary-view" class="hidden w-full bg-gray-50 min-h-[600px]">
+                 <!-- Summary content generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">设置</h3>
+                <button class="close-btn text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200">
+                    <div>
+                        <span class="font-medium text-gray-700">生理周期追踪</span>
+                        <p class="text-xs text-gray-500">在日历和记录中显示经期追踪功能</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle-menstrual-cycle" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <!-- 年份选择 -->
+                <div class="flex items-center justify-between p-4 rounded-lg bg-gray-50 border border-gray-200">
+                    <div>
+                        <span class="font-medium text-gray-700">当前年份</span>
+                        <p class="text-xs text-gray-500">切换年份以查看不同年度的记录</p>
+                    </div>
+                    <select id="year-selector" class="px-3 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+
+                <!-- 数据重置区域 -->
+                <div class="border-t border-gray-200 pt-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-3">数据管理</h4>
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-lg bg-yellow-50 border border-yellow-200 hover:shadow-md hover:border-yellow-300 hover:bg-yellow-100 transition-all duration-200 cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 select-none">
+                                    <span class="font-medium text-yellow-800 group-hover:text-yellow-900 transition-colors flex items-center">
+                                        清空所有记录
+                                        <svg class="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </span>
+                                    <p class="text-xs text-yellow-600 mt-1 group-hover:text-yellow-700 transition-colors">删除所有日常记录和旬目标，但保留设置和自定义标签</p>
+                                </div>
+                                <button id="reset-records-btn" class="ml-3 px-3 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 hover:shadow-lg hover:scale-105 transform transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-300 active:scale-95">
+                                    清空记录
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg bg-red-50 border border-red-200 hover:shadow-md hover:border-red-300 hover:bg-red-100 transition-all duration-200 cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1 select-none">
+                                    <span class="font-medium text-red-800 group-hover:text-red-900 transition-colors flex items-center">
+                                        完全重置
+                                        <svg class="w-4 h-4 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                    </span>
+                                    <p class="text-xs text-red-600 mt-1 group-hover:text-red-700 transition-colors">删除所有数据包括设置，恢复到全新状态</p>
+                                </div>
+                                <button id="full-reset-btn" class="ml-3 px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 hover:shadow-lg hover:scale-105 transform transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-300 active:scale-95">
+                                    完全重置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Scroll Controls - Removed unused partial implementation -->
+
+
+    <!-- Modal for Rich Data Entry -->
+    <div id="modal" class="fixed inset-0 hidden items-start justify-center overflow-y-auto overscroll-contain z-50 px-3 sm:px-4 py-3 md:py-8 bg-slate-900/55 backdrop-blur-sm">
+        <div id="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" class="relative w-full max-w-2xl lg:max-w-3xl my-2 md:my-10 bg-[var(--color-surface)] border border-white/60 ring-1 ring-white/40 rounded-3xl shadow-xl shadow-slate-900/10 p-4 sm:p-6 md:p-8 transform transition-transform duration-300 ease-in-out scale-95">
+            <div class="pointer-events-none absolute -top-16 -right-14 h-56 w-56 rounded-full bg-gradient-to-br from-blue-100/30 via-purple-100/20 to-transparent blur-3xl opacity-50"></div>
+            <div class="pointer-events-none absolute -bottom-16 -left-10 h-52 w-52 rounded-full bg-gradient-to-br from-indigo-100/30 via-violet-100/20 to-transparent blur-3xl opacity-40"></div>
+
+            <div class="relative z-10 flex justify-between items-start mb-6">
+                <div>
+                    <h3 id="modal-title" class="text-lg md:text-xl font-semibold text-gray-800">记录 <span id="modal-date" class="font-mono text-blue-700"></span></h3>
+                    <p class="text-sm text-gray-600 mt-1">今天的你，更接近哪种状态？</p>
+                </div>
+                <button id="modal-close" class="text-gray-500 hover:text-gray-700 text-4xl leading-none w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/70 hover:scale-95 active:scale-90 transition duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="关闭">&times;</button>
+            </div>
+
+            <div class="relative z-10 mb-6 border-b border-white/40 pb-4">
+                <div class="flex w-full p-1 bg-white/40 backdrop-blur-md rounded-xl border border-white/40" role="tablist" aria-label="记录页面切换">
+                    <button id="modal-tab-checkin" data-tab="checkin" class="modal-tab-btn flex-1 text-center px-4 py-2.5 text-sm font-medium rounded-lg border-b-2 border-transparent text-gray-400 transition duration-200 ease-out" role="tab" aria-controls="modal-page-checkin" aria-selected="true">
+                        <span data-tab-label>今日状态</span>
+                        <span data-tab-status class="ml-1"></span>
+                    </button>
+                    <button id="modal-tab-record" data-tab="record" class="modal-tab-btn flex-1 text-center px-4 py-2.5 text-sm font-medium rounded-lg border-b-2 border-transparent text-gray-400 transition duration-200 ease-out" role="tab" aria-controls="modal-page-record" aria-selected="false">
+                        <span data-tab-label>今日记录</span>
+                        <span data-tab-status class="ml-1"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div id="modal-page-checkin" class="modal-tab-page space-y-5 transition-all duration-300" data-page="checkin" role="tabpanel">
+                <div class="bg-[rgba(59,130,246,0.05)] rounded-[16px] p-4 md:p-5 space-y-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <h4 class="text-[15px] font-semibold text-gray-700 mb-2">身心状态 (Vitality)</h4>
+                    <div id="body-state-selector" class="body-state-container"></div>
+                </div>
+
+                <details class="bg-[rgba(251,146,60,0.05)] rounded-[16px] p-4 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]" open>
+                    <summary class="cursor-pointer text-[15px] font-semibold text-gray-700 mb-2">身体状态 (Body State)</summary>
+                    <div class="mt-4 space-y-4">
+                        <div id="body-condition-group" class="grid grid-cols-3 gap-3">
+                            <button type="button" data-condition="良好" class="body-condition-btn body-state-button">良好</button>
+                            <button type="button" data-condition="轻微不适" class="body-condition-btn body-state-button">轻微不适</button>
+                            <button type="button" data-condition="严重不适" class="body-condition-btn body-state-button">严重不适</button>
+                        </div>
+                        <input id="body-condition-note" type="text" class="w-full p-3 border border-white/60 bg-white/65 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="补充说明（可选）：例如鼻炎/感冒/头痛" />
+                    </div>
+                </details>
+
+                <div class="bg-[rgba(59,130,246,0.05)] rounded-[16px] p-4 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <label class="block text-[15px] font-semibold text-gray-700 mb-2">今日整体感受 (Daily Mood Tone)</label>
+                    <p class="text-xs text-blue-500/80 mb-3">回顾一下今天的状态：</p>
+                    <div id="mood-selector" class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                        <button data-mood="1" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl bg-white/50 border border-white/60 hover:bg-white/70 hover:scale-105 active:scale-95 transition duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="糟糕"><span class="text-3xl md:text-4xl filter grayscale transition-all">😫</span><span class="text-[10px] md:text-xs text-gray-500 font-medium">糟糕</span></button>
+                        <button data-mood="2" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl bg-white/50 border border-white/60 hover:bg-white/70 hover:scale-105 active:scale-95 transition duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="低落"><span class="text-3xl md:text-4xl filter grayscale transition-all">😞</span><span class="text-[10px] md:text-xs text-gray-500 font-medium">低落</span></button>
+                        <button data-mood="3" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl bg-white/50 border border-white/60 hover:bg-white/70 hover:scale-105 active:scale-95 transition duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="平淡"><span class="text-3xl md:text-4xl filter grayscale transition-all">😐</span><span class="text-[10px] md:text-xs text-gray-500 font-medium">平淡</span></button>
+                        <button data-mood="4" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl bg-white/50 border border-white/60 hover:bg-white/70 hover:scale-105 active:scale-95 transition duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="不错"><span class="text-3xl md:text-4xl filter grayscale transition-all">🙂</span><span class="text-[10px] md:text-xs text-gray-500 font-medium">不错</span></button>
+                        <button data-mood="5" class="mood-btn flex flex-col items-center gap-1 p-2 rounded-xl bg-white/50 border border-white/60 hover:bg-white/70 hover:scale-105 active:scale-95 transition duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-200" aria-label="超棒"><span class="text-3xl md:text-4xl filter grayscale transition-all">🤩</span><span class="text-[10px] md:text-xs text-gray-500 font-medium">超棒</span></button>
+                    </div>
+                </div>
+
+                <div class="bg-[rgba(59,130,246,0.05)] rounded-[16px] p-4 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <label class="block text-[15px] font-semibold text-gray-700 mb-2">情绪标签 (Feelings)</label>
+                    <p class="text-xs text-blue-500 mb-3">今天有哪些情绪出现？</p>
+                    <div id="emotion-tags" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <div class="bg-[rgba(59,130,246,0.05)] rounded-[16px] p-4 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <label class="block text-[15px] font-semibold text-gray-700 mb-2">天气</label>
+                    <div id="weather-selector" class="flex flex-wrap gap-2 text-2xl">
+                        <button data-weather="Sunny" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="晴" aria-label="天气：晴">☀️</button>
+                        <button data-weather="Cloudy" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="多云" aria-label="天气：多云">☁️</button>
+                        <button data-weather="Overcast" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="阴" aria-label="天气：阴">🌥️</button>
+                        <button data-weather="Rainy" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="雨" aria-label="天气：雨">🌧️</button>
+                        <button data-weather="Snowy" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="雪" aria-label="天气：雪">❄️</button>
+                        <button data-weather="Windy" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="大风" aria-label="天气：大风">🌬️</button>
+                        <button data-weather="Foggy" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="雾" aria-label="天气：雾">🌫️</button>
+                        <button data-weather="Thunder" class="p-2 rounded-xl bg-white/55 border border-white/60 hover:bg-white/80 hover:scale-95 active:scale-90 transition duration-300 ease-out" title="雷暴" aria-label="天气：雷暴">⚡</button>
+                    </div>
+                </div>
+
+                <div class="bg-[rgba(34,197,94,0.05)] rounded-[16px] p-4 md:p-5 space-y-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <h4 class="text-[15px] font-semibold text-gray-600 mb-2">今日生活滋养（Nourishment)</h4>
+                    <div class="flex flex-wrap gap-2 mb-2" id="nourishment-tags-container"></div>
+                </div>
+            </div>
+
+            <div id="modal-page-record" class="modal-tab-page hidden space-y-5 transition-all duration-300" data-page="record" role="tabpanel">
+                <div class="bg-[rgba(168,85,247,0.05)] rounded-[16px] p-4 md:p-5 space-y-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <div class="">
+                        <label class="text-[15px] font-semibold text-gray-700 block mb-2">睡眠记录</label>
+                        <div class="bg-white/75 p-4 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                            <div id="sleep-selector-container"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-3 bg-white/55 rounded-xl px-3 py-2 border border-white/60">
+                        <label for="metric-exercise" class="text-xs text-gray-500">运动 (min)</label>
+                        <input type="number" id="metric-exercise" class="w-24 sm:w-28 p-2 border border-white/70 rounded-lg text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                    </div>
+                    <div class="flex items-center justify-between gap-3 bg-white/55 rounded-xl px-3 py-2 border border-white/60">
+                        <label for="metric-reading" class="text-xs text-gray-500">阅读 (min)</label>
+                        <input type="number" id="metric-reading" class="w-24 sm:w-28 p-2 border border-white/70 rounded-lg text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                    </div>
+                    <div class="money-awareness-module rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50/90 to-amber-50/30 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 ease-out" id="money-awareness-module">
+                        <div class="p-4 sm:p-5 lg:p-6 border-b border-amber-100/80 bg-white/40 backdrop-blur-sm">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-6 h-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <h4 class="text-lg sm:text-xl font-semibold text-gray-900 leading-tight">今日金钱观察</h4>
+                                    </div>
+                                    <p class="text-sm text-gray-600 leading-relaxed">每一笔钱，都在支持一种生活方式</p>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                                        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="money-step-progress" class="mt-4"></div>
+                            <div class="mt-4 flex flex-wrap gap-2 text-xs text-gray-600">
+                                <button 
+                                    class="step-nav-btn px-3 py-1.5 rounded-full bg-white/90 border border-amber-200 font-medium transition-all duration-200"
+                                    data-step="1"
+                                    onclick="moneyAwarenessModule.jumpToStep(1)">
+                                    ① 看见一笔钱
+                                </button>
+                                <button 
+                                    class="step-nav-btn px-3 py-1.5 rounded-full bg-white/90 border border-amber-200 font-medium transition-all duration-200"
+                                    data-step="2"
+                                    onclick="moneyAwarenessModule.jumpToStep(2)">
+                                    ② 看懂它去了哪里
+                                </button>
+                                <button 
+                                    class="step-nav-btn px-3 py-1.5 rounded-full bg-white/90 border border-amber-200 font-medium transition-all duration-200"
+                                    data-step="3"
+                                    onclick="moneyAwarenessModule.jumpToStep(3)">
+                                    ③ 看清它改变了什么
+                                </button>
+                            </div>
+                        </div>
+                        <div id="money-observation-content" class="px-4 sm:px-5 lg:px-6 py-4 sm:py-5 overflow-y-auto max-h-[50vh] sm:max-h-[55vh] lg:max-h-[60vh]"></div>
+                        <div id="money-observation-footer" class="sticky bottom-0 bg-gradient-to-t from-amber-50/95 to-amber-50/90 backdrop-blur border-t border-amber-100/80 px-4 sm:px-5 lg:px-6 py-4 sm:py-5"></div>
+                    </div>
+                                        <div class="flex items-center justify-between gap-3 bg-white/55 rounded-xl px-3 py-2 border border-white/60">
+                        <label for="metric-social" class="text-xs text-gray-500">社交/备注</label>
+                        <input type="text" id="metric-social" class="w-full min-w-0 p-2 border border-white/70 rounded-lg text-xs bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="和朋友聚餐...">
+                    </div>
+                </div>
+
+                <div class="bg-white/40 backdrop-blur-md rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-medium text-gray-600">今日微行动</span>
+                        <span class="text-xs text-gray-500">今日微行动完成情况</span>
+                    </div>
+                    <div class="space-y-3" id="day-indicator-container">
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white/65 p-3 rounded-xl border border-white/70 shadow-sm hover:shadow-md transition duration-300 ease-out">
+                            <input type="text" id="day-indicator-input-1" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm placeholder-gray-400" placeholder="例如：完成一组拉伸">
+                            <input type="checkbox" id="day-indicator-check-1" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300 cursor-pointer">
+                        </div>
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white/65 p-3 rounded-xl border border-white/70 shadow-sm hover:shadow-md transition duration-300 ease-out">
+                            <input type="text" id="day-indicator-input-2" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm placeholder-gray-400" placeholder="例如：闭目养神三分钟">
+                            <input type="checkbox" id="day-indicator-check-2" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300 cursor-pointer">
+                        </div>
+                        <div class="flex items-center justify-between gap-3 text-xs text-gray-600 bg-white/65 p-3 rounded-xl border border-white/70 shadow-sm hover:shadow-md transition duration-300 ease-out">
+                            <input type="text" id="day-indicator-input-3" class="flex-1 min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm placeholder-gray-400" placeholder="例如：了解一个新知识">
+                            <input type="checkbox" id="day-indicator-check-3" class="h-5 w-5 text-blue-500 rounded focus:ring-blue-500 border-gray-300 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="custom-activities-container" class="bg-white/40 backdrop-blur-md rounded-2xl p-5 space-y-2">
+                    <h4 class="font-semibold text-gray-600">自定义活动</h4>
+                    <button id="add-custom-activity" class="text-sm text-blue-600 hover:text-blue-700 hover:scale-95 active:scale-90 transition duration-300 ease-out inline-block">+ 添加活动</button>
+                </div>
+
+                <div class="bg-[rgba(107,114,128,0.05)] rounded-[16px] p-4 md:p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                    <label for="keywords-input" class="block text-[15px] font-semibold text-gray-700 mb-2">今日关键词 (Keywords)</label>
+                    <p class="text-xs text-gray-500 mb-2">将在日历格子中微缩显示，最多三个（为今日时光贴上便签，让美好在月历中留下印记）</p>
+                    <input type="text" id="keywords-input" class="w-full p-3 border border-white/70 bg-white/70 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="例如: 健身, 纪念日, Carpe Diem">
+                </div>
+
+                <div class="bg-white/40 backdrop-blur-md rounded-2xl p-5">
+                    <h4 class="font-semibold text-gray-600 mb-2">✨ 今日三件好事 (Three Good Things)</h4>
+                    <div class="space-y-2">
+                        <input type="text" id="good-thing-1" class="w-full p-3 border border-orange-100/70 bg-orange-50/60 rounded-xl text-sm" placeholder="1. 一件微小但温暖的事...">
+                        <input type="text" id="good-thing-2" class="w-full p-3 border border-orange-100/70 bg-orange-50/60 rounded-xl text-sm" placeholder="2. 一个让我感到轻松的瞬间...">
+                        <input type="text" id="good-thing-3" class="w-full p-3 border border-orange-100/70 bg-orange-50/60 rounded-xl text-sm" placeholder="3. 一个让我微笑的画面...">
+                    </div>
+                </div>
+
+                <div id="daily-quote-container" class="bg-blue-50/50 p-5 rounded-2xl border border-blue-100/70 text-center relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+                    <div class="absolute top-2 left-2 text-xs text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity">点击右上角可手动刷新</div>
+                    <p id="daily-quote-text" class="text-sm text-gray-600 font-serif italic mb-1 min-h-[1.5em]">正在加载今日金句...</p>
+                    <p id="daily-quote-author" class="text-xs text-gray-400 text-right">—— 佚名</p>
+                    <button id="refresh-quote" class="absolute top-2 right-2 bg-white/80 hover:bg-blue-50 text-blue-500 hover:text-blue-600 border border-blue-200 hover:border-blue-300 rounded-full p-1.5 shadow-sm hover:shadow-md transition-all duration-200 group" title="手动刷新名言"><svg class="h-4 w-4 group-hover:rotate-180 transition-transform duration-300"><use href="#icon-refresh"></use></svg></button>
+                </div>
+
+                <div>
+                    <label for="journal-input" class="block text-sm font-medium text-gray-700 mb-2">给明天的启发</label>
+                    <textarea id="journal-input" rows="3" class="w-full p-3 border border-white/70 bg-white/70 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-200"></textarea>
+                </div>
+            </div>
+
+            <div id="soft-transition-prompt" class="hidden mt-6 mb-4 bg-white/40 backdrop-blur-md rounded-xl px-4 py-3 border border-white/30 items-center justify-between opacity-0 translate-y-2 transition duration-300 ease-out">
+                <p class="text-sm text-gray-600">状态已经记录下来了，可以继续写一点今天的经历。</p>
+                <button id="soft-transition-cta" type="button" class="text-blue-500 text-sm font-medium hover:underline hover:scale-95 transition duration-200">去记录 →</button>
+            </div>
+
+            <!-- Actions -->
+            <div class="modal-footer relative z-10 mt-8 flex flex-wrap items-center justify-end gap-3">
+                <p id="modal-save-feedback" class="mr-auto text-xs text-gray-500" aria-live="polite"></p>
+                <button id="modal-delete" class="px-4 py-2 text-sm text-red-500 rounded-xl hover:bg-red-50/70 hover:scale-95 active:scale-90 transition duration-300 ease-out">删除本日记录</button>
+                <button id="cancelBtn" class="px-4 py-2 text-sm text-gray-600 rounded-xl hover:bg-gray-100/70 hover:scale-95 active:scale-90 transition duration-300 ease-out">取消</button>
+                <button id="saveDailyRecordBtn" class="px-5 py-2.5 bg-blue-500/90 text-white rounded-xl shadow-md hover:bg-blue-600 hover:scale-95 active:scale-90 hover:shadow-lg transition duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-blue-300">保存今日记录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Scroll Actions -->
+    <div class="fixed bottom-20 right-6 flex flex-col gap-3 z-40 md:hidden print:hidden">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="p-3 bg-white/90 backdrop-blur-md text-gray-600 rounded-full shadow-lg border border-gray-100 hover:bg-white active:scale-95 transition-all" title="回到顶部">
+            <svg class="h-6 w-6"><use href="#icon-top"></use></svg>
+        </button>
+        <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="p-3 bg-white/90 backdrop-blur-md text-gray-600 rounded-full shadow-lg border border-gray-100 hover:bg-white active:scale-95 transition-all" title="快速到底">
+            <svg class="h-6 w-6"><use href="#icon-bottom"></use></svg>
+        </button>
+    </div>
+    
+    <!-- Mobile Current Xun FAB -->
+    <div id="mobile-current-xun-fab" class="mobile-current-xun-fab" title="回到当前旬">
+        <span id="current-xun-number">--</span>
+    </div>
+
+    <!-- Backup Modal -->
+    <div id="backup-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-800">数据备份与恢复</h3>
+                <button id="backup-modal-close" class="text-gray-400 hover:text-gray-700 text-3xl leading-none">&times;</button>
+            </div>
+            
+            <div class="space-y-6">
+                <!-- Cloud Sync (GitHub Gist) -->
+                <div class="border-b border-gray-100 pb-6">
+                    <h4 class="font-medium text-gray-700 mb-2 flex items-center justify-between">
+                        云端同步 (GitHub Gist)
+                        <span id="sync-status" class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-500">未连接</span>
+                    </h4>
+                    <p class="text-sm text-gray-500 mb-3">使用 GitHub Gist 保持多端数据同步（完全控制数据隐私）。</p>
+                    <div class="space-y-3">
+                        <input type="password" id="gist-token" placeholder="GitHub Personal Access Token" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" id="gist-id" placeholder="Gist ID (可选，留空将自动创建)" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <div class="flex gap-2">
+                            <button id="btn-sync-up" class="flex-1 bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-900 transition-colors text-sm flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                备份到云端
+                            </button>
+                            <button id="btn-sync-down" class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                从云端恢复
+                            </button>
+                        </div>
+                        <p class="text-[11px] text-gray-400">需要具有 <code class="bg-gray-100 px-1 rounded">gist</code> 权限的 GitHub Token。</p>
+                    </div>
+                </div>
+
+                <!-- Export -->
+                <div class="border-b border-gray-100 pb-6">
+                    <h4 class="font-medium text-gray-700 mb-2">导出数据 (Export)</h4>
+                    <p class="text-sm text-gray-500 mb-4">将所有数据下载为 JSON 文件，以防丢失。</p>
+                    <button id="btn-export" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5"><use href="#icon-download"></use></svg>
+                        立即备份 (Download)
+                    </button>
+                </div>
+
+                <!-- Import -->
+                <div>
+                    <h4 class="font-medium text-gray-700 mb-2">导入数据 (Import)</h4>
+                    <p class="text-sm text-gray-500 mb-4">从备份文件恢复数据。注意：这将覆盖当前所有数据。</p>
+                    <input type="file" id="file-import" accept=".json" class="hidden">
+                    <button id="btn-import" class="w-full border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-5 h-5"><use href="#icon-upload"></use></svg>
+                        选择备份文件 (Upload)
+                    </button>
+                </div>
+
+                <!-- Auto Backup Toggle -->
+                 <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">自动快照 (Auto Snapshot)</span>
+                        <p class="text-xs text-gray-400">数据变更时自动保存最近7份快照</p>
+                    </div>
+                     <!-- Toggle Switch -->
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="toggle-auto-backup" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+
+                <!-- Auto Backup List -->
+                <div id="auto-backup-list-container" class="hidden space-y-2 border-t border-gray-100 pt-4">
+                    <h4 class="font-medium text-gray-700 text-sm">最近快照 (Latest Snapshots)</h4>
+                    <div id="auto-backup-list" class="max-h-40 overflow-y-auto space-y-2 text-sm">
+                        <!-- Populated by JS -->
+                        <p class="text-xs text-gray-400">暂无快照记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menstrual Cycle Modal -->
+    <div id="menstrual-modal" class="fixed inset-0 hidden items-center justify-center z-50 px-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm p-5 transform transition-all scale-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">我的经期记录</h3>
+                <button id="menstrual-modal-close" class="text-gray-400 hover:text-gray-700 text-3xl leading-none" aria-label="关闭经期记录弹窗">&times;</button>
+            </div>
+            
+            <div class="mb-4 flex justify-between items-center">
+                <button id="menstrual-prev-month" class="p-2 rounded-full hover:bg-gray-100" aria-label="上一月">&lt;</button>
+                <h4 id="menstrual-month-year" class="text-lg font-semibold"></h4>
+                <button id="menstrual-next-month" class="p-2 rounded-full hover:bg-gray-100" aria-label="下一月">&gt;</button>
+            </div>
+
+            <div id="menstrual-calendar-grid" class="grid grid-cols-7 gap-1 text-center">
+                <!-- Calendar days will be populated by JS -->
+            </div>
+
+            <div class="mt-3 text-[11px] text-gray-400">
+                <p>小提示：在上方日历中 <span class="font-semibold text-gray-600">点击或长按任意日期</span>，可以标记经期开始、结束，或清除该日标记。</p>
+            </div>
+
+            <div class="mt-3 text-xs text-gray-500 space-y-1">
+                <p>平均周期: <span id="menstrual-avg-cycle">--</span> 天</p>
+                <p>平均持续: <span id="menstrual-avg-duration">--</span> 天</p>
+                <p>平均间隔: <span id="menstrual-avg-interval">--</span> 天
+                    <span class="ml-1 text-[10px] text-gray-400">(最近2-3次起始间隔的加权平均)</span>
+                </p>
+                <button id="menstrual-clear-all" class="mt-2 w-full text-center px-3 py-1.5 rounded-md border border-gray-200 text-[11px] text-gray-500 hover:bg-gray-50 hover:border-gray-300" aria-label="清除所有经期记录">
+                    清除所有经期记录
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menstrual Context Menu -->
+    <div id="menstrual-context-menu" class="hidden absolute z-50 bg-white rounded-md shadow-lg border border-gray-100 py-1 text-sm">
+        <button data-action="start" class="w-full text-left px-4 py-2 hover:bg-gray-100">标记为开始</button>
+        <button data-action="end" class="w-full text-left px-4 py-2 hover:bg-gray-100">标记为结束</button>
+        <div class="my-1 h-[1px] bg-gray-100"></div>
+        <button data-action="clear" class="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50">清除记录</button>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-50 md:hidden pb-safe">
+        <div class="flex justify-around items-center h-14">
+            <button id="mobile-nav-macro" class="flex flex-col items-center justify-center w-full h-full text-blue-600 focus:outline-none hover:bg-gray-50 active:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span class="text-[10px] mt-1">36旬</span>
+            </button>
+            <button id="mobile-nav-overview" class="flex flex-col items-center justify-center w-full h-full text-gray-500 focus:outline-none hover:bg-gray-50 active:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <span class="text-[10px] mt-1">全景</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- IE11 Warning -->
+    <script>
+        if (window.document.documentMode || /Edge/.test(navigator.userAgent)) {
+            // Check for Grid support roughly or just UA
+             if (!('grid' in document.body.style)) {
+                 var div = document.createElement('div');
+                 div.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;background:#fff3cd;color:#856404;padding:10px;text-align:center;z-index:9999;border-top:1px solid #ffeeba;';
+                 div.innerHTML = '您正在使用旧版浏览器，建议使用 Chrome, Edge, Safari 或 Firefox 最新版本以获得最佳体验。 <span style="cursor:pointer;float:right;margin-right:20px;" onclick="this.parentElement.style.display=\'none\'">&times;</span>';
+                 document.body.appendChild(div);
+             }
+        }
+    </script>
+    
+    <!-- App Entry -->
+
+    <!-- Service Worker Registration for PWA Offline Support -->
+    <!-- DISABLED during development to prevent CSS caching issues -->
+    <!--
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('[Service Worker] Registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('[Service Worker] Registration failed:', error);
+                    });
+            });
+        }
+    </script>
+    -->
+
+    <!-- Toast/Snackbar for Undo -->
+    <div id="toast-container" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg hidden flex items-center gap-4">
+        <span id="toast-message"></span>
+        <button id="toast-undo" class="font-bold hover:underline">撤销</button>
+    </div>
+
+
+    <!-- Core App Logic -->
+</body>
+</html>

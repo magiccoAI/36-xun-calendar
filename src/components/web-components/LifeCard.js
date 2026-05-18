@@ -244,7 +244,7 @@ export class LifeCard extends HTMLElement {
                 }
 
                 /* Responsive */
-                @media (max-width: 767px) {
+                @media (max-width: calc(var(--breakpoint-md) - 1px)) {
                     .life-card {
                         padding: 8px;
                         min-height: 50px;

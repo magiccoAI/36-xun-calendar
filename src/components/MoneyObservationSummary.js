@@ -24,6 +24,7 @@ class MoneyObservationSummary {
     // 使用与主系统一致的旬期计算逻辑
     try {
       // 使用Calendar获取旬期信息
+      console.log('🔍 MoneyObservationSummary.getXunDateRange - CONFIG.YEAR:', CONFIG.YEAR, 'type:', typeof CONFIG.YEAR);
       const periods = Calendar.getXunPeriods(CONFIG.YEAR);
       const targetPeriod = periods.find(p => {
         // 将旬期索引转换为字符串格式匹配
@@ -397,8 +398,18 @@ class MoneyObservationSummary {
 
   // 获取聚合数据
   getSummaryData() {
+    console.log('🔍 getSummaryData() called with xunPeriod:', this.xunPeriod);
     const records = this.getMoneyRecords();
-    return this.aggregateRecords(records);
+    console.log('📊 getMoneyRecords() returned:', records.length, 'records');
+    
+    try {
+      const aggregated = this.aggregateRecords(records);
+      console.log('✅ aggregateRecords() returned data:', aggregated);
+      return aggregated;
+    } catch (error) {
+      console.error('❌ Error in aggregateRecords():', error);
+      return null;
+    }
   }
 }
 
@@ -1191,8 +1202,16 @@ export class MoneyObservationSummaryComponent {
     console.log('📊 Money summary data:', this.currentData);
     
     if (!this.currentData) {
-      console.log('❌ No current data found, returning loading state');
-      return '<div class="text-center py-8">加载中...</div>';
+      console.log('❌ No current data found, returning debug info');
+      return `
+        <div class="text-center py-8">
+          <div class="text-red-500 font-bold mb-2">数据加载失败</div>
+          <div class="text-sm text-gray-600">
+            <p>当前旬期: ${this.xunPeriod}</p>
+            <p>请检查控制台查看详细调试信息</p>
+          </div>
+        </div>
+      `;
     }
 
     const { recordedDays } = this.currentData.overview;

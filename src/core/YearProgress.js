@@ -14,8 +14,9 @@ export class YearProgress {
 
     update() {
         const now = new Date();
-        const start = new Date(CONFIG.YEAR, 0, 1);
-        const end = new Date(CONFIG.YEAR, 11, 31, 23, 59, 59);
+        const year = this.xunPeriods[0]?.startDate.getFullYear() || new Date().getFullYear();
+        const start = new Date(year, 0, 1);
+        const end = new Date(year, 11, 31, 23, 59, 59);
         const total = end - start;
         const current = now - start;
         let percentage = (current / total) * 100;
@@ -68,7 +69,7 @@ export class YearProgress {
             if (currentXun) {
                 currentXunInfo.textContent = `Current: 第 ${currentXun.index} 旬`;
             } else {
-                currentXunInfo.textContent = `Welcome to ${CONFIG.YEAR}`;
+                currentXunInfo.textContent = `Welcome to ${year}`;
             }
         }
 

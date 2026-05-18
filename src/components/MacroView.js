@@ -144,7 +144,7 @@ export class MacroView {
                     grid-column: span 2;
                 }
                 /* Mobile responsive */
-                @media (max-width: 767px) {
+                @media (max-width: calc(var(--breakpoint-md) - 1px)) {
                     .table-header {
                         display: none; /* Hide header on mobile, use inline labels instead */
                     }

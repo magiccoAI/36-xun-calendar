@@ -73,14 +73,94 @@
 ## 🛠️ 技术实现
 
 这是一个纯粹的、注重隐私的 Web 应用。
-*   **核心架构**：原生 HTML5 + JavaScript (ES Modules)，轻量级，无框架依赖。
-*   **样式设计**：[Tailwind CSS](https://tailwindcss.com/) 打造的极简主义界面，支持多主题切换。
-*   **数据存储**：所有数据均存储在您浏览器的 `localStorage` 中。**没有服务器，没有账号，没有上传。** 你的生活记录只属于你自己。
-*   **组件库**：
-    *   [Lunar.js](https://github.com/6tail/lunar-javascript) (提供精准的农历与节气支持)
-    *   [Chart.js](https://www.chartjs.org/) (绘制直观的数据图表)
-*   **测试覆盖**：使用 Jest 进行单元测试，核心模块覆盖率 >80%。
-*   **构建工具**：支持 CSS 实时编译和构建优化。
+
+### 技术栈
+- **核心架构**：原生 HTML5 + JavaScript (ES Modules)，轻量级，无框架依赖
+- **样式设计**：[Tailwind CSS 4.1.18](https://tailwindcss.com/) 打造的极简主义界面，支持多主题切换
+- **构建工具**：[Vite 8.0.5](https://vitejs.dev/) 提供快速开发和构建
+- **数据存储**：所有数据均存储在您浏览器的 `localStorage` 中。**没有服务器，没有账号，没有上传。** 你的生活记录只属于你自己
+- **外部依赖**：
+  - [Chart.js 4.5.1](https://www.chartjs.org/) (绘制直观的数据图表)
+  - [lunar-javascript 1.7.7](https://github.com/6tail/lunar-javascript) (提供精准的农历与节气支持)
+- **测试覆盖**：使用 Jest 30.2.0 进行单元测试，Playwright 1.58.1 进行E2E测试，核心模块覆盖率 >80%
+
+### 项目结构
+```
+src/
+├── components/          # 视图组件
+│   ├── Modal.js         # 每日记录弹窗 (68KB, 1533行) - 整合睡眠、身体状态、金钱觉察
+│   ├── DetailView.js    # 旬详情视图 (20KB)
+│   ├── SummaryView.js   # 旬总结视图 (38KB) - 整合XunSummary和MoneyObservationSummary
+│   ├── MacroView.js     # 36旬宏观视图 (10KB)
+│   ├── OverviewView.js  # 年度概览 (10KB)
+│   ├── MoneyAwarenessModule.js    # 金钱觉察模块 (41KB)
+│   ├── MoneyObservationSummary.js # 金钱观察总结 (52KB)
+│   ├── MenstrualView.js  # 生理周期追踪 (28KB)
+│   ├── BackupModal.js    # 数据备份弹窗 (10KB)
+│   ├── SettingsModal.js  # 设置弹窗 (10KB)
+│   ├── sleep/            # 睡眠模块子组件 (CircularSleepSelector, ClockRenderer等)
+│   ├── MacroView/        # 宏观视图子组件 (DesignSystem, ProgressRenderer等)
+│   └── web-components/   # Web Components (LifeCard, XunRow)
+├── core/                # 核心模块
+│   ├── State.js         # 状态管理 (15KB) - Store pattern with localStorage persistence
+│   ├── Calendar.js      # 日期计算 (15KB) - 旬周期计算、日期处理、时区安全
+│   ├── app.js           # 主应用 (25KB) - 视图路由、事件协调
+│   ├── XunSummary.js    # 旬数据统计 (23KB) - 数据聚合、洞察生成
+│   ├── BackupManager.js # 备份管理 (6KB)
+│   ├── BackgroundLoader.js # 背景加载 (7KB)
+│   ├── ThemeManager.js  # 主题管理 (2KB)
+│   ├── YearProgress.js  # 年度进度 (6KB)
+│   ├── NavigationManager.js # 导航管理 (2KB)
+│   └── PixelFarm.js     # 像素花园 (8KB)
+├── config.js            # 配置文件 (4KB) - 数据模型、存储键、默认值
+├── quote.js             # 每日金句系统 (5KB)
+├── styles/              # 样式文件
+│   ├── design-tokens.css    # 设计令牌 (5KB)
+│   ├── body-state.css       # 身体状态样式 (11KB)
+│   └── responsive-backgrounds.css # 响应式背景 (4KB)
+├── input.css            # Tailwind入口 (3KB)
+├── output.css           # 编译后的CSS (135KB)
+└── images/              # 静态资源
+```
+
+### 核心架构说明
+
+**状态管理 (State.js)**
+- 采用 Store pattern，统一管理所有应用状态
+- 支持订阅机制，状态变更自动通知订阅者
+- 持久化到 localStorage，支持自动备份
+- 管理的数据包括：用户记录、宏观目标、自定义情绪/滋养、生理周期、设置等
+
+**日期计算 (Calendar.js)**
+- 提供36旬周期计算（从年初开始的连续10天周期）
+- 时区安全的日期处理（parseDateStrToLocalDate, startOfDay）
+- 支持动态年份（2026-2100）
+- 提供日期范围查询、旬定位等工具函数
+
+**主应用 (app.js)**
+- 视图路由管理（macro, overview, detail, summary）
+- 协调各视图组件的渲染
+- 处理弹窗、备份、设置等交互
+- 移动端FAB、滚动高亮等UI增强
+
+**旬数据统计 (XunSummary.js)**
+- 聚合旬内所有记录数据
+- 计算睡眠、精力、运动、阅读等指标
+- 生成洞察和建议
+- 支持三件好事统计分析
+
+### 数据流
+```
+用户交互 → Modal/DetailView → State.setState() → localStorage持久化 → 订阅者通知 → 视图重渲染
+```
+
+### 已知技术债务
+- **P0（关键逻辑）**：Double save logic、getXunRange()与getXunPeriods()定义矛盾、cloneNode DOM替换
+- **P1（架构设计）**：Breakpoint系统冲突、内联CSS硬编码、app.js和Modal.js文件过大需要拆分
+- **P2（性能质量）**：initPixelFarm()全量重建、无prefers-reduced-motion保护、CDN依赖未通过Vite打包
+- **P3（优化建议）**：Service Worker未启用、Modal缺乏focus trap、辅助功能改进
+
+详见项目文档中的Bug Registry和QA Rules。
 
 ## 🚀 使用指南
 
@@ -107,7 +187,26 @@
 
 ### 💻 本地安装使用
 
-#### 方法一：直接打开 (简单快速)
+#### 方法一：安装为离线应用 (PWA - 推荐，最便捷)
+**无需下载代码，像原生 App 一样使用**
+
+1.  **访问在线地址**：在 Chrome、Edge 或 Safari 浏览器中打开 [https://magiccoai.github.io/36-xun-calendar/](https://magiccoai.github.io/36-xun-calendar/)。
+2.  **安装到设备**：
+    *   **电脑端**：点击地址栏右侧出现的“安装”图标（或在菜单中选择“安装 36旬日历”）。
+    *   **手机端**：点击浏览器的“分享”按钮，选择“添加到主屏幕”。
+3.  **离线运行**：安装后，桌面或手机屏幕会出现应用图标。即便在断网状态下，您也可以直接点击图标进入日历，体验与原生 App 无异。
+
+**优势**：
+- ✅ **零安装**：无需下载任何压缩包或安装环境。
+- ✅ **离线优先**：即使没有网络，所有功能也能完美运行。
+- ✅ **绝对隐私**：数据完全存储在您本地设备的浏览器中，绝不上传云端。
+
+#### 方法二：开发者本地运行
+如果您需要修改代码或进行二次开发：
+- ✅ 隐私安全，所有数据仅保存在您的设备上
+- ✅ 跨平台支持（Windows、macOS、Linux）
+
+#### 方法二：克隆源码（适合开发者）
 ```bash
 # 1. 克隆项目
 git clone https://github.com/magiccoAI/36-xun-calendar.git
@@ -115,47 +214,29 @@ git clone https://github.com/magiccoAI/36-xun-calendar.git
 # 2. 进入项目目录
 cd "36-xun-calendar"
 
-# 3. 直接双击打开 index.html 文件
-# 或者在浏览器地址栏输入完整路径
-```
-
-#### 方法二：本地服务器 (推荐)
-```bash
-# 1. 克隆项目
-git clone https://github.com/magiccoAI/36-xun-calendar.git
-
-# 2. 进入项目目录
-cd "36-xun-calendar"
-
-# 3. 安装依赖 (可选，用于开发)
+# 3. 安装依赖
 npm install
 
-# 4. 启动本地服务器
-npx serve .
-# 或者使用 Python 3
-python -m http.server 8000
-# 或者使用 Node.js http-server
-npx http-server .
+# 4. 构建项目
+npm run build
 
-# 5. 在浏览器中访问 http://localhost:3000 或 http://localhost:8000
+# 5. 进入 dist 目录，双击 index.html 使用
+cd dist
+# 或使用本地服务器预览
+npm run preview
 ```
 
-#### 完整开发环境设置
+#### 方法三：开发模式（仅用于开发调试）
 ```bash
 # 1. 克隆并安装依赖
 git clone https://github.com/magiccoAI/36-xun-calendar.git
 cd "36-xun-calendar"
 npm install
 
-# 2. 构建资源
-npm run build:css
-npm run build:images
+# 2. 启动开发服务器
+npm run dev
 
-# 3. 启动开发模式 (监听 CSS 变化)
-npm run watch:css
-
-# 4. 运行测试
-npm test
+# 3. 浏览器自动打开 http://localhost:3000
 ```
 
 ## 🆕 v1.2.0 新功能亮点

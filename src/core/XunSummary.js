@@ -145,28 +145,6 @@ function parseDateStringToLocalNoon(dateStr) {
     return Number.isNaN(date.getTime()) ? null : date;
 }
 
-export function getXunRange(inputDate = new Date()) {
-    // 使用年历系统获取旬范围，确保与全景视图一致
-    const year = inputDate.getFullYear();
-    const periods = Calendar.getXunPeriods(year);
-    
-    // 找到输入日期所在的旬
-    const targetPeriod = periods.find(p => {
-        const date = new Date(inputDate);
-        return date >= p.startDate && date <= p.endDate;
-    });
-    
-    if (targetPeriod) {
-        return {
-            startDate: targetPeriod.startDate,
-            endDate: targetPeriod.endDate
-        };
-    }
-    
-    // 降级到原有的月历系统
-    return Calendar.getXunRange(inputDate);
-}
-
 export function loadDailyRecords() {
     const storeData = store.getAllData();
     const legacyData = JSON.parse(localStorage.getItem('dailyRecords') || '{}');

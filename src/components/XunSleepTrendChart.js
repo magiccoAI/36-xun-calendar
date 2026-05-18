@@ -1,4 +1,7 @@
-import { Chart } from 'chart.js';
+import { Chart, registerables } from 'chart.js';
+
+// Register all Chart.js components including scales
+Chart.register(...registerables);
 
 let sleepTrendChartInstance = null;
 

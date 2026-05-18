@@ -31,10 +31,7 @@
     <meta name="twitter:image" content="https://magiccoai.github.io/36-xun-calendar/src/images/og-image.jpg">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="src/images/favicon.svg">
-    <link rel="icon" type="image/png" sizes="32x32" href="src/images/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="src/images/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="src/images/apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     
     <!-- Web App Manifest -->
     <link rel="manifest" href="manifest.webmanifest">
@@ -56,8 +53,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Nunito:wght@300;400;600&display=swap" rel="stylesheet">
 
-    <!-- Import map removed - dependencies now bundled via Vite -->
-    <link href="src/output.css" rel="stylesheet">
+    <!-- CSS will be injected by Vite -->
     <style>
         /* Mobile-first root font size */
         html {
@@ -617,115 +613,8 @@
             }
         }
 
-        /* Custom styles for the energy slider */
-        #energy-level {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 6px;
-            background: transparent;
-            border-radius: 3px;
-            outline: none;
-            position: relative;
-        }
-
-        #energy-level::-webkit-slider-track {
-            width: 100%;
-            height: 6px;
-            background: linear-gradient(90deg, 
-                var(--color-progress-0) 0%, 
-                var(--color-progress-20) 20%, 
-                var(--color-progress-40) 40%, 
-                var(--color-progress-60) 60%, 
-                var(--color-progress-80) 80%, 
-                var(--color-progress-100) 100%);
-            border-radius: 3px;
-            border: none;
-        }
-
-        #energy-level::-moz-range-track {
-            width: 100%;
-            height: 6px;
-            background: linear-gradient(90deg, 
-                var(--color-progress-0) 0%, 
-                var(--color-progress-20) 20%, 
-                var(--color-progress-40) 40%, 
-                var(--color-progress-60) 60%, 
-                var(--color-progress-80) 80%, 
-                var(--color-progress-100) 100%);
-            border-radius: 3px;
-            border: none;
-        }
-
-        #energy-level::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            background: var(--color-background);
-            border: 1px solid var(--color-border);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.15),
-                0 4px 12px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(1px);
-            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-        }
-
-        #energy-level::-webkit-slider-thumb:hover {
-            transform: scale(1.05);
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.2),
-                0 6px 16px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.7);
-        }
-
-        #energy-level::-webkit-slider-thumb:active {
-            transform: scale(0.95);
-            box-shadow: 
-                0 1px 4px rgba(0, 0, 0, 0.15),
-                0 2px 6px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
-
-        #energy-level::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            background: var(--color-background);
-            border: 1px solid var(--color-border);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 
-                0 2px 8px rgba(0, 0, 0, 0.15),
-                0 4px 12px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(1px);
-            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            position: relative;
-            border: none;
-        }
-
-        #energy-level::-moz-range-thumb:hover {
-            transform: scale(1.05);
-            box-shadow: 
-                0 4px 12px rgba(0, 0, 0, 0.2),
-                0 6px 16px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.7);
-        }
-
-        #energy-level::-moz-range-thumb:active {
-            transform: scale(0.95);
-            box-shadow: 
-                0 1px 4px rgba(0, 0, 0, 0.15),
-                0 2px 6px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
-        }
         body.theme-winter #winter-header-image {
             display: block;
-            background-image: url('src/images/winter-header.png');
             background-size: cover;
             background-position: center;
             height: 250px; /* Increased height */
@@ -1360,6 +1249,152 @@
     <div id="mobile-current-xun-fab" class="mobile-current-xun-fab" title="回到当前旬">
         <span id="current-xun-number">--</span>
     </div>
+
+    <!-- Debug Script for Money Observation Data -->
+    <script>
+    // Temporary debug script to check and inject money observation data
+    window.debugMoneyData = {
+        checkData: function() {
+            const keys = Object.keys(localStorage).filter(key => key.includes('money'));
+            console.log('💰 Money data keys:', keys);
+            keys.forEach(key => {
+                const data = localStorage.getItem(key);
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        console.log(`📊 ${key}:`, parsed);
+                    } catch (e) {
+                        console.log(`❌ ${key}: Invalid JSON`);
+                    }
+                } else {
+                    console.log(`📭 ${key}: empty`);
+                }
+            });
+            return keys;
+        },
+        
+        injectTestData: function() {
+            // Create test data for current旬 (14th旬: 2026-05-11 to 2026-05-20)
+            const testData = [
+                { date: '2026-05-11', data: {
+                    step1: ['花掉的一笔'],
+                    step2: { lifeSupport: ['让生活正常运转'], selfState: '在维持生活的我', breathFeeling: '舒展的' },
+                    step3: '我愿意继续',
+                    customText: '测试数据',
+                    summary: '测试金钱观察',
+                    step: 3,
+                    timestamp: Date.now()
+                }},
+                { date: '2026-05-12', data: {
+                    step1: ['赚到的一笔'],
+                    step2: { lifeSupport: ['让生活正常运转', '往长远处走'], selfState: '在推进未来的我', breathFeeling: '平稳的' },
+                    step3: '我愿意继续',
+                    customText: '测试数据2',
+                    summary: '测试金钱观察2',
+                    step: 3,
+                    timestamp: Date.now() - 86400000
+                }},
+                { date: '2026-05-13', data: {
+                    step1: ['花掉的一笔'],
+                    step2: { lifeSupport: ['让生活正常运转'], selfState: '在照顾当下的我', breathFeeling: '留神的' },
+                    step3: '我希望调整一点',
+                    customText: '测试数据3',
+                    summary: '测试金钱观察3',
+                    step: 3,
+                    timestamp: Date.now() - 172800000
+                }}
+            ];
+            
+            testData.forEach(item => {
+                const key = `moneyObservationDraft_${item.date}`;
+                localStorage.setItem(key, JSON.stringify(item.data));
+                console.log(`Injected data for ${item.date}`);
+            });
+            
+            console.log('Test data injected successfully for 14th xun (2026-05-11 to 2026-05-20)');
+            return testData;
+        },
+        
+        checkCurrentXun: function() {
+            // Check what xun period is currently being viewed
+            const state = window.store?.getState();
+            if (state) {
+                console.log('Current viewed xun index:', state.viewedXunIndex);
+                console.log('Current view:', state.currentView);
+                
+                // Calculate xun period string
+                const quarter = Math.ceil(state.viewedXunIndex / 3);
+                const xun = ((state.viewedXunIndex - 1) % 3) + 1;
+                const xunPeriod = `2026-Q${quarter}-X${xun}`;
+                console.log('Xun period string:', xunPeriod);
+                
+                return xunPeriod;
+            }
+            console.log('Store not available');
+            return null;
+        },
+        
+        checkDateRange: function() {
+            // Check what date range the current xun covers
+            const xunPeriod = this.checkCurrentXun();
+            if (!xunPeriod) return;
+            
+            const quarter = Math.ceil(14 / 3); // Assuming current is 14th xun
+            const xun = ((14 - 1) % 3) + 1;
+            const globalIndex = 14;
+            
+            // Calculate date range for 14th xun
+            const yearStart = new Date(2026, 0, 1);
+            const daysFromStart = (globalIndex - 1) * 10;
+            const startDate = new Date(yearStart);
+            startDate.setDate(yearStart.getDate() + daysFromStart);
+            
+            const dates = [];
+            for (let i = 0; i < 10; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                dates.push(date.toISOString().split('T')[0]);
+            }
+            
+            console.log('Date range for 14th xun:', dates);
+            return dates;
+        },
+        
+        checkLocalStorageYear: function() {
+            const year = localStorage.getItem('xun_current_year');
+            console.log('📅 localStorage xun_current_year:', year, 'type:', typeof year);
+            const parsedYear = parseInt(year);
+            console.log('📅 Parsed year:', parsedYear, 'isNaN:', isNaN(parsedYear));
+            return year;
+        },
+        
+        fixLocalStorageYear: function() {
+            const currentYear = new Date().getFullYear();
+            localStorage.setItem('xun_current_year', currentYear.toString());
+            console.log('✅ Fixed localStorage year to:', currentYear);
+            return currentYear;
+        }
+    };
+    
+    console.log('Money data debug tools loaded. Use window.debugMoneyData.checkData(), window.debugMoneyData.injectTestData(), window.debugMoneyData.checkCurrentXun(), window.debugMoneyData.checkDateRange(), window.debugMoneyData.checkLocalStorageYear(), or window.debugMoneyData.fixLocalStorageYear()');
+    
+    // Auto-debug on page load
+    setTimeout(() => {
+        console.log('🔍 Auto-debugging money observation data...');
+        window.debugMoneyData.checkData();
+        window.debugMoneyData.checkCurrentXun();
+        window.debugMoneyData.checkDateRange();
+        window.debugMoneyData.checkLocalStorageYear();
+        
+        // Check if money observation container exists and what it contains
+        const container = document.getElementById('money-observation-summary-container');
+        if (container) {
+            console.log('📦 Money observation container found:', container.innerHTML);
+        } else {
+            console.log('❌ Money observation container not found');
+        }
+    }, 2000);
+    </script>
 
     <!-- Backup Modal -->
     <div id="backup-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 px-4">

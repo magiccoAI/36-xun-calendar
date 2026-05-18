@@ -1,4 +1,4 @@
-const CACHE_NAME = '36-xun-calendar-v1';
+const CACHE_NAME = '36-xun-calendar-v2'; // Bumped version to clear old cache
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -34,10 +34,12 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Caching app assets');
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
-      .catch((error) => {
-        console.error('[Service Worker] Cache install failed:', error);
+        // Use catch to prevent one missing file from stopping the whole cache process
+        return Promise.allSettled(
+          ASSETS_TO_CACHE.map(url => 
+            cache.add(url).catch(err => console.warn(`[Service Worker] Failed to cache ${url}:`, err))
+          )
+        );
       })
   );
   self.skipWaiting();
@@ -61,7 +63,7 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - Network First, fallback to cache
 self.addEventListener('fetch', (event) => {
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
@@ -73,40 +75,41 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Skip Vite's HMR and internal requests during development
+  if (event.request.url.includes('@vite') || event.request.url.includes('@fs') || event.request.url.includes('node_modules')) {
+    return;
+  }
+
+  // Use Network First strategy instead of Cache First
+  // This ensures we always get the latest version if online, fixing the "stale UI on refresh" issue
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        if (cachedResponse) {
-          // Return cached version
-          return cachedResponse;
+    fetch(event.request)
+      .then((response) => {
+        // Check if valid response
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
         }
 
-        // Not in cache, fetch from network
-        return fetch(event.request)
-          .then((response) => {
-            // Check if valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone response since it can only be consumed once
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                // Cache the new resource
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch((error) => {
-            console.error('[Service Worker] Fetch failed:', error);
-            // Return a basic offline fallback for HTML requests
-            if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match('/index.html');
-            }
+        // Clone response and update cache
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME)
+          .then((cache) => {
+            cache.put(event.request, responseToCache);
           });
+
+        return response;
+      })
+      .catch((error) => {
+        console.log('[Service Worker] Network request failed, falling back to cache for:', event.request.url);
+        return caches.match(event.request).then(cachedResponse => {
+            if (cachedResponse) {
+                return cachedResponse;
+            }
+            // If HTML request fails and not in cache, return index.html
+            if (event.request.headers.get('accept')?.includes('text/html')) {
+                return caches.match('/index.html');
+            }
+        });
       })
   );
 });

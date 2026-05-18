@@ -167,6 +167,14 @@ const generateGoodThingsSection = (summary) => {
 export class SummaryView {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+    }
+
+    handleKeyDown(e) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            store.setState({ currentView: 'detail' });
+        }
     }
 
     render() {
@@ -190,8 +198,14 @@ export class SummaryView {
             return;
         }
 
+        // Remove existing keyboard listener
+        document.removeEventListener('keydown', this.handleKeyDown);
+        // Add keyboard listener for Escape key
+        document.addEventListener('keydown', this.handleKeyDown);
+
         const state = store.getState();
-        const xunPeriods = Calendar.getXunPeriods(CONFIG.YEAR);
+        console.log('🔍 SummaryView render - currentYear:', state.currentYear, 'type:', typeof state.currentYear);
+        const xunPeriods = Calendar.getXunPeriods(state.currentYear);
         const targetPeriod = xunPeriods.find(p => p.index === state.viewedXunIndex);
         const targetDate = targetPeriod ? targetPeriod.startDate : new Date();
 
@@ -464,6 +478,7 @@ export class SummaryView {
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                                 </svg>
                                 <span>返回日历</span>
+                                <span class="ml-2 px-2 py-0.5 rounded bg-gray-100 text-xs text-gray-500 font-mono">Esc</span>
                             </button>
                         </div>
                     `}
@@ -527,5 +542,6 @@ export class SummaryView {
             this.unsubscribe();
             this.unsubscribe = null;
         }
+        document.removeEventListener('keydown', this.handleKeyDown);
     }
 }

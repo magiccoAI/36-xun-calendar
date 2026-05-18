@@ -14,12 +14,13 @@ class Store {
             currentXunIndex: null, // Index of current xun based on date
             viewedXunIndex: null,  // Currently viewed xun index
             currentView: 'macro',  // 'macro', 'overview'
+            currentYear: parseInt(localStorage.getItem('xun_current_year') || CONFIG.DEFAULT_YEAR, 10) || CONFIG.DEFAULT_YEAR,
             autoBackup: localStorage.getItem('auto_backup_enabled') === 'true', // Load auto backup setting
             menstrualData: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.MENSTRUAL_DATA) || '{"cycles":[], "avgLength": 28, "avgDuration": 5, "nextPrediction": null}'),
             settings: JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.SETTINGS) || '{"showMenstrualCycle": false}')
         };
         this.listeners = new Set();
-        
+
         this.migrateData();
     }
 
@@ -49,6 +50,15 @@ class Store {
 
     getAllData() {
         return this.state.userData;
+    }
+
+    setCurrentYear(year) {
+        if (!year || isNaN(year) || year < CONFIG.SUPPORTED_YEAR_START || year > CONFIG.SUPPORTED_YEAR_END) {
+            console.error('Invalid year:', year);
+            return;
+        }
+        this.setState({ currentYear: year });
+        localStorage.setItem('xun_current_year', year);
     }
 
     getDay(dateStr) {
@@ -83,6 +93,9 @@ class Store {
         }
         if (newState.customNourishments) {
             localStorage.setItem(CONFIG.STORAGE_KEYS.CUSTOM_NOURISHMENTS, JSON.stringify(newState.customNourishments));
+        }
+        if (newState.currentYear) {
+            localStorage.setItem('xun_current_year', newState.currentYear);
         }
         if (newState.menstrualData) {
             localStorage.setItem(CONFIG.STORAGE_KEYS.MENSTRUAL_DATA, JSON.stringify(newState.menstrualData));

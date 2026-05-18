@@ -11,8 +11,8 @@ export class OverviewView {
 
     render(xunPeriods) {
         this.container.innerHTML = '';
-        this.container.className = 'flex flex-wrap gap-1 justify-center p-2 md:p-4 bg-white rounded-xl shadow-sm border border-gray-100'; 
-        
+        this.container.className = 'flex flex-wrap gap-1 justify-center p-2 md:p-4 bg-white rounded-xl shadow-sm border border-gray-100';
+
         const legend = document.createElement('div');
         legend.className = "w-full flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pb-4 border-b border-gray-50 gap-2";
         legend.innerHTML = `
@@ -22,23 +22,24 @@ export class OverviewView {
             </div>
             <div class="flex flex-wrap gap-4 text-xs text-gray-500">
                 <div class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded-[1px] bg-gray-50 border border-gray-200"></span> 
+                    <span class="w-3 h-3 rounded-[1px] bg-gray-50 border border-gray-200"></span>
                     <span>未记录</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded-[1px] shadow-sm" style="background-color: hsl(210, 85%, 60%)"></span> 
+                    <span class="w-3 h-3 rounded-[1px] shadow-sm" style="background-color: hsl(210, 85%, 60%)"></span>
                     <span>已记录</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <span class="w-3 h-3 rounded-[1px] border-2 border-blue-400 bg-white"></span> 
+                    <span class="w-3 h-3 rounded-[1px] border-2 border-blue-400 bg-white"></span>
                     <span>今天</span>
                 </div>
             </div>
         `;
         this.container.appendChild(legend);
 
-        const start = new Date(CONFIG.YEAR, 0, 1);
-        const end = new Date(CONFIG.YEAR, 11, 31);
+        const year = store.getState().currentYear;
+        const start = new Date(year, 0, 1);
+        const end = new Date(year, 11, 31);
         
         const dateToXunMap = {};
         xunPeriods.forEach(p => {

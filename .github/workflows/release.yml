@@ -13,8 +13,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Zip the project files
-      run: zip -r project-archive.zip .
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build project
+      run: npm run build
+
+    - name: Package dist directory
+      run: cd dist && zip -r ../36-xun-calendar-standalone.zip .
 
     - name: Create Release
       id: create_release
@@ -26,7 +37,12 @@ jobs:
         release_name: Release ${{ github.ref }}
         body: |
           A new release of the 36-Xun Calendar.
-          Download the `project-archive.zip` file below to run locally.
+          
+          ## Standalone Version (Recommended)
+          Download `36-xun-calendar-standalone.zip` below. Extract and double-click `index.html` to use. No installation required.
+          
+          ## Developer Version
+          Clone the repository and run `npm install && npm run dev` for development.
         draft: false
         prerelease: false
 
@@ -37,6 +53,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./project-archive.zip
-        asset_name: project-archive.zip
+        asset_path: ./36-xun-calendar-standalone.zip
+        asset_name: 36-xun-calendar-standalone.zip
         asset_content_type: application/zip

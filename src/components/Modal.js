@@ -745,15 +745,19 @@ export class Modal {
             const isSelected = this.selectedEmotions.has(emo.value);
             tagBtn.className = `px-3 py-1 rounded-full text-xs border transition-colors ${isSelected ? 'bg-blue-100 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`;
             tagBtn.textContent = emo.text;
+            tagBtn.setAttribute('aria-label', emo.text);
+            tagBtn.setAttribute('aria-pressed', isSelected);
             tagBtn.onclick = () => {
                 if (this.selectedEmotions.has(emo.value)) {
                     this.selectedEmotions.delete(emo.value);
                     tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-white border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors';
+                    tagBtn.setAttribute('aria-pressed', 'false');
                     this.updateTabStatusIndicators();
                     this.syncStatusStateFromUI();
                 } else {
                     this.selectedEmotions.add(emo.value);
                     tagBtn.className = 'px-3 py-1 rounded-full text-xs border bg-blue-100 border-blue-300 text-blue-700 transition-colors';
+                    tagBtn.setAttribute('aria-pressed', 'true');
                     this.onCheckinInteraction('feelings');
                     this.syncStatusStateFromUI();
                 }

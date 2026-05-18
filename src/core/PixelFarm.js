@@ -11,71 +11,91 @@ export class PixelFarm {
     init() {
         const grid = document.getElementById('pixel-farm-grid');
         if (!grid) return;
-        grid.innerHTML = ''; // Clear grid before redraw
 
-        const year = CONFIG.YEAR;
+        const year = store.getState().currentYear;
         const totalDays = 365;
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         const allData = store.getAllData();
 
-        for (let i = 0; i < totalDays; i++) {
-            const dayDate = new Date(year, 0, i + 1);
-            const dateStr = Calendar.formatLocalDate(dayDate);
+        // If grid is empty, do full initialization
+        if (grid.children.length === 0) {
+            grid.innerHTML = '';
+            for (let i = 0; i < totalDays; i++) {
+                const dayDate = new Date(year, 0, i + 1);
+                const dateStr = Calendar.formatLocalDate(dayDate);
 
-            const plot = document.createElement('div');
-            plot.id = `plot-${dateStr}`;
-            // 基础像素土地块：留出间隔，由容器 gap 控制
-            plot.className = 'w-4 h-4 cursor-pointer hover:ring-2 hover:ring-amber-400 border border-amber-400/50 flex items-center justify-center rounded-sm';
-            plot.dataset.date = dateStr;
-            plot.setAttribute('title', dateStr);
-            plot.setAttribute('aria-label', dateStr);
-            plot.onclick = (e) => {
+                const plot = document.createElement('div');
+                plot.id = `plot-${dateStr}`;
+                plot.className = 'w-4 h-4 cursor-pointer hover:ring-2 hover:ring-amber-400 border border-amber-400/50 flex items-center justify-center rounded-sm';
+                plot.dataset.date = dateStr;
+                plot.setAttribute('title', dateStr);
+                plot.setAttribute('role', 'gridcell');
+                plot.setAttribute('aria-label', dateStr);
+
+                grid.appendChild(plot);
+                this.updatePlot(plot, dateStr, allData, today);
+            }
+
+            // Set up event delegation once
+            grid.onclick = (e) => {
+                const plot = e.target.closest('[data-date]');
+                if (!plot) return;
+                const dateStr = plot.dataset.date;
                 e.stopPropagation();
                 console.log(`Plot clicked: ${dateStr}`, plot);
                 this.showCropSelection(dateStr, plot);
             };
-
-            const dayData = allData[dateStr];
-            const crop = dayData ? dayData.crop : null;
-
-            // 重置样式，为状态化渲染做准备
-            plot.textContent = ''; // Use textContent instead of innerHTML for emojis
-            plot.style.backgroundImage = '';
-            plot.style.backgroundSize = '';
-            plot.style.backgroundPosition = '';
-            plot.style.backgroundRepeat = '';
-
-            // 默认使用像素土地贴图作为背景
-            plot.style.backgroundImage = "url('src/images/pixel square.png')";
-            plot.style.backgroundSize = 'cover';
-            plot.style.backgroundPosition = 'center';
-            plot.style.backgroundRepeat = 'no-repeat';
-
-            if (crop) {
-                if (crop.includes('/')) { // 作物是图片
-                    plot.style.backgroundImage = `url('${crop}')`;
-                    plot.style.backgroundSize = 'contain';
-                    plot.style.backgroundPosition = 'center';
-                    plot.style.backgroundRepeat = 'no-repeat';
-                } else { // Emoji crop
-                    plot.textContent = crop;
+        } else {
+            // Incremental update: only update changed plots
+            for (let i = 0; i < totalDays; i++) {
+                const dayDate = new Date(year, 0, i + 1);
+                const dateStr = Calendar.formatLocalDate(dayDate);
+                const plot = document.getElementById(`plot-${dateStr}`);
+                if (plot) {
+                    this.updatePlot(plot, dateStr, allData, today);
                 }
-                // 为已种植的地块加深背景色
-                plot.classList.add('bg-amber-600', 'border-amber-700/50');
-
-            } else if (dayDate < today) { // 过去的日子，默认显示嫩芽
-                plot.innerHTML = '<div class="w-1 h-1 bg-green-500 rounded-full"></div>';
-                // 为过去未种植的地块也加深背景色
-                plot.classList.add('bg-amber-600', 'border-amber-700/50');
             }
+        }
+    }
 
-            if (dayDate.getTime() === today.getTime()) {
-                plot.classList.add('ring-2', 'ring-blue-500');
+    updatePlot(plot, dateStr, allData, today) {
+        const dayData = allData[dateStr];
+        const crop = dayData ? dayData.crop : null;
+        const dayDate = new Date(dateStr);
+
+        // Reset styles
+        plot.textContent = '';
+        plot.style.backgroundImage = '';
+        plot.style.backgroundSize = '';
+        plot.style.backgroundPosition = '';
+        plot.style.backgroundRepeat = '';
+        plot.classList.remove('bg-amber-600', 'border-amber-700/50', 'ring-2', 'ring-blue-500');
+
+        // Default background
+        plot.style.backgroundImage = "url('src/images/pixel square.png')";
+        plot.style.backgroundSize = 'cover';
+        plot.style.backgroundPosition = 'center';
+        plot.style.backgroundRepeat = 'no-repeat';
+
+        if (crop) {
+            if (crop.includes('/')) {
+                plot.style.backgroundImage = `url('${crop}')`;
+                plot.style.backgroundSize = 'contain';
+                plot.style.backgroundPosition = 'center';
+                plot.style.backgroundRepeat = 'no-repeat';
+            } else {
+                plot.textContent = crop;
             }
+            plot.classList.add('bg-amber-600', 'border-amber-700/50');
+        } else if (dayDate < today) {
+            plot.innerHTML = '<div class="w-1 h-1 bg-green-500 rounded-full"></div>';
+            plot.classList.add('bg-amber-600', 'border-amber-700/50');
+        }
 
-            grid.appendChild(plot);
+        if (dayDate.getTime() === today.getTime()) {
+            plot.classList.add('ring-2', 'ring-blue-500');
         }
     }
 

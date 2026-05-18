@@ -1,7 +1,7 @@
 /* 响应式主题背景优化 */
 
 /* 基础加载策略 - 移动端优先 */
-@media (max-width: 768px) {
+@media (max-width: var(--breakpoint-md)) {
   /* 移动端使用更小尺寸的图片 */
   body.theme-spring {
     background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0ic3ByaW5nIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6I2YwZjlmZjtzdG9wLW9wYWNpdHk6MSIgLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZTBlOWY5O3N0b3Atb3BhY2l0eToxIiAvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9InVybCgjc3ByaW5nKSIgLz4KPC9zdmc+');
@@ -34,7 +34,7 @@
 }
 
 /* 桌面端使用完整图片 */
-@media (min-width: 769px) {
+@media (min-width: calc(var(--breakpoint-md) + 1px)) {
   /* 支持现代浏览器的 WebP 格式 */
   @supports (background-image: url('image.webp')) {
     body.theme-spring {
@@ -103,4 +103,10 @@ body {
 @keyframes spin {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-loading::before {
+    animation: none;
+  }
 }

@@ -120,7 +120,7 @@ export class DesignSystem {
             }
             
             /* Mobile specific progress styles */
-            @media (max-width: 767px) {
+            @media (max-width: calc(var(--breakpoint-md) - 1px)) {
                 .mobile-progress-day button {
                     width: 2.5rem;
                     height: 2.5rem;

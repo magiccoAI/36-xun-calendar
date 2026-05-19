@@ -169,7 +169,7 @@ export class XunRow extends HTMLElement {
                     font-size: 0.875rem;
                     min-height: 3rem;
                 }
-                @media (min-width: var(--breakpoint-md)) {
+                @media (min-width: 768px) {
                     .row {
                         grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
                         border-bottom: none !important;
@@ -177,7 +177,10 @@ export class XunRow extends HTMLElement {
                         padding-top: 0 !important;
                     }
                     :host {
-                        border-bottom: none !important;
+                        border-bottom: 1px solid #e5e7eb !important;
+                    }
+                    :host(:last-child) {
+                        border-bottom: none !important; /* 移除最后一行的下边框 */
                     }
                     .col-index {
                         position: static !important;
@@ -218,7 +221,7 @@ export class XunRow extends HTMLElement {
                 .col-index .number {
                     font-size: 1.75rem;
                     font-weight: 700;
-                    color: #1f2937;
+                    color: #2563eb; /* 统一品牌蓝 */
                     line-height: 1;
                     position: relative;
                     z-index: 2;
@@ -227,12 +230,12 @@ export class XunRow extends HTMLElement {
                 .col-index .xun-char {
                     font-size: 0.75rem;
                     font-weight: 500;
-                    color: #6b7280;
+                    color: #60a5fa; /* 浅蓝色呼应 */
                     position: absolute;
                     bottom: 0.2rem;
                     right: 0.2rem;
                     z-index: 1;
-                    opacity: 0.8;
+                    opacity: 1;
                 }
                 .col-index:hover .number {
                     color: #3b82f6;
@@ -325,8 +328,9 @@ export class XunRow extends HTMLElement {
                     50% { transform: scale(1.05); opacity: 1; }
                 }
                 .current-row {
-                    border: 2px solid #3b82f6;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                    outline: 2px solid #3b82f6;
+                    outline-offset: -2px;
+                    background-color: #eff6ff !important;
                     z-index: 10;
                 }
                 .progress-container {

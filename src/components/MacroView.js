@@ -105,7 +105,7 @@ export class MacroView {
         store.setState({ macroGoals });
     }
 
-    renderTableHeader() {
+    renderTableHeader(parent = this.container) {
         const header = document.createElement('div');
         header.className = 'table-header';
         header.innerHTML = `
@@ -113,23 +113,26 @@ export class MacroView {
                 .table-header {
                     display: grid;
                     grid-template-columns: repeat(12, minmax(0, 1fr));
-                    background-color: #f3f4f6;
-                    border-radius: 0.75rem;
-                    padding: 0.75rem 1rem;
-                    margin-bottom: 0.5rem;
-                    gap: 0.5rem;
+                    background-color: #f0f7ff; /* 浅蓝色背景，品牌调性呼应 */
+                    border-bottom: 2px solid #bfdbfe; /* 与主体的衔接 */
+                    padding: 0.75rem 0; /* 移除水平padding，与body严格对齐 */
+                    margin-bottom: 0; /* 移除下边距，无缝衔接主体 */
+                    gap: 0;
                     font-size: 0.875rem;
                     font-weight: 600;
-                    color: #374151;
+                    color: #1e3a8a; /* 深蓝色文字 */
                 }
                 .header-col {
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     text-align: center;
+                    padding: 0 0.5rem;
                 }
                 .header-col-index {
                     grid-column: span 1;
+                    color: #2563eb; /* “旬”列使用主品牌蓝 */
+                    font-size: 1rem;
                 }
                 .header-col-date {
                     grid-column: span 2;
@@ -144,7 +147,7 @@ export class MacroView {
                     grid-column: span 2;
                 }
                 /* Mobile responsive */
-                @media (max-width: calc(var(--breakpoint-md) - 1px)) {
+                @media (max-width: 767px) {
                     .table-header {
                         display: none; /* Hide header on mobile, use inline labels instead */
                     }
@@ -156,14 +159,38 @@ export class MacroView {
             <div class="header-col header-col-progress">每日微行动</div>
             <div class="header-col header-col-remarks">备注</div>
         `;
-        this.container.appendChild(header);
+        parent.appendChild(header);
     }
 
     render(xunPeriods, currentXun) {
         this.container.innerHTML = '';
         
+        // 创建整体表格容器
+        const tableWrapper = document.createElement('div');
+        tableWrapper.className = 'macro-table-wrapper';
+        tableWrapper.innerHTML = `
+            <style>
+                .macro-table-wrapper {
+                    background: white;
+                    border-radius: 0.75rem;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    border: 1px solid #e5e7eb;
+                    overflow: hidden;
+                    margin-bottom: 2rem;
+                }
+                @media (max-width: 767px) {
+                    .macro-table-wrapper {
+                        background: transparent;
+                        border: none;
+                        box-shadow: none;
+                    }
+                }
+            </style>
+        `;
+        this.container.appendChild(tableWrapper);
+        
         // Add table header
-        this.renderTableHeader();
+        this.renderTableHeader(tableWrapper);
         
         const state = store.getState();
         const { userData, macroGoals } = state;
@@ -245,7 +272,7 @@ export class MacroView {
             // However, attribute works fine if escaped properly, or we can just pass it as a property
             row.setAttribute('progress-html', progressHtml);
 
-            this.container.appendChild(row);
+            tableWrapper.appendChild(row);
         });
     }
 }

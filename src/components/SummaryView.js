@@ -226,7 +226,12 @@ export class SummaryView {
 
                 <div class="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
 
-                    <header class="mb-10 text-center">
+                    <header class="mb-10 text-center relative">
+                        <button data-action="go-detail" class="absolute left-0 top-0 p-2 rounded-full bg-white/80 backdrop-blur-sm text-gray-600 hover:text-gray-800 hover:bg-white transition-colors shadow-sm border border-gray-200" aria-label="返回上一页">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
                         <div class="inline-flex items-center gap-2 rounded-full bg-white/60 backdrop-blur-md px-4 py-2 text-xs font-medium text-gray-600 shadow-sm border border-white/40 mb-6">
                             <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
                             ${rangeLabel}

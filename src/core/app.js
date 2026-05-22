@@ -500,7 +500,7 @@ class App {
 
     afterModalSave() {
         this.summaryView?.afterModalSave?.();
-        this.initPixelFarm();
+        this.pixelFarm?.render();
     }
 
     getWeightedPeriodPredictionInfo(cycles) {

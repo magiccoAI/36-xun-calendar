@@ -246,7 +246,7 @@ export class Modal {
 
         console.log('Modal open:', dateStr, 'sleepData:', data.sleepData);
 
-        // Reset UI
+        // Reset UI first to clear all previous selections
         this.resetUI();
         this.switchTab('checkin');
         this.isHydrating = true;
